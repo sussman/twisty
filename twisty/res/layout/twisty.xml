@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    id="@+id/all" android:orientation="vertical"
+    android:layout_width="fill_parent" android:layout_height="fill_parent">
+  <LinearLayout id="@+id/status" android:orientation="horizontal"
+      android:layout_width="fill_parent" android:layout_height="wrap_content"
+      android:background="@drawable/status_bg" >
+    <TextView id="@+id/statusL" android:textSize="12sp" android:textStyle="bold"
+      android:layout_width="wrap_content" android:layout_height="wrap_content"
+       android:layout_weight="1"
+       android:textColor="@drawable/status_fg" />
+    <TextView id="@+id/statusR"
+      android:textSize="12sp"
+      android:textStyle="bold"
+      android:layout_width="wrap_content" android:layout_height="wrap_content"
+      android:textColor="@drawable/status_fg" />
+  </LinearLayout>
+    <TextView android:textSize="12sp"
+      android:layout_width="fill_parent" android:layout_height="wrap_content"
+      android:layout_weight="0"
+      android:background="@drawable/error_bg" 
+      android:textColor="@drawable/error_fg" id="@+id/errors"/>
+    <com.google.twisty.TwistyView id="@+id/body"
+      android:layout_width="fill_parent" android:layout_height="0px"
+      android:layout_weight="1"
+      android:background="@drawable/body_bg" />
+</LinearLayout>

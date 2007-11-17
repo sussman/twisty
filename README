@@ -1,0 +1,42 @@
+             Twisty, a z-machine interpreter for Android.
+             ============================================
+
+What is this program?
+---------------------
+
+Twisty is a z-machine interpreter for the Android operating system.
+It allaws you to play "text adventures' on your handset.
+
+The z-machine is a virtual machine designed in 1979 by Infocom for
+playing text adventures, and has been re-implemented on nearly every
+computer and PDA since then.  This application allows Android users to
+play Infocom classics just as 'Zork', as well hundreds of newer text
+adventures written in the last ten years or so.
+
+You can find numerous z-machine games to download at
+http://ifarchive.org.  We also recommend visiting
+http://www.ifwiki.org for general information on Interactive Fiction.
+
+
+Installation & Usage
+--------------------
+
+  ### TODO: write me
+
+
+History
+-------
+
+This code began as a heavily-hacked port of 'zplet', an early
+lightweight z-machine interpreter written for Java 1.0.  It was then
+connected to Android's various UI elements.
+
+The original zplet source code is avaliable at
+
+   http://www.speakeasy.org/~russotto/zplet/ifol.html
+
+
+Redistribution and Licensing
+-----------------------------
+
+For details on Licensing, see the LICENSE file.
