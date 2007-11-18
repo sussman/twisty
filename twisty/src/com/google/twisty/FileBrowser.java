@@ -141,7 +141,6 @@ public class FileBrowser extends ListActivity
 				al.add(new FileInfo("[ no files found ]", ""));
 			} else {
 				Arrays.sort(files);
-				// TODO: restrict path?
 				File parent = d.getParentFile();
 				if (parent != null) {
 					String path = parent.getPath();

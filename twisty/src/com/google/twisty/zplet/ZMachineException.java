@@ -14,17 +14,27 @@
 
 package com.google.twisty.zplet;
 
-/** Rather like java.awt.Graphics but restricted to what's needed by ZPlet,
- * with simplifications
- */
-public interface ZGraphics {
+public class ZMachineException extends RuntimeException {
+	private static final long serialVersionUID = 293492265628801027L;
 
-	void fillRect(int l, int t, int w, int h, Color color);
+	public ZMachineException(int pc, Exception reason) {
+		super(reason);
+		this.pc = pc;
+	}
+	
+	public ZMachineException() {
+		pc = -1;
+	}
+	
+	public ZMachineException(int pc, String message) {
+		super(message);
+		this.pc = pc;
+	}
 
-	void setFont(Font textfont);
+	private final int pc;
 
-	void copyArea(int i, int j, int width, int k, int l, int m);
-
-	void drawChars(char[] newtext, int offset, int length, int tx, int ty, Color color);
+	public int getPc() {
+		return pc;
+	}
 
 }

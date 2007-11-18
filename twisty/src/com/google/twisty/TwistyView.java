@@ -16,6 +16,8 @@ package com.google.twisty;
 
 import java.util.Map;
 
+import com.google.twisty.zplet.ZMachineException;
+
 import russotto.zplet.screenmodel.ZScreen;
 
 import android.content.Context;
@@ -83,5 +85,18 @@ public class TwistyView extends View {
 	
 	public static TwistyView getLastCreated() {
 		return last_created;
+	}
+
+	/**
+	 * Called from the zmachine's thread just before it exits
+	 * @param machineException
+	 */
+	public void onZmFinished(final ZMachineException e) {
+		handler.post(new Runnable() {
+			public void run() {
+				Twisty activity = (Twisty)getContext();
+				activity.onZmFinished(e);
+			}
+		});
 	}
 }

@@ -442,4 +442,8 @@ public class ZScreen extends ZCanvas {
 		public int stringWidth(char[] chars, int index, int count, Font font) {
 			return getFontMetrics(font).stringWidth(chars, index, count);
 		}
+
+		public void removeBufferedCodes() {
+			bufferedcodes.removeAllElements();			
+		}
 }

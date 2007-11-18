@@ -932,29 +932,9 @@ public class ZInstruction {
 
 	protected short op_quit()
 	{
-				zm.print_ascii_char((short)'*');
-				zm.print_ascii_char((short)'*');
-				zm.print_ascii_char((short)'*');
-				zm.print_ascii_char((short)'E');
-				zm.print_ascii_char((short)'N');
-				zm.print_ascii_char((short)'D');
-				zm.print_ascii_char((short)' ');
-				zm.print_ascii_char((short)'O');
-				zm.print_ascii_char((short)'F');
-				zm.print_ascii_char((short)' ');
-				zm.print_ascii_char((short)'S');
-				zm.print_ascii_char((short)'E');
-				zm.print_ascii_char((short)'S');
-				zm.print_ascii_char((short)'S');
-				zm.print_ascii_char((short)'I');
-				zm.print_ascii_char((short)'O');
-				zm.print_ascii_char((short)'N');
-				zm.print_ascii_char((short)'*');
-				zm.print_ascii_char((short)'*');
-				zm.print_ascii_char((short)'*');
-				zm.print_ascii_char((short)13);
-				zm.interrupt();
-				return ZFALSE;
+		zm.print_ascii_string("[[ Game has ended ]]");
+		zm.interrupt();
+		return ZFALSE;
 	}
 
 	protected short op_new_line()

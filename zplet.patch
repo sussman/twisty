@@ -2,7 +2,7 @@ Only in zplet.new/src/russotto/: .svn
 Only in zplet.new/src/russotto/iff: .svn
 diff -urbw zplet.20060707/src/russotto/iff/IFFChunkNotFoundException.java zplet.new/src/russotto/iff/IFFChunkNotFoundException.java
 --- zplet.20060707/src/russotto/iff/IFFChunkNotFoundException.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/iff/IFFChunkNotFoundException.java	2007-11-15 11:38:32.000000000 -0800
++++ zplet.new/src/russotto/iff/IFFChunkNotFoundException.java	2007-11-17 22:39:18.000000000 -0800
 @@ -1,8 +1,17 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -23,7 +23,7 @@ diff -urbw zplet.20060707/src/russotto/iff/IFFChunkNotFoundException.java zplet.
       */
 diff -urbw zplet.20060707/src/russotto/iff/IFFFile.java zplet.new/src/russotto/iff/IFFFile.java
 --- zplet.20060707/src/russotto/iff/IFFFile.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/iff/IFFFile.java	2007-11-15 11:38:28.000000000 -0800
++++ zplet.new/src/russotto/iff/IFFFile.java	2007-11-17 22:39:18.000000000 -0800
 @@ -1,3 +1,7 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -68,7 +68,7 @@ diff -urbw zplet.20060707/src/russotto/iff/IFFFile.java zplet.new/src/russotto/i
  
 diff -urbw zplet.20060707/src/russotto/iff/IFFInputFile.java zplet.new/src/russotto/iff/IFFInputFile.java
 --- zplet.20060707/src/russotto/iff/IFFInputFile.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/iff/IFFInputFile.java	2007-11-15 11:38:24.000000000 -0800
++++ zplet.new/src/russotto/iff/IFFInputFile.java	2007-11-17 22:39:18.000000000 -0800
 @@ -1,3 +1,7 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -141,7 +141,7 @@ diff -urbw zplet.20060707/src/russotto/iff/IFFInputFile.java zplet.new/src/russo
      	seek(chunkend);
 diff -urbw zplet.20060707/src/russotto/iff/IFFOutputFile.java zplet.new/src/russotto/iff/IFFOutputFile.java
 --- zplet.20060707/src/russotto/iff/IFFOutputFile.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/iff/IFFOutputFile.java	2007-11-15 11:38:20.000000000 -0800
++++ zplet.new/src/russotto/iff/IFFOutputFile.java	2007-11-17 22:39:18.000000000 -0800
 @@ -1,6 +1,9 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -166,11 +166,11 @@ diff -urbw zplet.20060707/src/russotto/iff/IFFOutputFile.java zplet.new/src/russ
  		return result;
      }
  
-Binary files zplet.20060707/src/russotto/zplet/.DS_Store and zplet.new/src/russotto/zplet/.DS_Store differ
+Only in zplet.20060707/src/russotto/zplet: .DS_Store
 Only in zplet.new/src/russotto/zplet: .svn
 diff -urbw zplet.20060707/src/russotto/zplet/ZColor.java zplet.new/src/russotto/zplet/ZColor.java
 --- zplet.20060707/src/russotto/zplet/ZColor.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/ZColor.java	2007-11-15 12:57:41.000000000 -0800
++++ zplet.new/src/russotto/zplet/ZColor.java	2007-11-17 22:39:23.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -193,10 +193,11 @@ diff -urbw zplet.20060707/src/russotto/zplet/ZColor.java zplet.new/src/russotto/
  	public final static int Z_CURRENT = 0;
 Only in zplet.20060707/src/russotto/zplet: ZJApp.java
 Only in zplet.20060707/src/russotto/zplet: Zplet.java
+Only in zplet.20060707/src/russotto/zplet/screenmodel: .DS_Store
 Only in zplet.new/src/russotto/zplet/screenmodel: .svn
 diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/NoSuchKeyException.java zplet.new/src/russotto/zplet/screenmodel/NoSuchKeyException.java
 --- zplet.20060707/src/russotto/zplet/screenmodel/NoSuchKeyException.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/screenmodel/NoSuchKeyException.java	2007-11-15 11:38:07.000000000 -0800
++++ zplet.new/src/russotto/zplet/screenmodel/NoSuchKeyException.java	2007-11-17 22:39:20.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -225,7 +226,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/NoSuchKeyException.java
  	}
 diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/SyncVector.java zplet.new/src/russotto/zplet/screenmodel/SyncVector.java
 --- zplet.20060707/src/russotto/zplet/screenmodel/SyncVector.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/screenmodel/SyncVector.java	2007-11-15 11:38:04.000000000 -0800
++++ zplet.new/src/russotto/zplet/screenmodel/SyncVector.java	2007-11-17 22:39:20.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -280,7 +281,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/SyncVector.java zplet.n
  	}
 diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZCursor.java zplet.new/src/russotto/zplet/screenmodel/ZCursor.java
 --- zplet.20060707/src/russotto/zplet/screenmodel/ZCursor.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/screenmodel/ZCursor.java	2007-11-15 23:23:34.000000000 -0800
++++ zplet.new/src/russotto/zplet/screenmodel/ZCursor.java	2007-11-17 22:39:20.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -367,7 +368,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZCursor.java zplet.new/
  
 diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java zplet.new/src/russotto/zplet/screenmodel/ZScreen.java
 --- zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java	2006-07-07 17:12:38.000000000 -0700
-+++ zplet.new/src/russotto/zplet/screenmodel/ZScreen.java	2007-11-16 14:25:55.000000000 -0800
++++ zplet.new/src/russotto/zplet/screenmodel/ZScreen.java	2007-11-17 22:45:05.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -686,7 +687,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java zplet.new/
  				}
  				catch (NullPointerException booga) {
  						System.err.println("No graphics in clear");
-@@ -512,25 +436,10 @@
+@@ -512,25 +436,14 @@
  		public void setZBackground(int zcolor)
  		{
  				zbackground = zcolor;
@@ -702,22 +703,24 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java zplet.new/
 -				cursor = cursor.getParent();
 -				
 -			return (Frame)cursor;
--		}
--		
++				setBackground(ZColor.getcolor(zcolor));
+ 		}
+ 		
 -		public Dimension minimumSize() {
 -				return new Dimension(100,100);
-+				setBackground(ZColor.getcolor(zcolor));
++		public int stringWidth(char[] chars, int index, int count, Font font) {
++			return getFontMetrics(font).stringWidth(chars, index, count);
  		}
  
 -		public Dimension preferredSize() {
 -				return new Dimension(500,500);
-+		public int stringWidth(char[] chars, int index, int count, Font font) {
-+			return getFontMetrics(font).stringWidth(chars, index, count);
++		public void removeBufferedCodes() {
++			bufferedcodes.removeAllElements();			
  		}
  }
 diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZStatus.java zplet.new/src/russotto/zplet/screenmodel/ZStatus.java
 --- zplet.20060707/src/russotto/zplet/screenmodel/ZStatus.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/screenmodel/ZStatus.java	2007-11-15 12:57:41.000000000 -0800
++++ zplet.new/src/russotto/zplet/screenmodel/ZStatus.java	2007-11-17 22:39:20.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -782,7 +785,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZStatus.java zplet.new/
  
 diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZWindow.java zplet.new/src/russotto/zplet/screenmodel/ZWindow.java
 --- zplet.20060707/src/russotto/zplet/screenmodel/ZWindow.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/screenmodel/ZWindow.java	2007-11-16 15:45:25.000000000 -0800
++++ zplet.new/src/russotto/zplet/screenmodel/ZWindow.java	2007-11-17 22:39:20.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -837,7 +840,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZWindow.java zplet.new/
 Only in zplet.new/src/russotto/zplet/zmachine: .svn
 diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZDictionary.java zplet.new/src/russotto/zplet/zmachine/ZDictionary.java
 --- zplet.20060707/src/russotto/zplet/zmachine/ZDictionary.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/ZDictionary.java	2007-11-15 11:37:42.000000000 -0800
++++ zplet.new/src/russotto/zplet/zmachine/ZDictionary.java	2007-11-17 22:39:22.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -859,7 +862,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZDictionary.java zplet.new
  {
 diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZFrameBound.java zplet.new/src/russotto/zplet/zmachine/ZFrameBound.java
 --- zplet.20060707/src/russotto/zplet/zmachine/ZFrameBound.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/ZFrameBound.java	2007-11-15 11:37:39.000000000 -0800
++++ zplet.new/src/russotto/zplet/zmachine/ZFrameBound.java	2007-11-17 22:39:22.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -869,7 +872,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZFrameBound.java zplet.new
  /* As of 23 February 2001, this code is open source and covered by the */
 diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZHeader.java zplet.new/src/russotto/zplet/zmachine/ZHeader.java
 --- zplet.20060707/src/russotto/zplet/zmachine/ZHeader.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/ZHeader.java	2007-11-15 11:37:35.000000000 -0800
++++ zplet.new/src/russotto/zplet/zmachine/ZHeader.java	2007-11-17 22:39:22.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -892,7 +895,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZHeader.java zplet.new/src
  	protected byte memory_image[];
 diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZInstruction.java zplet.new/src/russotto/zplet/zmachine/ZInstruction.java
 --- zplet.20060707/src/russotto/zplet/zmachine/ZInstruction.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/ZInstruction.java	2007-11-16 00:35:15.000000000 -0800
++++ zplet.new/src/russotto/zplet/zmachine/ZInstruction.java	2007-11-18 01:14:20.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -963,18 +966,40 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZInstruction.java zplet.ne
  					zm.restore(restore_state);
  					decode_second_half();
  					
-@@ -955,7 +953,7 @@
- 				zm.print_ascii_char((short)'*');
- 				zm.print_ascii_char((short)'*');
- 				zm.print_ascii_char((short)13);
+@@ -934,28 +932,8 @@
+ 
+ 	protected short op_quit()
+ 	{
+-				zm.print_ascii_char((short)'*');
+-				zm.print_ascii_char((short)'*');
+-				zm.print_ascii_char((short)'*');
+-				zm.print_ascii_char((short)'E');
+-				zm.print_ascii_char((short)'N');
+-				zm.print_ascii_char((short)'D');
+-				zm.print_ascii_char((short)' ');
+-				zm.print_ascii_char((short)'O');
+-				zm.print_ascii_char((short)'F');
+-				zm.print_ascii_char((short)' ');
+-				zm.print_ascii_char((short)'S');
+-				zm.print_ascii_char((short)'E');
+-				zm.print_ascii_char((short)'S');
+-				zm.print_ascii_char((short)'S');
+-				zm.print_ascii_char((short)'I');
+-				zm.print_ascii_char((short)'O');
+-				zm.print_ascii_char((short)'N');
+-				zm.print_ascii_char((short)'*');
+-				zm.print_ascii_char((short)'*');
+-				zm.print_ascii_char((short)'*');
+-				zm.print_ascii_char((short)13);
 -				zm.stop();
-+				zm.interrupt();
++		zm.print_ascii_string("[[ Game has ended ]]");
++		zm.interrupt();
  				return ZFALSE;
  	}
  
 diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java zplet.new/src/russotto/zplet/zmachine/ZMachine.java
 --- zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/ZMachine.java	2007-11-15 11:37:27.000000000 -0800
++++ zplet.new/src/russotto/zplet/zmachine/ZMachine.java	2007-11-18 00:43:59.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -982,7 +1007,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java zplet.new/sr
  /* Zplet, a Z-Machine interpreter in Java */
  /* Copyright 1996,2001 Matthew T. Russotto */
  /* As of 23 February 2001, this code is open source and covered by the */
-@@ -5,12 +8,13 @@
+@@ -5,12 +8,15 @@
  
  package russotto.zplet.zmachine;
  
@@ -996,13 +1021,15 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java zplet.new/sr
 +import java.util.Random;
 +import java.util.Stack;
 +
++import com.google.twisty.zplet.ZMachineException;
++
 +import russotto.zplet.screenmodel.ZScreen;
 +import russotto.zplet.screenmodel.ZStatus;
 +import russotto.zplet.screenmodel.ZWindow;
  import russotto.zplet.zmachine.state.ZState;
  
  public abstract class ZMachine extends Thread {
-@@ -24,7 +28,7 @@
+@@ -24,7 +30,7 @@
  	public ZState restart_state;
  	protected ZStatus status_line;
  	public byte memory_image[];
@@ -1011,7 +1038,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java zplet.new/sr
  	public Random zrandom;
  	protected int globals;
  	public short locals[];
-@@ -41,6 +45,7 @@
+@@ -41,6 +47,7 @@
  	protected String status_location;
  
  	protected final String A2 = "0123456789.,!?_#\'\"/\\-:()";
@@ -1019,7 +1046,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java zplet.new/sr
  
  	public final static int OP_LARGE = 0;
  	public final static int OP_SMALL = 1;
-@@ -52,7 +57,7 @@
+@@ -52,7 +59,7 @@
  				this.status_line = status_line;
  				this.memory_image = memory_image;
  				locals = new short[0];
@@ -1028,7 +1055,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java zplet.new/sr
  				restart_state = new ZState(this);
  				restart_state.save_current();
  				zrandom = new Random(); /* starts in "random" mode */
-@@ -310,6 +315,7 @@
+@@ -310,6 +317,7 @@
  	}
  
  	public void start() {
@@ -1036,7 +1063,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java zplet.new/sr
  				screen.clear();
  				restart();
  				header.set_transcripting(false);
-@@ -319,7 +325,7 @@
+@@ -319,27 +327,28 @@
  	public void run()
  	{
  				try {
@@ -1045,7 +1072,25 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java zplet.new/sr
  //								System.err.print("pc = ");
  //								System.err.println(Integer.toString(pc, 16));
  								zi.decode_instruction();
-@@ -340,6 +346,12 @@
+ 								zi.execute();
+ 					}
++					screen.onZmFinished(null);
+ 				}
+-				catch (ArrayIndexOutOfBoundsException booga) {
+-					System.err.print("pc = ");
+-					System.err.println(Integer.toString(pc, 16));
+-					
+-					throw booga;
++				catch (ZMachineException e) {
++					screen.onZmFinished(e);
+ 				}
+-				catch (ClassCastException booga) {
+-					System.err.print("pc = ");
+-					System.err.println(Integer.toString(pc, 16));
+-					
+-					throw booga;
++				catch (RuntimeException e) {
++					screen.onZmFinished(new ZMachineException(pc, e));
  				}
  	}
  
@@ -1058,7 +1103,17 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java zplet.new/sr
  	void calculate_checksum() {
  				int filesize = header.file_length();
  				int i;
-@@ -421,7 +433,6 @@
+@@ -371,8 +380,7 @@
+ 	}
+ 
+ 	public void fatal(String s) {
+-				System.err.println(s + " @ $" + Integer.toString(pc,16));
+-				System.exit(-1);
++		throw new ZMachineException(pc, s);
+ 	}
+ 
+ 	public short get_variable(short varnum) {
+@@ -421,7 +429,6 @@
  	}
  	
  	public short get_operand(int optype) {
@@ -1068,7 +1123,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java zplet.new/sr
  					return (short)(get_code_byte() & 0xFF);
 diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZObjectTree.java zplet.new/src/russotto/zplet/zmachine/ZObjectTree.java
 --- zplet.20060707/src/russotto/zplet/zmachine/ZObjectTree.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/ZObjectTree.java	2007-11-15 11:37:23.000000000 -0800
++++ zplet.new/src/russotto/zplet/zmachine/ZObjectTree.java	2007-11-17 22:39:22.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1091,7 +1146,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZObjectTree.java zplet.new
 Only in zplet.new/src/russotto/zplet/zmachine/state: .svn
 diff -urbw zplet.20060707/src/russotto/zplet/zmachine/state/ZSFrame.java zplet.new/src/russotto/zplet/zmachine/state/ZSFrame.java
 --- zplet.20060707/src/russotto/zplet/zmachine/state/ZSFrame.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/state/ZSFrame.java	2007-11-16 00:51:37.000000000 -0800
++++ zplet.new/src/russotto/zplet/zmachine/state/ZSFrame.java	2007-11-17 22:39:20.000000000 -0800
 @@ -5,64 +5,40 @@
  
  package russotto.zplet.zmachine.state;
@@ -1183,7 +1238,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/state/ZSFrame.java zplet.n
  /** ZState holds the state-of-play for the Z machine */
 diff -urbw zplet.20060707/src/russotto/zplet/zmachine/state/ZState.java zplet.new/src/russotto/zplet/zmachine/state/ZState.java
 --- zplet.20060707/src/russotto/zplet/zmachine/state/ZState.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/state/ZState.java	2007-11-16 00:37:06.000000000 -0800
++++ zplet.new/src/russotto/zplet/zmachine/state/ZState.java	2007-11-18 00:39:07.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1359,7 +1414,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/state/ZState.java zplet.ne
  			outfile.closeChunk();
 diff -urbw zplet.20060707/src/russotto/zplet/zmachine/state/ZStateHeader.java zplet.new/src/russotto/zplet/zmachine/state/ZStateHeader.java
 --- zplet.20060707/src/russotto/zplet/zmachine/state/ZStateHeader.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/state/ZStateHeader.java	2007-11-15 11:37:16.000000000 -0800
++++ zplet.new/src/russotto/zplet/zmachine/state/ZStateHeader.java	2007-11-17 22:39:20.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1383,7 +1438,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/state/ZStateHeader.java zp
 Only in zplet.new/src/russotto/zplet/zmachine/zmachine3: .svn
 diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZDictionary3.java zplet.new/src/russotto/zplet/zmachine/zmachine3/ZDictionary3.java
 --- zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZDictionary3.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/zmachine3/ZDictionary3.java	2007-11-15 11:37:14.000000000 -0800
++++ zplet.new/src/russotto/zplet/zmachine/zmachine3/ZDictionary3.java	2007-11-17 22:39:21.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1413,7 +1468,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZDictionary3.jav
  
 diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZHeader3.java zplet.new/src/russotto/zplet/zmachine/zmachine3/ZHeader3.java
 --- zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZHeader3.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/zmachine3/ZHeader3.java	2007-11-15 11:37:11.000000000 -0800
++++ zplet.new/src/russotto/zplet/zmachine/zmachine3/ZHeader3.java	2007-11-17 22:39:21.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1435,7 +1490,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZHeader3.java zp
  class ZHeader3 extends ZHeader
 diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZMachine3.java zplet.new/src/russotto/zplet/zmachine/zmachine3/ZMachine3.java
 --- zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZMachine3.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/zmachine3/ZMachine3.java	2007-11-15 11:37:07.000000000 -0800
++++ zplet.new/src/russotto/zplet/zmachine/zmachine3/ZMachine3.java	2007-11-17 22:39:21.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1463,7 +1518,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZMachine3.java z
  
 diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZObjectTree3.java zplet.new/src/russotto/zplet/zmachine/zmachine3/ZObjectTree3.java
 --- zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZObjectTree3.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/zmachine3/ZObjectTree3.java	2007-11-15 11:37:03.000000000 -0800
++++ zplet.new/src/russotto/zplet/zmachine/zmachine3/ZObjectTree3.java	2007-11-17 22:39:21.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1489,7 +1544,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZObjectTree3.jav
 Only in zplet.new/src/russotto/zplet/zmachine/zmachine5: .svn
 diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZDictionary5.java zplet.new/src/russotto/zplet/zmachine/zmachine5/ZDictionary5.java
 --- zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZDictionary5.java	2001-02-26 11:18:18.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/zmachine5/ZDictionary5.java	2007-11-15 11:37:00.000000000 -0800
++++ zplet.new/src/russotto/zplet/zmachine/zmachine5/ZDictionary5.java	2007-11-17 22:39:22.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1522,7 +1577,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZDictionary5.jav
  
 diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZHeader5.java zplet.new/src/russotto/zplet/zmachine/zmachine5/ZHeader5.java
 --- zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZHeader5.java	2001-02-26 11:18:18.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/zmachine5/ZHeader5.java	2007-11-15 11:36:56.000000000 -0800
++++ zplet.new/src/russotto/zplet/zmachine/zmachine5/ZHeader5.java	2007-11-17 22:39:22.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1544,7 +1599,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZHeader5.java zp
  class ZHeader5 extends ZHeader
 diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZInstruction5.java zplet.new/src/russotto/zplet/zmachine/zmachine5/ZInstruction5.java
 --- zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZInstruction5.java	2001-02-26 11:18:18.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/zmachine5/ZInstruction5.java	2007-11-16 00:37:42.000000000 -0800
++++ zplet.new/src/russotto/zplet/zmachine/zmachine5/ZInstruction5.java	2007-11-17 22:39:22.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1580,7 +1635,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZInstruction5.ja
  						return ZRESTORE_SUCCESS;
 diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZMachine5.java zplet.new/src/russotto/zplet/zmachine/zmachine5/ZMachine5.java
 --- zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZMachine5.java	2001-02-26 11:18:18.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/zmachine5/ZMachine5.java	2007-11-15 11:36:30.000000000 -0800
++++ zplet.new/src/russotto/zplet/zmachine/zmachine5/ZMachine5.java	2007-11-17 22:39:22.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1606,7 +1661,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZMachine5.java z
  public class ZMachine5 extends ZMachine {
 diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZMachine8.java zplet.new/src/russotto/zplet/zmachine/zmachine5/ZMachine8.java
 --- zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZMachine8.java	2001-02-26 11:18:18.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/zmachine5/ZMachine8.java	2007-11-15 11:36:18.000000000 -0800
++++ zplet.new/src/russotto/zplet/zmachine/zmachine5/ZMachine8.java	2007-11-17 22:39:22.000000000 -0800
 @@ -1,16 +1,12 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1629,7 +1684,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZMachine8.java z
  public class ZMachine8 extends ZMachine5 {
 diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZObjectTree5.java zplet.new/src/russotto/zplet/zmachine/zmachine5/ZObjectTree5.java
 --- zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZObjectTree5.java	2001-02-26 11:18:18.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/zmachine5/ZObjectTree5.java	2007-11-15 11:34:57.000000000 -0800
++++ zplet.new/src/russotto/zplet/zmachine/zmachine5/ZObjectTree5.java	2007-11-17 22:39:22.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.

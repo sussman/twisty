@@ -12,6 +12,8 @@ import java.util.EmptyStackException;
 import java.util.Random;
 import java.util.Stack;
 
+import com.google.twisty.zplet.ZMachineException;
+
 import russotto.zplet.screenmodel.ZScreen;
 import russotto.zplet.screenmodel.ZStatus;
 import russotto.zplet.screenmodel.ZWindow;
@@ -331,18 +333,13 @@ public abstract class ZMachine extends Thread {
 								zi.decode_instruction();
 								zi.execute();
 					}
+					screen.onZmFinished(null);
 				}
-				catch (ArrayIndexOutOfBoundsException booga) {
-					System.err.print("pc = ");
-					System.err.println(Integer.toString(pc, 16));
-					
-					throw booga;
+				catch (ZMachineException e) {
+					screen.onZmFinished(e);
 				}
-				catch (ClassCastException booga) {
-					System.err.print("pc = ");
-					System.err.println(Integer.toString(pc, 16));
-					
-					throw booga;
+				catch (RuntimeException e) {
+					screen.onZmFinished(new ZMachineException(pc, e));
 				}
 	}
 
@@ -383,8 +380,7 @@ public abstract class ZMachine extends Thread {
 	}
 
 	public void fatal(String s) {
-				System.err.println(s + " @ $" + Integer.toString(pc,16));
-				System.exit(-1);
+		throw new ZMachineException(pc, s);
 	}
 
 	public short get_variable(short varnum) {

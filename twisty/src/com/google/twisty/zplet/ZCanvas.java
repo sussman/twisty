@@ -76,11 +76,6 @@ public class ZCanvas {
 			canvas.drawText(text, index, count, x, y, paint);
 		}
 
-		public void drawImage(Image image, int i, int j, Object object) {
-			// TODO Auto-generated method stub
-            Log.i(TAG, "ImageGraphics.drawImage: " + i + " " + j);
-		}
-
 		public void fillRect(int l, int t, int w, int h, Color color) {
             canvas.save();  // save clipping
             canvas.clipRect(l, t, l+w, t+h);
@@ -99,7 +94,7 @@ public class ZCanvas {
 		private ImageGraphics ig;
 
 		public ImageGlue(int width, int height) {
-			// TODO(marius): Maybe handle differently when created with 0 size
+			// TODO(mariusm): Maybe handle differently when created with 0 size
 			if (width <= 0)
 				width = 1;
 			if (height <= 0)
@@ -228,5 +223,10 @@ public class ZCanvas {
 	
 	public Bitmap getBitmap() {
 		return image.getBitmap();
+	}
+
+
+	public void onZmFinished(ZMachineException machineException) {
+		view.onZmFinished(machineException);
 	}
 }

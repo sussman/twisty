@@ -21,6 +21,7 @@ import java.io.InputStream;
 
 import com.google.twisty.zplet.Event;
 import com.google.twisty.zplet.StatusLine;
+import com.google.twisty.zplet.ZMachineException;
 
 import russotto.zplet.screenmodel.ZScreen;
 import russotto.zplet.screenmodel.ZStatus;
@@ -88,9 +89,6 @@ public class Twisty extends Activity {
             InitZJApp();
             if (screen == null)
             	return;
-            // TODO: let the screen figure out its own size and display
-            // everything when it's ready
-            screen.reshape(0, 0, 320, 176);
             setupWelcomeMessage();
         } catch (Exception e) {
             fatal("Oops, an error occurred preparing to play");
@@ -99,6 +97,14 @@ public class Twisty extends Activity {
     }
 	
 	private void setupWelcomeMessage() {
+		// Display a temporary welcome message
+		screen.clear();
+		String msg = "Please wait...";
+		int x = (screen.getchars() - msg.length()) / 2;
+		if (x < 0)
+			x = 0;
+		int y = screen.getlines() / 2;
+		screen.settext(y, x, msg.toCharArray(), 0, msg.length());
         // When the battery update comes in, we will print the
         // welcome message with the details
         monitorBatteryState();
@@ -320,6 +326,8 @@ public class Twisty extends Activity {
             fatal("I/O Error:\n" + Log.getStackTraceString(e));
             // don't set failed, may want to retry
         }
+        screen.clear();
+        screen.removeBufferedCodes();
         if (zmemimage != null) {
             switch (zmemimage[0]) {
             case 3:
@@ -389,8 +397,11 @@ public class Twisty extends Activity {
     public void stopzm() {
         if (zmIsRunning()) {
             zm.abort();
-            // I found some games need to be sent a keypress or
-            // two before they will actually quit
+            // Some games need to be sent a key press or two before they will
+            // actually quit.
+            // TODO(mariusm): send one if the zmachine is not currently waiting
+            // in screen.read_code() or similar; are a second and third really
+            // ever needed?
             sendKeyEvent(Event.KEY_PRESS, '\n');
             sendKeyEvent(Event.KEY_PRESS, '\n');
             sendKeyEvent(Event.KEY_PRESS, '\n');
@@ -439,15 +450,14 @@ public class Twisty extends Activity {
         switch (item.getId()) {
         case MENU_RESTART:
             zm.restart();
+            // TODO(mariusm): only send this if the zmachine is not currently
+            // waiting in screen.read_code() or similar.
             sendKeyEvent(Event.KEY_PRESS, '\n');
             break;
         case MENU_STOP:
             stopzm();
-            screen.clear();
-            // TODO(marius): instead of blindly showing the message,
-            // we should detect zmachine termination and show it when
-            // that happens.
-            setupWelcomeMessage();
+            // After the zmachine exits, the welcome message should show
+            // again.
             break;
         case MENU_PICK_FILE:
             pickFile();
@@ -460,7 +470,12 @@ public class Twisty extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    /** Launch UI to pick a file to load and execute */
     private void pickFile() {
+		// TODO(mariusm): allow for multiple unrelated directories
+		// (typically we should allow the user to load games from both
+    	// /sdcard and /data)
+    	
     	// Until there's a system-provided file picker, we use our own
         Intent intent = new Intent(Intent.PICK_ACTION);
         intent.setClass(this, FileBrowser.class);
@@ -474,4 +489,31 @@ public class Twisty extends Activity {
         
         // When the new activity is done, onActivityResult will be called
     }
+
+    /** Called from UI thread to request cleanup or whatever */
+	public void onZmFinished(final ZMachineException e) {
+		if (e != null) {
+			// Report that an error occurred
+			StringBuilder sb = new StringBuilder("Fatal error\n");
+			if (e.getPc() >= 0) {
+				sb.append("@ zmachine pc = 0x");
+				sb.append(Integer.toHexString(e.getPc()));
+				sb.append('\n');
+			}
+			sb.append(e.getMessage());
+			if (e.getCause() != null) {
+				StackTraceElement[] stack = e.getCause().getStackTrace();
+				for (StackTraceElement frame: stack) {
+					sb.append(frame.toString());
+					sb.append('\n');
+				}
+			}
+			// trim back trailing \n
+			sb.deleteCharAt(sb.length() - 1);
+			fatal(sb.toString());
+		} else {
+			// Normal ending, return to welcome screen
+			setupWelcomeMessage();
+		}
+	}
 }
