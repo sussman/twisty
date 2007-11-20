@@ -10,7 +10,7 @@
    Matthew Russotto, is distributed under the Artistic License
    (printed in the second section below.)  Twisty includes a
    heavily-modified version of zplet, and the changes are supplied as
-   a patch in CHANGES.zplet.
+   a patch in 'zplet.patch'.
 
  * The bundled games are distributable under different licenses, all
    with explicit permission from their authors.  Details are in the
