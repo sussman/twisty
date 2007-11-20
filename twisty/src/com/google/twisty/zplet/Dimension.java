@@ -19,6 +19,10 @@ public class Dimension {
 		height = h;
 		width = w;
 	}
+	public Dimension(float w, float h) {
+		height = (int)h;
+		width = (int)w;
+	}
 	public final int height;
 	public final int width;
 }

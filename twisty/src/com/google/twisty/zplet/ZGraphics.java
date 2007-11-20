@@ -27,4 +27,18 @@ public interface ZGraphics {
 
 	void drawChars(char[] newtext, int offset, int length, int tx, int ty, Color color);
 
+	FontMetrics getFontMetrics(Font font);
+
+	void drawImage(BufferedImage imageBuffer, int i, int j,
+			Object viewport);
+
+	void drawString(String str, int x, int y, Color color);
+
+	void drawLine(int x0, int y0, int x1, int y1, Color color);
+
+	void setClip(int left, int top, int width, int height);
+
+	void drawImage(BufferedImage image, int x, int y, int width, int height,
+			ImageObserver observer);
+
 }

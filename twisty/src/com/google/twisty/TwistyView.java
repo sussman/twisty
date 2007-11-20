@@ -16,9 +16,19 @@ package com.google.twisty;
 
 import java.util.Map;
 
-import com.google.twisty.zplet.ZMachineException;
+import org.zmpp.swingui.ColorTranslator;
+import org.zmpp.swingui.DisplaySettings;
+import org.zmpp.swingui.GameThread;
+import org.zmpp.swingui.LineEditor;
+import org.zmpp.swingui.LineEditorImpl;
+import org.zmpp.swingui.TextViewport;
+import org.zmpp.swingui.Viewport;
+import org.zmpp.swingui.Viewport6;
+import org.zmpp.vm.Machine;
+import org.zmpp.vm.ScreenModel;
 
-import russotto.zplet.screenmodel.ZScreen;
+import com.google.twisty.zplet.ZMachineException;
+import com.google.twisty.zplet.ZScreen;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -31,39 +41,45 @@ import android.view.View;
 public class TwistyView extends View {
 	private static String TAG = "TwistyView";
 
-	private ZScreen screen;
 	private Handler handler;
 	private static TwistyView last_created;
+	private Machine machine;
+	private ScreenModel screen;
+	private Viewport view;
+	private LineEditor editor;
+	private DisplaySettings settings;
+	private GameThread game_thread;
 
 	@SuppressWarnings("unchecked")
 	public TwistyView(Context context, AttributeSet attrs, Map inflateParams) {
 		super(context, attrs, inflateParams);
-		screen = null;
+		machine = null;
 		handler = new Handler();
+		settings = getSettings();
 		last_created = this;
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		Bitmap bitmap = screen.getBitmap();
-		canvas.drawBitmap(bitmap, 0, 0, null);
+		// TODO(marius) draw stuff
+//		Bitmap bitmap = screen.getBitmap();
+//		canvas.drawBitmap(bitmap, 0, 0, null);
 	}
 
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		Log.i(TAG, "size change: now " + w + " x " + h);
-		if (screen != null) {
+		// TODO resize
+/*		if (screen != null) {
 			screen.reshape(getLeft(), getTop(), getWidth(), getHeight());
-		}
+		} */
 		super.onSizeChanged(w, h, oldw, oldh);
 	}
-
-	synchronized public void setScreen(ZScreen newscreen) {
-		screen = newscreen;
-		if (screen != null) {
-			screen.reshape(getLeft(), getTop(), getWidth(), getHeight());
-		}
+	
+	public void startMachine() {
+		game_thread = new GameThread(machine, screen);
+		game_thread.start();
 	}
 
 	public void invalidateSoon() {
@@ -87,6 +103,17 @@ public class TwistyView extends View {
 		return last_created;
 	}
 
+	public static DisplaySettings getSettings() {
+	    int stdfontsize = 10;
+	    int fixedfontsize = 10;
+	    int foreground = ColorTranslator.UNDEFINED;
+	    int background = ColorTranslator.UNDEFINED;
+	    boolean antialias = true;
+	    
+	    return new DisplaySettings(stdfontsize, fixedfontsize, background,
+	                               foreground, antialias);		
+	}
+	
 	/**
 	 * Called from the zmachine's thread just before it exits
 	 * @param machineException
@@ -98,5 +125,23 @@ public class TwistyView extends View {
 				activity.onZmFinished(e);
 			}
 		});
+	}
+
+	public void setupMachine(Machine machine) {
+		this.machine = machine;
+	    editor = new LineEditorImpl(machine.getGameData().getStoryFileHeader(),
+	            machine.getGameData().getZsciiEncoding());
+
+	}
+
+	public void fixupUI() {
+		if (machine.getGameData().getStoryFileHeader().getVersion() ==  6) {
+			view = new Viewport6(machine, editor, settings);
+			screen = (ScreenModel) view;
+		} else {
+			view = new TextViewport(machine, editor, settings);
+			screen = (ScreenModel) view;
+		}
+
 	}
 }

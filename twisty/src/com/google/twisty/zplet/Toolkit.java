@@ -27,4 +27,9 @@ public class Toolkit {
 	
 	private static final Toolkit toolkit = new Toolkit();
 
+	public void beep() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

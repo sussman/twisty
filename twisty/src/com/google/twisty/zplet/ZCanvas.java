@@ -87,6 +87,38 @@ public class ZCanvas {
 			setupPaintFromFont(paint, font);
 		}
 
+		public void drawImage(BufferedImage imageBuffer, int i, int j,
+				Object viewport) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public void drawImage(BufferedImage image, int x, int y, int width,
+				int height, ImageObserver observer) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public void drawLine(int x0, int y0, int x1, int y1, Color color) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public void drawString(String str, int x, int y, Color color) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public FontMetrics getFontMetrics(Font font) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public void setClip(int left, int top, int width, int height) {
+			// TODO Auto-generated method stub
+			
+		}
+
 	}
 
 	class ImageGlue implements Image {
@@ -120,6 +152,7 @@ public class ZCanvas {
 			paint = new Paint();
 			setupPaintFromFont(paint, font);
 			Paint.FontMetricsInt fmi = paint.getFontMetricsInt();
+			ascent = fmi.ascent;
 			descent = fmi.bottom;
 			height = fmi.bottom - fmi.top;
 		}
@@ -142,8 +175,21 @@ public class ZCanvas {
 		}
 
 		private final Paint paint;
+		private final int ascent;
 		private final int descent;
 		private final int height;
+		public int getMaxAscent() {
+			return ascent;
+		}
+
+		public int getMaxDescent() {
+			return descent;
+		}
+
+		public int stringWidth(String str) {
+			// TODO Auto-generated method stub
+			return 0;
+		}
 	}
 
 	public ZCanvas(TwistyView v) {

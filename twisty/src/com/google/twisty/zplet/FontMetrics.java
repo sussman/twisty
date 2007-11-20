@@ -24,4 +24,10 @@ public interface FontMetrics {
 	
 	int getDescent();
 
+	int getMaxAscent();
+
+	int getMaxDescent();
+
+	int stringWidth(String str);
+
 }

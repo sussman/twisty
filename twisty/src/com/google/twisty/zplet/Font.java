@@ -19,6 +19,7 @@ public class Font {
 	public static final int PLAIN =  0x01;
 	public static final int BOLD =   0x10;
 	public static final int ITALIC = 0x20;
+	public static final int ROMAN_BASELINE = 0x100;
 
 	public Font(String name, int style, int size) {
 		this.name = name;
@@ -41,4 +42,8 @@ public class Font {
 	private final String name;
 	private final int style;
 	private final int size;
+
+	public Font deriveFont(int fontStyle) {
+		return new Font(name, fontStyle, size);
+	}
 }

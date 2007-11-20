@@ -19,17 +19,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.google.twisty.zplet.Event;
-import com.google.twisty.zplet.StatusLine;
-import com.google.twisty.zplet.ZMachineException;
+import org.zmpp.vm.Machine;
 
-import russotto.zplet.screenmodel.ZScreen;
-import russotto.zplet.screenmodel.ZStatus;
-import russotto.zplet.screenmodel.ZWindow;
-import russotto.zplet.zmachine.ZMachine;
-import russotto.zplet.zmachine.zmachine3.ZMachine3;
-import russotto.zplet.zmachine.zmachine5.ZMachine5;
-import russotto.zplet.zmachine.zmachine5.ZMachine8;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -49,18 +40,19 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.twisty.zplet.Event;
+import com.google.twisty.zplet.ZMachineException;
+import com.google.twisty.zplet.ZScreen;
+import com.google.twisty.zplet.ZWindow;
+
 public class Twisty extends Activity {
 	private static final int MENU_PICK_FILE = 101;
 	private static final int MENU_STOP = 102;
 	private static final int MENU_RESTART = 103;
 	private static final int FILE_PICKED = 104;
 	private static String TAG = "Twisty";
-	private static final String FONT_NAME = "Courier";
-	private static final int FONT_SIZE = 10;
 	private ZScreen screen;
-	private StatusLine status_line;
-	private ZStatus status;
-	private ZMachine zm;
+	private Machine zm;
 	// We use im and tb to allow for full text input, without any UI feedback
 	private InputMethod im;
 	private SpannableStringBuilder tb;
@@ -86,7 +78,6 @@ public class Twisty extends Activity {
         all.setFocusable(true);
 
         try {
-            InitZJApp();
             if (screen == null)
             	return;
             setupWelcomeMessage();
@@ -98,7 +89,7 @@ public class Twisty extends Activity {
 	
 	private void setupWelcomeMessage() {
 		// Display a temporary welcome message
-		screen.clear();
+		screen.reset();
 		String msg = "Please wait...";
 		int x = (screen.getchars() - msg.length()) / 2;
 		if (x < 0)
@@ -146,7 +137,7 @@ public class Twisty extends Activity {
 	}
 	
 	private boolean zmIsRunning() {
-        return (zm != null && zm.isAlive());
+        return (zm != null && zm.getCpu().isRunning());
 	}
 
 	private void monitorBatteryState() {
@@ -260,20 +251,6 @@ public class Twisty extends Activity {
         screen.keyDown(e, key_code);
     }
 
-    /** Set up things so the zmachine can request screen updates */
-    void InitZJApp() {
-        status_line = new StatusLine(this);
-        status = new ZStatus(status_line.getLeft(), status_line.getRight());
-        View v = findViewById(R.id.body);
-        if (v instanceof TwistyView) {
-        	TwistyView tv = (TwistyView)v;
-            screen = new ZScreen(tv, FONT_NAME, FONT_SIZE);
-        	tv.setScreen(screen);
-        } else {
-        	fatal("Internal error: View type should be TwistyView");
-        }
-    }
-
     /**
      * Start a zmachine, loading the program from the given file
      * @param filename Name of file to load
@@ -303,11 +280,6 @@ public class Twisty extends Activity {
         startzm(r.openRawResource(resource));
     }
 
-    /** Convenience helper to set visibility of status line */
-    void setStatusVisibility(int vis) {
-    	setViewVisibility(R.id.status, vis);
-    }
-
     /** Convenience helper to set visibility of any view */
     void setViewVisibility(int id, int vis) {
         findViewById(id).setVisibility(vis);
@@ -318,75 +290,29 @@ public class Twisty extends Activity {
      * @param zstream Stream containing the program
      */
     void startzm(InputStream zstream) {
-        byte zmemimage[] = null;
         setViewVisibility(R.id.errors, View.GONE);
-        try {
-            zmemimage = suckstream(zstream);
-        } catch (IOException e) {
-            fatal("I/O Error:\n" + Log.getStackTraceString(e));
-            // don't set failed, may want to retry
-        }
-        screen.clear();
-        screen.removeBufferedCodes();
-        if (zmemimage != null) {
-            switch (zmemimage[0]) {
-            case 3:
-                setStatusVisibility(View.VISIBLE);
-                zm = new ZMachine3(screen, status, zmemimage);
-                break;
-            case 5:
-                setStatusVisibility(View.GONE);
-                zm = new ZMachine5(screen, zmemimage);
-                break;
-            case 8:
-                setStatusVisibility(View.GONE);
-                zm = new ZMachine8(screen, zmemimage);
-                break;
-            default:
-                fatal("Not a valid V3, V5, or V8 story file (" +
-                		Integer.toString(zmemimage[0]) + ")");
-            }
-            if (zm != null) {
-                zm.start();
-            }
-        }
+        setViewVisibility(R.id.status, View.VISIBLE);
+        View body = findViewById(R.id.body);
+        TwistyView view = null;
+        if (body instanceof TwistyView) {
+        	view = (TwistyView)body;
+	        TwistyMachineFactory factory;
+	        factory = new TwistyMachineFactory(zstream, view);
+	        
+	        try {
+	          
+	          factory.buildMachine();
+	          TwistyView frame = factory.getUI();      
+	          frame.startMachine();
+	        } catch (IOException ex) {
+	          fatal("Could not read game.\nReason: " + Log.getStackTraceString(ex));
+	        }
+	    }
     }
-
-    /** Convenience helper that turns a stream into a byte array */
-    byte[] suckstream(InputStream mystream) throws IOException {
-        byte buffer[];
-        byte oldbuffer[];
-        int currentbytes = 0;
-        int bytesleft;
-        int got;
-        int buffersize = 2048;
-
-        buffer = new byte[buffersize];
-        bytesleft = buffersize;
-        got = 0;
-        while (got != -1) {
-            bytesleft -= got;
-            currentbytes += got;
-            if (bytesleft == 0) {
-                oldbuffer = buffer;
-                buffer = new byte[buffersize + currentbytes];
-                System.arraycopy(oldbuffer, 0, buffer, 0, currentbytes);
-                oldbuffer = null;
-                bytesleft = buffersize;
-            }
-            got = mystream.read(buffer, currentbytes, bytesleft);
-        }
-        if (buffer.length != currentbytes) {
-            oldbuffer = buffer;
-            buffer = new byte[currentbytes];
-            System.arraycopy(oldbuffer, 0, buffer, 0, currentbytes);
-        }
-        return buffer;
-    }
-
+    
     /** Displays a fatal error message */
     void fatal(String s) {
-        setStatusVisibility(View.VISIBLE);
+        setViewVisibility(R.id.status, View.VISIBLE);
         setItemText(R.id.statusL, "Error");
         setItemText(R.id.statusR, "");
         setViewVisibility(R.id.errors, View.VISIBLE);
@@ -396,7 +322,7 @@ public class Twisty extends Activity {
     /** Stops the currently running zmachine */
     public void stopzm() {
         if (zmIsRunning()) {
-            zm.abort();
+            zm.quit();
             // Some games need to be sent a key press or two before they will
             // actually quit.
             // TODO(mariusm): send one if the zmachine is not currently waiting
@@ -405,13 +331,13 @@ public class Twisty extends Activity {
             sendKeyEvent(Event.KEY_PRESS, '\n');
             sendKeyEvent(Event.KEY_PRESS, '\n');
             sendKeyEvent(Event.KEY_PRESS, '\n');
-            try {
-                zm.join();
-            } catch (InterruptedException e) {
-            }
+//            try {
+//                zm.join();
+//            } catch (InterruptedException e) {
+//            }
         }
         zm = null;
-        setStatusVisibility(View.GONE);
+        setViewVisibility(R.id.status, View.GONE);
     }
 
     @Override
