@@ -12,6 +12,8 @@ import java.util.EmptyStackException;
 import java.util.Random;
 import java.util.Stack;
 
+import android.util.Log;
+
 import com.google.twisty.zplet.ZMachineException;
 
 import russotto.zplet.screenmodel.ZScreen;
@@ -53,6 +55,7 @@ public abstract class ZMachine extends Thread {
 	public final static int OP_SMALL = 1;
 	public final static int OP_VARIABLE = 2;
 	public final static int OP_OMITTED = 3;
+	private static final String TAG = "ZMachine";
 	
 	public ZMachine(ZScreen screen, ZStatus status_line, byte [] memory_image) {
 				this.screen = screen;
@@ -135,6 +138,7 @@ public abstract class ZMachine extends Thread {
 					}
 					outputs[2] = header.transcripting();
 					if (outputs[2] && current_window.transcripting()) {
+						// TODO: android: send transcript somewhere else
 								if ((ch == 13) || (ch == 10)) {
 									System.out.println();
 								}					
@@ -166,7 +170,7 @@ public abstract class ZMachine extends Thread {
 					}
 					else if ((ch >= (int)'A') && (ch <= (int)'Z')) {
 								/* encode upper as lower.  Legal? */
-								System.err.println("Tried to encode uppercase dictionary word");
+								Log.e(TAG, "Tried to encode uppercase dictionary word");
 								zchars[zi] = ch - (int)'A' + 6;
 								if ((++zi) == (nwords*3))
 									break;
@@ -326,13 +330,20 @@ public abstract class ZMachine extends Thread {
 
 	public void run()
 	{
+		// Track timing for each opcode; 256 regular plus 28 extended
+		ProfileStats timers = new ProfileStats(284);
 				try {
 					while (!aborting && !isInterrupted()) {
 //								System.err.print("pc = ");
 //								System.err.println(Integer.toString(pc, 16));
+						long t1 = System.nanoTime();
 								zi.decode_instruction();
 								zi.execute();
+						long t2 = System.nanoTime();
+						// Figure out if this instruction caused a branch
+						timers.add(zi.opnum, 0.000001 * (t2 - t1));
 					}
+					timers.dump("opcode");
 					screen.onZmFinished(null);
 				}
 				catch (ZMachineException e) {
@@ -439,7 +450,63 @@ public abstract class ZMachine extends Thread {
 					return get_variable(get_code_byte());
 				}
 				/* crash */
+				fatal("Invalid operand type " + optype);
 				return -1;
+	}
+	
+	static class ProfileStats {
+		double[] count;
+		double[] sum_val;
+		double[] sum_val2;
+		final int limit;
+		
+		ProfileStats(int limit) {
+			this.limit = limit;
+			count = new double[limit + 1];
+			sum_val = new double[limit + 1];
+			sum_val2 = new double[limit + 1];
+		}
+		
+		public void add(int stat, double val) {
+			if (stat < 0 || stat >= limit)
+				stat = limit;
+			count[stat] += 1;
+			sum_val[stat] += val;
+			sum_val2[stat] += val * val;
+		}
+		
+		public void dump(String label) {
+			// This format makes it easy to pull data out of 'adb logcat'
+			// and load into a spreadsheet as CSV data
+			for (int i = 0; i <= limit; i++) {
+				StringBuilder sb = new StringBuilder(",");
+				sb.append(label);
+				sb.append(",");
+				if (i != limit)
+					sb.append(i);
+				else
+					sb.append("other");
+				sb.append(",");
+				sb.append(count[i]);
+				sb.append(",");
+				sb.append(mean(sum_val[i], count[i]));
+				sb.append(",");
+				sb.append(sd(sum_val2[i], sum_val[i], count[i]));
+				Log.i("ProfileStats", sb.toString());
+			}
+		}
+		
+		static double mean(double sum, double count) {
+			if (count <= 0.0)
+				return 0.0;
+			return sum / count;
+		}
+		
+		static double sd(double sum2, double sum, double count) {
+			if (count <= 0.0)
+				return 0.0;
+			return (sum2 - (sum * sum)) / (count * count);
+		}
 	}
 
 }

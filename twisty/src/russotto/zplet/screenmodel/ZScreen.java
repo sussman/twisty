@@ -13,6 +13,8 @@ import java.util.Vector;
 
 import russotto.zplet.ZColor;
 
+import android.util.Log;
+
 import com.google.twisty.TwistyView;
 import com.google.twisty.zplet.Dimension;
 import com.google.twisty.zplet.Event;
@@ -111,6 +113,7 @@ public class ZScreen extends ZCanvas {
 			 	'\u00a1',			/* inverse-! */
 			 	'\u00bf',			/* inverse-? */
 	     };
+		private static final String TAG = "ZScreen";
 
 		public ZScreen(TwistyView tv, String font_family, int font_size) {
 			super(tv);
@@ -146,7 +149,7 @@ public class ZScreen extends ZCanvas {
 					return '?';
 				}
 				else {
-					System.err.println("Illegal character code: " + zascii);
+					Log.e(TAG, "Illegal character code: " + zascii);
 					return '?';
 				}
 		}
@@ -209,7 +212,7 @@ public class ZScreen extends ZCanvas {
 					inputcodes.syncAddElement(new Integer(code));
 				}
 				catch (NoSuchKeyException excpt) {
-					System.err.println(excpt);
+					Log.e(TAG, "No such key in keyDown", excpt);
 				}
 				return true;
 		}
@@ -358,7 +361,7 @@ public class ZScreen extends ZCanvas {
 						}
 				}
 				catch (NullPointerException booga) {
-						System.err.println("No graphics in settext");
+					Log.e(TAG, "No graphics in settext");
 				}
 		}
 
@@ -399,7 +402,7 @@ public class ZScreen extends ZCanvas {
 //						Toolkit.getDefaultToolkit().sync();
 				}
 				catch (NullPointerException booga) {
-						System.err.println("No graphics in scrollLines");
+					Log.e(TAG, "No graphics in scrollLines");
 				}
 				repaint();
 				hasscrolled = true;
@@ -412,7 +415,7 @@ public class ZScreen extends ZCanvas {
 						g_store.fillRect(0, 0, mysize.width, mysize.height, getBackground());
 				}
 				catch (NullPointerException booga) {
-						System.err.println("No graphics in clear");
+					Log.e(TAG, "No graphics in clear");
 				}
 				repaint();
 		}

@@ -8,6 +8,7 @@
 
 package russotto.zplet.zmachine;
 
+import android.util.Log;
 import russotto.zplet.zmachine.state.ZState;
 
 public class ZInstruction {
@@ -92,6 +93,7 @@ public class ZInstruction {
 
 	protected final static int LOWER_WINDOW = 0;
 	protected final static int UPPER_WINDOW = 1;
+	private static final String TAG = "ZInstruction";
 
 	protected int opnum;
 	protected int count;
@@ -956,10 +958,10 @@ public class ZInstruction {
 				filesize = zm.header.file_length();
 				if ((filesize > zm.memory_image.length) ||
 					(zm.header.checksum() != zm.checksum)) {
-					System.err.println("VERIFY failed: ");
-					System.err.println("\texpected\tactual");
-					System.err.println("length\t"+filesize+"\t"+zm.memory_image.length);
-					System.err.println("checksum\t" 
+					Log.e(TAG, "VERIFY failed: ");
+					Log.e(TAG, "\texpected\tactual");
+					Log.e(TAG, "length\t"+filesize+"\t"+zm.memory_image.length);
+					Log.e(TAG, "checksum\t" 
 													   + Integer.toString(zm.header.checksum()&0xFFFF, 16)
 													   + "\t"+ Integer.toString(zm.checksum,16));
 					return ZFALSE;

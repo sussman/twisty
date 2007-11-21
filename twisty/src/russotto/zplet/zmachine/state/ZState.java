@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Stack;
 
+import android.util.Log;
+
 import russotto.iff.IFFChunkInfo;
 import russotto.iff.IFFChunkNotFoundException;
 import russotto.iff.IFFInputFile;
@@ -26,6 +28,8 @@ import russotto.zplet.zmachine.zmachine5.ZMachine5;
 
 public class ZState {
 	final static short QUETZAL_PROCEDURE = 0x10;
+
+	private static final String TAG = "ZState";
 
 	ZMachine zm;
 	Stack<Object> zstack;
@@ -260,7 +264,7 @@ immutable.	But the arrays aren't, so don't mess with them */
 		
 		catch (IOException excpt)
 		{
-			System.err.println(excpt);
+			Log.e(TAG, "Restore failed", excpt);
 			try {
 				if (infile != null)
 					infile.close();
@@ -270,7 +274,7 @@ immutable.	But the arrays aren't, so don't mess with them */
 		}
 		catch (IFFChunkNotFoundException cnfexcpt)
 		{
-			System.err.println(cnfexcpt);
+			Log.e(TAG, "Restore failed", cnfexcpt);
 			try {
 				if (infile != null)
 					infile.close();
@@ -280,7 +284,7 @@ immutable.	But the arrays aren't, so don't mess with them */
 		}
 		catch (SecurityException sexcpt)
 		{
-			System.err.println(sexcpt);
+			Log.e(TAG, "Restore failed", sexcpt);
 			try {
 				if (infile != null)
 					infile.close();

@@ -8,6 +8,7 @@
 
 package russotto.zplet.zmachine.zmachine5;
 
+import android.util.Log;
 import russotto.zplet.ZColor;
 import russotto.zplet.zmachine.ZFrameBound;
 import russotto.zplet.zmachine.ZInstruction;
@@ -58,6 +59,7 @@ public class ZInstruction5 extends ZInstruction
 
 		final static int SCREEN_UNSPLIT = -1;
 		final static int SCREEN_NOUNSPLIT = -2;
+		private static final String TAG = "ZInstruction5";
 
 		protected short call_opnum;
 		protected boolean has_returned = false;
@@ -746,7 +748,7 @@ public class ZInstruction5 extends ZInstruction
 				parseunknown = (count < 3) || (operands[3] == 0);
 					
 				if (userdict != 0)
-					System.err.println("tokenise opcode encountered (userdict)");
+					Log.e(TAG, "tokenise opcode encountered (userdict)");
 					
 				tbuf = operands[0]&0xFFFF;
 				tlen = zm.memory_image[tbuf+1];

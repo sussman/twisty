@@ -1,8 +1,6 @@
-Only in zplet.new/src/russotto/: .svn
-Only in zplet.new/src/russotto/iff: .svn
-diff -urbw zplet.20060707/src/russotto/iff/IFFChunkNotFoundException.java zplet.new/src/russotto/iff/IFFChunkNotFoundException.java
---- zplet.20060707/src/russotto/iff/IFFChunkNotFoundException.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/iff/IFFChunkNotFoundException.java	2007-11-17 22:39:18.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/iff/IFFChunkNotFoundException.java twisty/src/russotto/iff/IFFChunkNotFoundException.java
+--- zplet-20060707/src/russotto/iff/IFFChunkNotFoundException.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/iff/IFFChunkNotFoundException.java	2007-11-20 10:40:04.000000000 -0800
 @@ -1,8 +1,17 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -21,9 +19,9 @@ diff -urbw zplet.20060707/src/russotto/iff/IFFChunkNotFoundException.java zplet.
       * Constructs an IFFChunkNotFoundException with no detail message.
       * A detail message is a String that describes this particular exception.
       */
-diff -urbw zplet.20060707/src/russotto/iff/IFFFile.java zplet.new/src/russotto/iff/IFFFile.java
---- zplet.20060707/src/russotto/iff/IFFFile.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/iff/IFFFile.java	2007-11-17 22:39:18.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/iff/IFFFile.java twisty/src/russotto/iff/IFFFile.java
+--- zplet-20060707/src/russotto/iff/IFFFile.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/iff/IFFFile.java	2007-11-20 10:40:04.000000000 -0800
 @@ -1,3 +1,7 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -66,9 +64,9 @@ diff -urbw zplet.20060707/src/russotto/iff/IFFFile.java zplet.new/src/russotto/i
      }
  }
  
-diff -urbw zplet.20060707/src/russotto/iff/IFFInputFile.java zplet.new/src/russotto/iff/IFFInputFile.java
---- zplet.20060707/src/russotto/iff/IFFInputFile.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/iff/IFFInputFile.java	2007-11-17 22:39:18.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/iff/IFFInputFile.java twisty/src/russotto/iff/IFFInputFile.java
+--- zplet-20060707/src/russotto/iff/IFFInputFile.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/iff/IFFInputFile.java	2007-11-20 10:40:04.000000000 -0800
 @@ -1,3 +1,7 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -139,9 +137,9 @@ diff -urbw zplet.20060707/src/russotto/iff/IFFInputFile.java zplet.new/src/russo
      	openchunks.pop();
      	// doing the seek last ensures exceptions leave stacks consistent
      	seek(chunkend);
-diff -urbw zplet.20060707/src/russotto/iff/IFFOutputFile.java zplet.new/src/russotto/iff/IFFOutputFile.java
---- zplet.20060707/src/russotto/iff/IFFOutputFile.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/iff/IFFOutputFile.java	2007-11-17 22:39:18.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/iff/IFFOutputFile.java twisty/src/russotto/iff/IFFOutputFile.java
+--- zplet-20060707/src/russotto/iff/IFFOutputFile.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/iff/IFFOutputFile.java	2007-11-20 10:40:04.000000000 -0800
 @@ -1,6 +1,9 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -166,11 +164,10 @@ diff -urbw zplet.20060707/src/russotto/iff/IFFOutputFile.java zplet.new/src/russ
  		return result;
      }
  
-Only in zplet.20060707/src/russotto/zplet: .DS_Store
-Only in zplet.new/src/russotto/zplet: .svn
-diff -urbw zplet.20060707/src/russotto/zplet/ZColor.java zplet.new/src/russotto/zplet/ZColor.java
---- zplet.20060707/src/russotto/zplet/ZColor.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/ZColor.java	2007-11-17 22:39:23.000000000 -0800
+Only in zplet-20060707/src/russotto/zplet: .DS_Store
+diff -urbw zplet-20060707/src/russotto/zplet/ZColor.java twisty/src/russotto/zplet/ZColor.java
+--- zplet-20060707/src/russotto/zplet/ZColor.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/zplet/ZColor.java	2007-11-20 10:40:08.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -191,13 +188,12 @@ diff -urbw zplet.20060707/src/russotto/zplet/ZColor.java zplet.new/src/russotto/
  
  public class ZColor {
  	public final static int Z_CURRENT = 0;
-Only in zplet.20060707/src/russotto/zplet: ZJApp.java
-Only in zplet.20060707/src/russotto/zplet: Zplet.java
-Only in zplet.20060707/src/russotto/zplet/screenmodel: .DS_Store
-Only in zplet.new/src/russotto/zplet/screenmodel: .svn
-diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/NoSuchKeyException.java zplet.new/src/russotto/zplet/screenmodel/NoSuchKeyException.java
---- zplet.20060707/src/russotto/zplet/screenmodel/NoSuchKeyException.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/screenmodel/NoSuchKeyException.java	2007-11-17 22:39:20.000000000 -0800
+Only in zplet-20060707/src/russotto/zplet: ZJApp.java
+Only in zplet-20060707/src/russotto/zplet: Zplet.java
+Only in zplet-20060707/src/russotto/zplet/screenmodel: .DS_Store
+diff -urbw zplet-20060707/src/russotto/zplet/screenmodel/NoSuchKeyException.java twisty/src/russotto/zplet/screenmodel/NoSuchKeyException.java
+--- zplet-20060707/src/russotto/zplet/screenmodel/NoSuchKeyException.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/zplet/screenmodel/NoSuchKeyException.java	2007-11-20 10:40:05.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -224,9 +220,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/NoSuchKeyException.java
  	public NoSuchKeyException() {
  		super();
  	}
-diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/SyncVector.java zplet.new/src/russotto/zplet/screenmodel/SyncVector.java
---- zplet.20060707/src/russotto/zplet/screenmodel/SyncVector.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/screenmodel/SyncVector.java	2007-11-17 22:39:20.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/screenmodel/SyncVector.java twisty/src/russotto/zplet/screenmodel/SyncVector.java
+--- zplet-20060707/src/russotto/zplet/screenmodel/SyncVector.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/zplet/screenmodel/SyncVector.java	2007-11-20 10:40:05.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -279,9 +275,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/SyncVector.java zplet.n
  		super.addElement(obj);
  		notify();
  	}
-diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZCursor.java zplet.new/src/russotto/zplet/screenmodel/ZCursor.java
---- zplet.20060707/src/russotto/zplet/screenmodel/ZCursor.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/screenmodel/ZCursor.java	2007-11-17 22:39:20.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/screenmodel/ZCursor.java twisty/src/russotto/zplet/screenmodel/ZCursor.java
+--- zplet-20060707/src/russotto/zplet/screenmodel/ZCursor.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/zplet/screenmodel/ZCursor.java	2007-11-20 10:40:05.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -366,9 +362,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZCursor.java zplet.new/
  			}
  		}
  
-diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java zplet.new/src/russotto/zplet/screenmodel/ZScreen.java
---- zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java	2006-07-07 17:12:38.000000000 -0700
-+++ zplet.new/src/russotto/zplet/screenmodel/ZScreen.java	2007-11-17 22:45:05.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/screenmodel/ZScreen.java twisty/src/russotto/zplet/screenmodel/ZScreen.java
+--- zplet-20060707/src/russotto/zplet/screenmodel/ZScreen.java	2006-07-07 17:12:38.000000000 -0700
++++ twisty/src/russotto/zplet/screenmodel/ZScreen.java	2007-11-20 20:21:27.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -376,7 +372,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java zplet.new/
  /* Zplet, a Z-Machine interpreter in Java */
  /* Copyright 1996,2001 Matthew T. Russotto */
  /* As of 23 February 2001, this code is open source and covered by the */
-@@ -5,33 +8,38 @@
+@@ -5,33 +8,40 @@
  
  package russotto.zplet.screenmodel;
  
@@ -391,6 +387,8 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java zplet.new/
  import russotto.zplet.ZColor;
  
 -public class ZScreen extends Canvas {
++import android.util.Log;
++
 +import com.google.twisty.TwistyView;
 +import com.google.twisty.zplet.Dimension;
 +import com.google.twisty.zplet.Event;
@@ -427,9 +425,11 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java zplet.new/
  		final static char accent_table[] = {
  			 	'\u00e4',			/* a-umlaut */
  			 	'\u00f6',			/* o-umlaut */
-@@ -104,21 +112,17 @@
+@@ -103,22 +113,19 @@
+ 			 	'\u00a1',			/* inverse-! */
  			 	'\u00bf',			/* inverse-? */
  	     };
++		private static final String TAG = "ZScreen";
  
 -
 -		public ZScreen() {
@@ -454,7 +454,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java zplet.new/
  				inputcursor = new ZCursor(this);
  				setForeground(ZColor.getcolor(zforeground));
  				setBackground(ZColor.getcolor(zbackground));
-@@ -128,40 +132,6 @@
+@@ -128,40 +135,6 @@
  				return ((key == 10) || (key == 13));
  		}
  
@@ -495,7 +495,25 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java zplet.new/
  		static char zascii_to_unicode(short zascii) {
  				if ((zascii >= 32) && (zascii <= 126)) /* normal ascii */
  					return (char)zascii;
-@@ -253,7 +223,7 @@
+@@ -176,7 +149,7 @@
+ 					return '?';
+ 				}
+ 				else {
+-					System.err.println("Illegal character code: " + zascii);
++					Log.e(TAG, "Illegal character code: " + zascii);
+ 					return '?';
+ 				}
+ 		}
+@@ -239,7 +212,7 @@
+ 					inputcodes.syncAddElement(new Integer(code));
+ 				}
+ 				catch (NoSuchKeyException excpt) {
+-					System.err.println(excpt);
++					Log.e(TAG, "No such key in keyDown", excpt);
+ 				}
+ 				return true;
+ 		}
+@@ -253,7 +226,7 @@
  				Integer thecode = null;
  				
  				while (thecode == null) {
@@ -504,7 +522,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java zplet.new/
  				}
  				return (short)thecode.intValue();
  		}
-@@ -261,16 +231,13 @@
+@@ -261,16 +234,13 @@
  		public short read_buffered_code() { /* should really be synched */
  						   Integer thecode;
  				int incode;
@@ -523,7 +541,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java zplet.new/
  				inputcursor.size(cw, ch);
  
  				while (!bufferdone) {
-@@ -280,11 +247,10 @@
+@@ -280,11 +250,10 @@
  						inputcursor.show();
  						Toolkit.getDefaultToolkit().sync();
  						incode = read_code();
@@ -536,7 +554,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java zplet.new/
  										bufferedcodes.removeElementAt(bufferedcodes.size() - 1);
  										inputwindow.flush();
  										inputwindow.movecursor(inputwindow.cursorx - 1, 
-@@ -311,7 +277,7 @@
+@@ -311,7 +280,7 @@
  								bufferedcodes.addElement(new Integer(incode));
  						}
  				}
@@ -545,7 +563,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java zplet.new/
  				bufferedcodes.removeElementAt(0);
  				if (bufferedcodes.isEmpty()) {
  						bufferdone = false;
-@@ -329,23 +295,20 @@
+@@ -329,23 +298,20 @@
  
  		public synchronized void reshape(int x, int y, int width, int height) {
  				int lines;
@@ -572,7 +590,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java zplet.new/
  		}
  
  		/**
-@@ -361,10 +324,6 @@
+@@ -361,10 +327,6 @@
  		public synchronized void
  		setFixedFont( String font_family, int font_size )
  		{
@@ -583,7 +601,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java zplet.new/
  		    this.fixedfont = new Font(font_family, Font.PLAIN, font_size);
  		}
  
-@@ -387,9 +346,7 @@
+@@ -387,9 +349,7 @@
  		public synchronized void settext(int y, int x, char newtext[],
  																		 int offset, int length, boolean reverse,
  																		 Font textfont) {
@@ -594,7 +612,12 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java zplet.new/
  
  				try {
  						g_store.setFont(textfont);
-@@ -405,33 +362,26 @@
+@@ -401,37 +361,30 @@
+ 						}
+ 				}
+ 				catch (NullPointerException booga) {
+-						System.err.println("No graphics in settext");
++					Log.e(TAG, "No graphics in settext");
  				}
  		}
  
@@ -636,7 +659,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java zplet.new/
  				int texttop;
  
  //				System.err.println("scrollLines top height lines "
-@@ -443,10 +393,9 @@
+@@ -443,52 +396,26 @@
  						g_store.copyArea(0, texttop + lines * fixedmetrics.getHeight(),
  														 size().width, (height - lines) * fixedmetrics.getHeight(),
  														 0, -lines * fixedmetrics.getHeight());
@@ -649,7 +672,10 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java zplet.new/
  //						Toolkit.getDefaultToolkit().sync();
  				}
  				catch (NullPointerException booga) {
-@@ -456,36 +405,11 @@
+-						System.err.println("No graphics in scrollLines");
++					Log.e(TAG, "No graphics in scrollLines");
+ 				}
+ 				repaint();
  				hasscrolled = true;
  		}
  		
@@ -686,8 +712,12 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java zplet.new/
 +						g_store.fillRect(0, 0, mysize.width, mysize.height, getBackground());
  				}
  				catch (NullPointerException booga) {
- 						System.err.println("No graphics in clear");
-@@ -512,25 +436,14 @@
+-						System.err.println("No graphics in clear");
++					Log.e(TAG, "No graphics in clear");
+ 				}
+ 				repaint();
+ 		}
+@@ -512,25 +439,14 @@
  		public void setZBackground(int zcolor)
  		{
  				zbackground = zcolor;
@@ -718,9 +748,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZScreen.java zplet.new/
 +			bufferedcodes.removeAllElements();			
  		}
  }
-diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZStatus.java zplet.new/src/russotto/zplet/screenmodel/ZStatus.java
---- zplet.20060707/src/russotto/zplet/screenmodel/ZStatus.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/screenmodel/ZStatus.java	2007-11-17 22:39:20.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/screenmodel/ZStatus.java twisty/src/russotto/zplet/screenmodel/ZStatus.java
+--- zplet-20060707/src/russotto/zplet/screenmodel/ZStatus.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/zplet/screenmodel/ZStatus.java	2007-11-20 10:40:05.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -783,9 +813,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZStatus.java zplet.new/
   }
  
  
-diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZWindow.java zplet.new/src/russotto/zplet/screenmodel/ZWindow.java
---- zplet.20060707/src/russotto/zplet/screenmodel/ZWindow.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/screenmodel/ZWindow.java	2007-11-17 22:39:20.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/screenmodel/ZWindow.java twisty/src/russotto/zplet/screenmodel/ZWindow.java
+--- zplet-20060707/src/russotto/zplet/screenmodel/ZWindow.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/zplet/screenmodel/ZWindow.java	2007-11-20 10:40:05.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -837,10 +867,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/screenmodel/ZWindow.java zplet.new/
  		 }
   }
  
-Only in zplet.new/src/russotto/zplet/zmachine: .svn
-diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZDictionary.java zplet.new/src/russotto/zplet/zmachine/ZDictionary.java
---- zplet.20060707/src/russotto/zplet/zmachine/ZDictionary.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/ZDictionary.java	2007-11-17 22:39:22.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZDictionary.java twisty/src/russotto/zplet/zmachine/ZDictionary.java
+--- zplet-20060707/src/russotto/zplet/zmachine/ZDictionary.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/zplet/zmachine/ZDictionary.java	2007-11-20 10:40:08.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -860,9 +889,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZDictionary.java zplet.new
  
  public abstract class ZDictionary
  {
-diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZFrameBound.java zplet.new/src/russotto/zplet/zmachine/ZFrameBound.java
---- zplet.20060707/src/russotto/zplet/zmachine/ZFrameBound.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/ZFrameBound.java	2007-11-17 22:39:22.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZFrameBound.java twisty/src/russotto/zplet/zmachine/ZFrameBound.java
+--- zplet-20060707/src/russotto/zplet/zmachine/ZFrameBound.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/zplet/zmachine/ZFrameBound.java	2007-11-20 10:40:08.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -870,9 +899,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZFrameBound.java zplet.new
  /* Zplet, a Z-Machine interpreter in Java */
  /* Copyright 1996,2001 Matthew T. Russotto */
  /* As of 23 February 2001, this code is open source and covered by the */
-diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZHeader.java zplet.new/src/russotto/zplet/zmachine/ZHeader.java
---- zplet.20060707/src/russotto/zplet/zmachine/ZHeader.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/ZHeader.java	2007-11-17 22:39:22.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZHeader.java twisty/src/russotto/zplet/zmachine/ZHeader.java
+--- zplet-20060707/src/russotto/zplet/zmachine/ZHeader.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/zplet/zmachine/ZHeader.java	2007-11-20 10:40:08.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -893,9 +922,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZHeader.java zplet.new/src
  
  public abstract class ZHeader {
  	protected byte memory_image[];
-diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZInstruction.java zplet.new/src/russotto/zplet/zmachine/ZInstruction.java
---- zplet.20060707/src/russotto/zplet/zmachine/ZInstruction.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/ZInstruction.java	2007-11-18 01:14:20.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZInstruction.java twisty/src/russotto/zplet/zmachine/ZInstruction.java
+--- zplet-20060707/src/russotto/zplet/zmachine/ZInstruction.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/zplet/zmachine/ZInstruction.java	2007-11-20 20:13:20.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -903,7 +932,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZInstruction.java zplet.ne
  /* Zplet, a Z-Machine interpreter in Java */
  /* Copyright 1996,2001 Matthew T. Russotto */
  /* As of 23 February 2001, this code is open source and covered by the */
-@@ -5,11 +8,6 @@
+@@ -5,11 +8,7 @@
  
  package russotto.zplet.zmachine;
  
@@ -912,10 +941,19 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZInstruction.java zplet.ne
 -import java.net.*;
 -import java.io.*;
 -import java.applet.Applet;
++import android.util.Log;
  import russotto.zplet.zmachine.state.ZState;
  
  public class ZInstruction {
-@@ -197,19 +195,19 @@
+@@ -94,6 +93,7 @@
+ 
+ 	protected final static int LOWER_WINDOW = 0;
+ 	protected final static int UPPER_WINDOW = 1;
++	private static final String TAG = "ZInstruction";
+ 
+ 	protected int opnum;
+ 	protected int count;
+@@ -197,19 +197,19 @@
  
  					while (optypebytes-- != 0) {
  								optype = (optypes & 0xC0)>>6;
@@ -939,7 +977,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZInstruction.java zplet.ne
  									break;
  								operands[count++] = zm.get_operand(optype);
  								optypes = optypes2;
-@@ -218,7 +216,7 @@
+@@ -218,7 +218,7 @@
  
  				case 0x80: /* short form */
  					optype = (opcode&0x30) >> 4;
@@ -948,7 +986,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZInstruction.java zplet.ne
  								opnum = opcode;
  								count = 0;
  					}
-@@ -882,7 +880,7 @@
+@@ -882,7 +882,7 @@
  
  	protected short op_save()
  	{
@@ -957,7 +995,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZInstruction.java zplet.ne
  					return ZSAVE_SUCCESS;
  				return ZFALSE;
  	}
-@@ -892,7 +890,7 @@
+@@ -892,7 +892,7 @@
  				ZState restore_state;
  				
  				restore_state = new ZState(zm);
@@ -966,7 +1004,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZInstruction.java zplet.ne
  					zm.restore(restore_state);
  					decode_second_half();
  					
-@@ -934,28 +932,8 @@
+@@ -934,28 +934,8 @@
  
  	protected short op_quit()
  	{
@@ -997,9 +1035,24 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZInstruction.java zplet.ne
  				return ZFALSE;
  	}
  
-diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java zplet.new/src/russotto/zplet/zmachine/ZMachine.java
---- zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/ZMachine.java	2007-11-18 00:43:59.000000000 -0800
+@@ -978,10 +958,10 @@
+ 				filesize = zm.header.file_length();
+ 				if ((filesize > zm.memory_image.length) ||
+ 					(zm.header.checksum() != zm.checksum)) {
+-					System.err.println("VERIFY failed: ");
+-					System.err.println("\texpected\tactual");
+-					System.err.println("length\t"+filesize+"\t"+zm.memory_image.length);
+-					System.err.println("checksum\t" 
++					Log.e(TAG, "VERIFY failed: ");
++					Log.e(TAG, "\texpected\tactual");
++					Log.e(TAG, "length\t"+filesize+"\t"+zm.memory_image.length);
++					Log.e(TAG, "checksum\t" 
+ 													   + Integer.toString(zm.header.checksum()&0xFFFF, 16)
+ 													   + "\t"+ Integer.toString(zm.checksum,16));
+ 					return ZFALSE;
+diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/russotto/zplet/zmachine/ZMachine.java
+--- zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/zplet/zmachine/ZMachine.java	2007-11-21 00:30:52.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1007,7 +1060,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java zplet.new/sr
  /* Zplet, a Z-Machine interpreter in Java */
  /* Copyright 1996,2001 Matthew T. Russotto */
  /* As of 23 February 2001, this code is open source and covered by the */
-@@ -5,12 +8,15 @@
+@@ -5,12 +8,17 @@
  
  package russotto.zplet.zmachine;
  
@@ -1021,6 +1074,8 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java zplet.new/sr
 +import java.util.Random;
 +import java.util.Stack;
 +
++import android.util.Log;
++
 +import com.google.twisty.zplet.ZMachineException;
 +
 +import russotto.zplet.screenmodel.ZScreen;
@@ -1029,7 +1084,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java zplet.new/sr
  import russotto.zplet.zmachine.state.ZState;
  
  public abstract class ZMachine extends Thread {
-@@ -24,7 +30,7 @@
+@@ -24,7 +32,7 @@
  	public ZState restart_state;
  	protected ZStatus status_line;
  	public byte memory_image[];
@@ -1038,7 +1093,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java zplet.new/sr
  	public Random zrandom;
  	protected int globals;
  	public short locals[];
-@@ -41,6 +47,7 @@
+@@ -41,18 +49,20 @@
  	protected String status_location;
  
  	protected final String A2 = "0123456789.,!?_#\'\"/\\-:()";
@@ -1046,7 +1101,12 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java zplet.new/sr
  
  	public final static int OP_LARGE = 0;
  	public final static int OP_SMALL = 1;
-@@ -52,7 +59,7 @@
+ 	public final static int OP_VARIABLE = 2;
+ 	public final static int OP_OMITTED = 3;
++	private static final String TAG = "ZMachine";
+ 	
+ 	public ZMachine(ZScreen screen, ZStatus status_line, byte [] memory_image) {
+ 				this.screen = screen;
  				this.status_line = status_line;
  				this.memory_image = memory_image;
  				locals = new short[0];
@@ -1055,7 +1115,24 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java zplet.new/sr
  				restart_state = new ZState(this);
  				restart_state.save_current();
  				zrandom = new Random(); /* starts in "random" mode */
-@@ -310,6 +317,7 @@
+@@ -128,6 +138,7 @@
+ 					}
+ 					outputs[2] = header.transcripting();
+ 					if (outputs[2] && current_window.transcripting()) {
++						// TODO: android: send transcript somewhere else
+ 								if ((ch == 13) || (ch == 10)) {
+ 									System.out.println();
+ 								}					
+@@ -159,7 +170,7 @@
+ 					}
+ 					else if ((ch >= (int)'A') && (ch <= (int)'Z')) {
+ 								/* encode upper as lower.  Legal? */
+-								System.err.println("Tried to encode uppercase dictionary word");
++								Log.e(TAG, "Tried to encode uppercase dictionary word");
+ 								zchars[zi] = ch - (int)'A' + 6;
+ 								if ((++zi) == (nwords*3))
+ 									break;
+@@ -310,6 +321,7 @@
  	}
  
  	public void start() {
@@ -1063,17 +1140,25 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java zplet.new/sr
  				screen.clear();
  				restart();
  				header.set_transcripting(false);
-@@ -319,27 +327,28 @@
+@@ -318,26 +330,34 @@
+ 
  	public void run()
  	{
++		// Track timing for each opcode; 256 regular plus 28 extended
++		ProfileStats timers = new ProfileStats(284);
  				try {
 -					while (true) {
 +					while (!aborting && !isInterrupted()) {
  //								System.err.print("pc = ");
  //								System.err.println(Integer.toString(pc, 16));
++						long t1 = System.nanoTime();
  								zi.decode_instruction();
  								zi.execute();
++						long t2 = System.nanoTime();
++						// Figure out if this instruction caused a branch
++						timers.add(zi.opnum, 0.000001 * (t2 - t1));
  					}
++					timers.dump("opcode");
 +					screen.onZmFinished(null);
  				}
 -				catch (ArrayIndexOutOfBoundsException booga) {
@@ -1083,27 +1168,25 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java zplet.new/sr
 -					throw booga;
 +				catch (ZMachineException e) {
 +					screen.onZmFinished(e);
++				}
++				catch (RuntimeException e) {
++					screen.onZmFinished(new ZMachineException(pc, e));
  				}
 -				catch (ClassCastException booga) {
 -					System.err.print("pc = ");
 -					System.err.println(Integer.toString(pc, 16));
 -					
 -					throw booga;
-+				catch (RuntimeException e) {
-+					screen.onZmFinished(new ZMachineException(pc, e));
  				}
- 	}
- 
++
 +	public void abort() {
 +		aborting = true;
 +		interrupt();
 +		pc = -1;
-+	}
-+
+ 	}
+ 
  	void calculate_checksum() {
- 				int filesize = header.file_length();
- 				int i;
-@@ -371,8 +380,7 @@
+@@ -371,8 +391,7 @@
  	}
  
  	public void fatal(String s) {
@@ -1113,7 +1196,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java zplet.new/sr
  	}
  
  	public short get_variable(short varnum) {
-@@ -421,7 +429,6 @@
+@@ -421,7 +440,6 @@
  	}
  	
  	public short get_operand(int optype) {
@@ -1121,9 +1204,73 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZMachine.java zplet.new/sr
  				switch (optype) {
  				case OP_SMALL:
  					return (short)(get_code_byte() & 0xFF);
-diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZObjectTree.java zplet.new/src/russotto/zplet/zmachine/ZObjectTree.java
---- zplet.20060707/src/russotto/zplet/zmachine/ZObjectTree.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/ZObjectTree.java	2007-11-17 22:39:22.000000000 -0800
+@@ -432,7 +450,63 @@
+ 					return get_variable(get_code_byte());
+ 				}
+ 				/* crash */
++				fatal("Invalid operand type " + optype);
+ 				return -1;
+ 	}
+ 
++	static class ProfileStats {
++		double[] count;
++		double[] sum_val;
++		double[] sum_val2;
++		final int limit;
++		
++		ProfileStats(int limit) {
++			this.limit = limit;
++			count = new double[limit + 1];
++			sum_val = new double[limit + 1];
++			sum_val2 = new double[limit + 1];
++		}
++		
++		public void add(int stat, double val) {
++			if (stat < 0 || stat >= limit)
++				stat = limit;
++			count[stat] += 1;
++			sum_val[stat] += val;
++			sum_val2[stat] += val * val;
++		}
++		
++		public void dump(String label) {
++			// This format makes it easy to pull data out of 'adb logcat'
++			// and load into a spreadsheet as CSV data
++			for (int i = 0; i <= limit; i++) {
++				StringBuilder sb = new StringBuilder(",");
++				sb.append(label);
++				sb.append(",");
++				if (i != limit)
++					sb.append(i);
++				else
++					sb.append("other");
++				sb.append(",");
++				sb.append(count[i]);
++				sb.append(",");
++				sb.append(mean(sum_val[i], count[i]));
++				sb.append(",");
++				sb.append(sd(sum_val2[i], sum_val[i], count[i]));
++				Log.i("ProfileStats", sb.toString());
++			}
++		}
++		
++		static double mean(double sum, double count) {
++			if (count <= 0.0)
++				return 0.0;
++			return sum / count;
++		}
++		
++		static double sd(double sum2, double sum, double count) {
++			if (count <= 0.0)
++				return 0.0;
++			return (sum2 - (sum * sum)) / (count * count);
++		}
++	}
++
+ }
+diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZObjectTree.java twisty/src/russotto/zplet/zmachine/ZObjectTree.java
+--- zplet-20060707/src/russotto/zplet/zmachine/ZObjectTree.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/zplet/zmachine/ZObjectTree.java	2007-11-20 10:40:08.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1143,10 +1290,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/ZObjectTree.java zplet.new
  
  public abstract class ZObjectTree {
  	protected ZMachine zm;
-Only in zplet.new/src/russotto/zplet/zmachine/state: .svn
-diff -urbw zplet.20060707/src/russotto/zplet/zmachine/state/ZSFrame.java zplet.new/src/russotto/zplet/zmachine/state/ZSFrame.java
---- zplet.20060707/src/russotto/zplet/zmachine/state/ZSFrame.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/state/ZSFrame.java	2007-11-17 22:39:20.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/zmachine/state/ZSFrame.java twisty/src/russotto/zplet/zmachine/state/ZSFrame.java
+--- zplet-20060707/src/russotto/zplet/zmachine/state/ZSFrame.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/zplet/zmachine/state/ZSFrame.java	2007-11-20 10:40:06.000000000 -0800
 @@ -5,64 +5,40 @@
  
  package russotto.zplet.zmachine.state;
@@ -1236,9 +1382,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/state/ZSFrame.java zplet.n
  }
  
  /** ZState holds the state-of-play for the Z machine */
-diff -urbw zplet.20060707/src/russotto/zplet/zmachine/state/ZState.java zplet.new/src/russotto/zplet/zmachine/state/ZState.java
---- zplet.20060707/src/russotto/zplet/zmachine/state/ZState.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/state/ZState.java	2007-11-18 00:39:07.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/zmachine/state/ZState.java twisty/src/russotto/zplet/zmachine/state/ZState.java
+--- zplet-20060707/src/russotto/zplet/zmachine/state/ZState.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/zplet/zmachine/state/ZState.java	2007-11-20 20:17:39.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1246,7 +1392,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/state/ZState.java zplet.ne
  /* Zplet, a Z-Machine interpreter in Java */
  /* Copyright 1996,2001 Matthew T. Russotto */
  /* As of 23 February 2001, this code is open source and covered by the */
-@@ -5,24 +8,27 @@
+@@ -5,24 +8,31 @@
  
  package russotto.zplet.zmachine.state;
  
@@ -1261,6 +1407,8 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/state/ZState.java zplet.ne
 +import java.io.IOException;
 +import java.util.Enumeration;
 +import java.util.Stack;
++
++import android.util.Log;
 +
 +import russotto.iff.IFFChunkInfo;
 +import russotto.iff.IFFChunkNotFoundException;
@@ -1278,13 +1426,15 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/state/ZState.java zplet.ne
  public class ZState {
  	final static short QUETZAL_PROCEDURE = 0x10;
  
++	private static final String TAG = "ZState";
++
  	ZMachine zm;
 -	Stack zstack;
 +	Stack<Object> zstack;
  	public ZHeader header;
  	int pc;
  	byte dynamic[];
-@@ -33,6 +39,12 @@
+@@ -33,6 +43,12 @@
  		this.zm = zm;
  	}
  
@@ -1297,7 +1447,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/state/ZState.java zplet.ne
  	public void save_current() {
  		int dyn_size;
  
-@@ -40,7 +52,7 @@
+@@ -40,7 +56,7 @@
  		dyn_size = header.static_base();
  /* clones the stack but not the Integers within.  Fortunately they are
  immutable.	But the arrays aren't, so don't mess with them */
@@ -1306,7 +1456,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/state/ZState.java zplet.ne
  		dynamic = new byte[dyn_size];
  		System.arraycopy(zm.memory_image, 0, dynamic, 0, dyn_size);
  		locals = new short[zm.locals.length];
-@@ -55,47 +67,25 @@
+@@ -55,47 +71,25 @@
  		System.arraycopy(dynamic, 0, zm.memory_image, 0, dynamic.length);
  		zm.locals = new short[locals.length];
  		System.arraycopy(locals, 0, zm.locals, 0, locals.length);
@@ -1362,7 +1512,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/state/ZState.java zplet.ne
  		String fname;
  		IFFInputFile infile = null;
  		IFFChunkInfo chunkinfo;
-@@ -123,7 +113,7 @@
+@@ -123,7 +117,7 @@
  		lastargmask = 0;
  		
  		version = zm.header.version();
@@ -1371,7 +1521,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/state/ZState.java zplet.ne
  		try {
  			infile = new IFFInputFile(fname);
  			formtype = infile.readFORM();
-@@ -198,7 +188,7 @@
+@@ -198,7 +192,7 @@
  				infile.seek(ifhdend);
  				/* read the stacks */
  				chunkinfo = infile.skipToChunk("Stks");
@@ -1380,7 +1530,34 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/state/ZState.java zplet.ne
  				
  				frameno = 0;
  				while (infile.getChunkPointer() < chunkinfo.chunklength) {
-@@ -340,9 +330,9 @@
+@@ -270,7 +264,7 @@
+ 		
+ 		catch (IOException excpt)
+ 		{
+-			System.err.println(excpt);
++			Log.e(TAG, "Restore failed", excpt);
+ 			try {
+ 				if (infile != null)
+ 					infile.close();
+@@ -280,7 +274,7 @@
+ 		}
+ 		catch (IFFChunkNotFoundException cnfexcpt)
+ 		{
+-			System.err.println(cnfexcpt);
++			Log.e(TAG, "Restore failed", cnfexcpt);
+ 			try {
+ 				if (infile != null)
+ 					infile.close();
+@@ -290,7 +284,7 @@
+ 		}
+ 		catch (SecurityException sexcpt)
+ 		{
+-			System.err.println(sexcpt);
++			Log.e(TAG, "Restore failed", sexcpt);
+ 			try {
+ 				if (infile != null)
+ 					infile.close();
+@@ -340,9 +334,9 @@
  		outfile.closeChunk();
  	}
  	
@@ -1392,7 +1569,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/state/ZState.java zplet.ne
  		Object el, el2;
  		int i;
  		IFFOutputFile outfile = null;
-@@ -359,15 +349,15 @@
+@@ -359,15 +353,15 @@
  		boolean returnvalue = false;
  
  		try {
@@ -1412,9 +1589,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/state/ZState.java zplet.ne
  			outfile.writeByte((save_pc&0xFF0000) >>> 16);
  			outfile.writeShort(save_pc&0xFFFF);
  			outfile.closeChunk();
-diff -urbw zplet.20060707/src/russotto/zplet/zmachine/state/ZStateHeader.java zplet.new/src/russotto/zplet/zmachine/state/ZStateHeader.java
---- zplet.20060707/src/russotto/zplet/zmachine/state/ZStateHeader.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/state/ZStateHeader.java	2007-11-17 22:39:20.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/zmachine/state/ZStateHeader.java twisty/src/russotto/zplet/zmachine/state/ZStateHeader.java
+--- zplet-20060707/src/russotto/zplet/zmachine/state/ZStateHeader.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/zplet/zmachine/state/ZStateHeader.java	2007-11-20 10:40:06.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1435,10 +1612,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/state/ZStateHeader.java zp
  import russotto.zplet.zmachine.ZHeader;
  
  class ZStateHeader extends ZHeader
-Only in zplet.new/src/russotto/zplet/zmachine/zmachine3: .svn
-diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZDictionary3.java zplet.new/src/russotto/zplet/zmachine/zmachine3/ZDictionary3.java
---- zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZDictionary3.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/zmachine3/ZDictionary3.java	2007-11-17 22:39:21.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/zmachine/zmachine3/ZDictionary3.java twisty/src/russotto/zplet/zmachine/zmachine3/ZDictionary3.java
+--- zplet-20060707/src/russotto/zplet/zmachine/zmachine3/ZDictionary3.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/zplet/zmachine/zmachine3/ZDictionary3.java	2007-11-20 10:40:06.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1466,9 +1642,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZDictionary3.jav
  		char ch;
  		boolean pbfull;
  
-diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZHeader3.java zplet.new/src/russotto/zplet/zmachine/zmachine3/ZHeader3.java
---- zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZHeader3.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/zmachine3/ZHeader3.java	2007-11-17 22:39:21.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/zmachine/zmachine3/ZHeader3.java twisty/src/russotto/zplet/zmachine/zmachine3/ZHeader3.java
+--- zplet-20060707/src/russotto/zplet/zmachine/zmachine3/ZHeader3.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/zplet/zmachine/zmachine3/ZHeader3.java	2007-11-20 10:40:06.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1488,9 +1664,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZHeader3.java zp
  import russotto.zplet.zmachine.ZHeader;
  
  class ZHeader3 extends ZHeader
-diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZMachine3.java zplet.new/src/russotto/zplet/zmachine/zmachine3/ZMachine3.java
---- zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZMachine3.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/zmachine3/ZMachine3.java	2007-11-17 22:39:21.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/zmachine/zmachine3/ZMachine3.java twisty/src/russotto/zplet/zmachine/zmachine3/ZMachine3.java
+--- zplet-20060707/src/russotto/zplet/zmachine/zmachine3/ZMachine3.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/zplet/zmachine/zmachine3/ZMachine3.java	2007-11-20 10:40:06.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1516,9 +1692,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZMachine3.java z
  
  public class ZMachine3 extends ZMachine {
  
-diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZObjectTree3.java zplet.new/src/russotto/zplet/zmachine/zmachine3/ZObjectTree3.java
---- zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZObjectTree3.java	2001-02-26 11:18:16.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/zmachine3/ZObjectTree3.java	2007-11-17 22:39:21.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/zmachine/zmachine3/ZObjectTree3.java twisty/src/russotto/zplet/zmachine/zmachine3/ZObjectTree3.java
+--- zplet-20060707/src/russotto/zplet/zmachine/zmachine3/ZObjectTree3.java	2001-02-26 11:18:16.000000000 -0800
++++ twisty/src/russotto/zplet/zmachine/zmachine3/ZObjectTree3.java	2007-11-20 10:40:06.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1541,10 +1717,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine3/ZObjectTree3.jav
  
  class ZObjectTree3 extends ZObjectTree
  {
-Only in zplet.new/src/russotto/zplet/zmachine/zmachine5: .svn
-diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZDictionary5.java zplet.new/src/russotto/zplet/zmachine/zmachine5/ZDictionary5.java
---- zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZDictionary5.java	2001-02-26 11:18:18.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/zmachine5/ZDictionary5.java	2007-11-17 22:39:22.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/zmachine/zmachine5/ZDictionary5.java twisty/src/russotto/zplet/zmachine/zmachine5/ZDictionary5.java
+--- zplet-20060707/src/russotto/zplet/zmachine/zmachine5/ZDictionary5.java	2001-02-26 11:18:18.000000000 -0800
++++ twisty/src/russotto/zplet/zmachine/zmachine5/ZDictionary5.java	2007-11-20 10:40:07.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1575,9 +1750,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZDictionary5.jav
  				char ch;
  				boolean pbfull;
  
-diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZHeader5.java zplet.new/src/russotto/zplet/zmachine/zmachine5/ZHeader5.java
---- zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZHeader5.java	2001-02-26 11:18:18.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/zmachine5/ZHeader5.java	2007-11-17 22:39:22.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/zmachine/zmachine5/ZHeader5.java twisty/src/russotto/zplet/zmachine/zmachine5/ZHeader5.java
+--- zplet-20060707/src/russotto/zplet/zmachine/zmachine5/ZHeader5.java	2001-02-26 11:18:18.000000000 -0800
++++ twisty/src/russotto/zplet/zmachine/zmachine5/ZHeader5.java	2007-11-20 10:40:07.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1597,9 +1772,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZHeader5.java zp
  import russotto.zplet.zmachine.ZHeader;
  
  class ZHeader5 extends ZHeader
-diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZInstruction5.java zplet.new/src/russotto/zplet/zmachine/zmachine5/ZInstruction5.java
---- zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZInstruction5.java	2001-02-26 11:18:18.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/zmachine5/ZInstruction5.java	2007-11-17 22:39:22.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/zmachine/zmachine5/ZInstruction5.java twisty/src/russotto/zplet/zmachine/zmachine5/ZInstruction5.java
+--- zplet-20060707/src/russotto/zplet/zmachine/zmachine5/ZInstruction5.java	2001-02-26 11:18:18.000000000 -0800
++++ twisty/src/russotto/zplet/zmachine/zmachine5/ZInstruction5.java	2007-11-20 20:14:35.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1607,7 +1782,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZInstruction5.ja
  /* Zplet, a Z-Machine interpreter in Java */
  /* Copyright 1996,2001 Matthew T. Russotto */
  /* As of 23 February 2001, this code is open source and covered by the */
-@@ -5,15 +8,10 @@
+@@ -5,15 +8,11 @@
  
  package russotto.zplet.zmachine.zmachine5;
  
@@ -1616,6 +1791,7 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZInstruction5.ja
 -import java.net.*;
 -import java.io.*;
 -import java.applet.Applet;
++import android.util.Log;
  import russotto.zplet.ZColor;
 +import russotto.zplet.zmachine.ZFrameBound;
  import russotto.zplet.zmachine.ZInstruction;
@@ -1624,7 +1800,24 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZInstruction5.ja
  import russotto.zplet.zmachine.state.ZState;
  
  public class ZInstruction5 extends ZInstruction
-@@ -852,7 +850,7 @@
+@@ -60,6 +59,7 @@
+ 
+ 		final static int SCREEN_UNSPLIT = -1;
+ 		final static int SCREEN_NOUNSPLIT = -2;
++		private static final String TAG = "ZInstruction5";
+ 
+ 		protected short call_opnum;
+ 		protected boolean has_returned = false;
+@@ -748,7 +748,7 @@
+ 				parseunknown = (count < 3) || (operands[3] == 0);
+ 					
+ 				if (userdict != 0)
+-					System.err.println("tokenise opcode encountered (userdict)");
++					Log.e(TAG, "tokenise opcode encountered (userdict)");
+ 					
+ 				tbuf = operands[0]&0xFFFF;
+ 				tlen = zm.memory_image[tbuf+1];
+@@ -852,7 +852,7 @@
  					ZState restore_state;
  					
  					restore_state = new ZState(zm);
@@ -1633,9 +1826,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZInstruction5.ja
  						zm.restore(restore_state);
  						storevar = zm.get_code_byte();
  						return ZRESTORE_SUCCESS;
-diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZMachine5.java zplet.new/src/russotto/zplet/zmachine/zmachine5/ZMachine5.java
---- zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZMachine5.java	2001-02-26 11:18:18.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/zmachine5/ZMachine5.java	2007-11-17 22:39:22.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/zmachine/zmachine5/ZMachine5.java twisty/src/russotto/zplet/zmachine/zmachine5/ZMachine5.java
+--- zplet-20060707/src/russotto/zplet/zmachine/zmachine5/ZMachine5.java	2001-02-26 11:18:18.000000000 -0800
++++ twisty/src/russotto/zplet/zmachine/zmachine5/ZMachine5.java	2007-11-20 10:40:07.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1659,9 +1852,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZMachine5.java z
  import russotto.zplet.zmachine.state.ZState;
  
  public class ZMachine5 extends ZMachine {
-diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZMachine8.java zplet.new/src/russotto/zplet/zmachine/zmachine5/ZMachine8.java
---- zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZMachine8.java	2001-02-26 11:18:18.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/zmachine5/ZMachine8.java	2007-11-17 22:39:22.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/zmachine/zmachine5/ZMachine8.java twisty/src/russotto/zplet/zmachine/zmachine5/ZMachine8.java
+--- zplet-20060707/src/russotto/zplet/zmachine/zmachine5/ZMachine8.java	2001-02-26 11:18:18.000000000 -0800
++++ twisty/src/russotto/zplet/zmachine/zmachine5/ZMachine8.java	2007-11-20 10:40:07.000000000 -0800
 @@ -1,16 +1,12 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1682,9 +1875,9 @@ diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZMachine8.java z
  import russotto.zplet.screenmodel.ZScreen;
  
  public class ZMachine8 extends ZMachine5 {
-diff -urbw zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZObjectTree5.java zplet.new/src/russotto/zplet/zmachine/zmachine5/ZObjectTree5.java
---- zplet.20060707/src/russotto/zplet/zmachine/zmachine5/ZObjectTree5.java	2001-02-26 11:18:18.000000000 -0800
-+++ zplet.new/src/russotto/zplet/zmachine/zmachine5/ZObjectTree5.java	2007-11-17 22:39:22.000000000 -0800
+diff -urbw zplet-20060707/src/russotto/zplet/zmachine/zmachine5/ZObjectTree5.java twisty/src/russotto/zplet/zmachine/zmachine5/ZObjectTree5.java
+--- zplet-20060707/src/russotto/zplet/zmachine/zmachine5/ZObjectTree5.java	2001-02-26 11:18:18.000000000 -0800
++++ twisty/src/russotto/zplet/zmachine/zmachine5/ZObjectTree5.java	2007-11-20 10:40:07.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
