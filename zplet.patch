@@ -1052,7 +1052,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZInstruction.java twisty/s
  					return ZFALSE;
 diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/russotto/zplet/zmachine/ZMachine.java
 --- zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java	2001-02-26 11:18:16.000000000 -0800
-+++ twisty/src/russotto/zplet/zmachine/ZMachine.java	2007-11-21 11:27:19.000000000 -0800
++++ twisty/src/russotto/zplet/zmachine/ZMachine.java	2007-11-21 11:36:34.000000000 -0800
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1132,7 +1132,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/r
  								zchars[zi] = ch - (int)'A' + 6;
  								if ((++zi) == (nwords*3))
  									break;
-@@ -310,36 +321,80 @@
+@@ -310,36 +321,77 @@
  	}
  
  	public void start() {
@@ -1180,18 +1180,17 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/r
 +	
  	public void run()
  	{
-+		// Track timing for each opcode; 256 regular plus 28 extended
-+		ProfileStats timers = new ProfileStats(284);
++		// Track timing for each opcode named above
++		ProfileStats timers = new ProfileStats(opnames.length);
  				try {
 -					while (true) {
+-//								System.err.print("pc = ");
+-//								System.err.println(Integer.toString(pc, 16));
 +					while (!aborting && !isInterrupted()) {
- //								System.err.print("pc = ");
- //								System.err.println(Integer.toString(pc, 16));
 +						long t1 = System.nanoTime();
  								zi.decode_instruction();
  								zi.execute();
 +						long t2 = System.nanoTime();
-+						// Figure out if this instruction caused a branch
 +						timers.add(zi.opnum, 0.000001 * (t2 - t1));
  					}
 +					timers.dump("opcode", opnames);
@@ -1224,7 +1223,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/r
  	void calculate_checksum() {
  				int filesize = header.file_length();
  				int i;
-@@ -371,8 +426,7 @@
+@@ -371,8 +423,7 @@
  	}
  
  	public void fatal(String s) {
@@ -1234,7 +1233,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/r
  	}
  
  	public short get_variable(short varnum) {
-@@ -421,7 +475,6 @@
+@@ -421,7 +472,6 @@
  	}
  	
  	public short get_operand(int optype) {
@@ -1242,7 +1241,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/r
  				switch (optype) {
  				case OP_SMALL:
  					return (short)(get_code_byte() & 0xFF);
-@@ -432,7 +485,73 @@
+@@ -432,7 +482,73 @@
  					return get_variable(get_code_byte());
  				}
  				/* crash */

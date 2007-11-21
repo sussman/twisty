@@ -365,17 +365,14 @@ public abstract class ZMachine extends Thread {
 	
 	public void run()
 	{
-		// Track timing for each opcode; 256 regular plus 28 extended
-		ProfileStats timers = new ProfileStats(284);
+		// Track timing for each opcode named above
+		ProfileStats timers = new ProfileStats(opnames.length);
 				try {
 					while (!aborting && !isInterrupted()) {
-//								System.err.print("pc = ");
-//								System.err.println(Integer.toString(pc, 16));
 						long t1 = System.nanoTime();
 								zi.decode_instruction();
 								zi.execute();
 						long t2 = System.nanoTime();
-						// Figure out if this instruction caused a branch
 						timers.add(zi.opnum, 0.000001 * (t2 - t1));
 					}
 					timers.dump("opcode", opnames);
