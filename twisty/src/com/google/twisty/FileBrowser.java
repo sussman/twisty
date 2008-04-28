@@ -20,7 +20,8 @@ import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import android.app.ListActivity;
-import android.database.ArrayCursor;
+import android.database.ArrayListCursor;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -52,20 +53,20 @@ public class FileBrowser extends ListActivity
 		super.onCreate(icicle);
 		// Pass in a file-filter RE to determine what files are visible
 		fileMatcher = null;
-		Object o = getIntent().getExtra("file-filter");
-		if (o != null && o instanceof String) {
-			fileMatcher = Pattern.compile((String) o);
+		String s = getIntent().getStringExtra("file-filter");
+		if (s != null) {
+			fileMatcher = Pattern.compile(s);
 		}
 		// Pass in a path-filter RE to determine what directories are visible
 		pathMatcher = null;
-		o = getIntent().getExtra("path-filter");
-		if (o != null && o instanceof String) {
-			pathMatcher = Pattern.compile((String) o);
+		s = getIntent().getStringExtra("path-filter");
+		if (s != null) {
+			pathMatcher = Pattern.compile(s);
 		}
 		// Pass in a file-filter RE to determine where browsing starts
-		o = getIntent().getExtra("start-dir");
-		if (o != null && o instanceof String) {
-			mWorkingDir = (String) o;
+		s = getIntent().getStringExtra("start-dir");
+		if (s != null) {
+			mWorkingDir = s;
 		} else {
 			mWorkingDir = "/";        
 		}
@@ -90,7 +91,7 @@ public class FileBrowser extends ListActivity
 	void refresh() {
 		if (mCursor == null) {
 			// First time
-			mCursor = new FileListCursor(mWorkingDir);
+			mCursor = new FileListCursor(mWorkingDir).getCursor();
 			// Map Cursor columns to views defined in simple_list_item_2.xml
 			ListAdapter adapter = new SimpleCursorAdapter(this,
 					android.R.layout.simple_list_item_1, mCursor,
@@ -125,20 +126,19 @@ public class FileBrowser extends ListActivity
 		}
 	}
 
-	private FileListCursor mCursor;
+	private Cursor mCursor;
 	private String mWorkingDir;
 
 	/** A Cursor that allows navigation of files in a directory */
-	class FileListCursor extends ArrayCursor
+	class FileListCursor
 	{
 		public FileListCursor(String wd)
 		{
-			super(new String[] { "name" });
-			File d = new File(mWorkingDir);
+			File d = new File(wd);
 			String[] files = d.list();
-			ArrayList<FileInfo> al = new ArrayList<FileInfo>();
+			mFiles = new ArrayList<FileInfo>();
 			if (files == null) {
-				al.add(new FileInfo("[ no files found ]", ""));
+				mFiles.add(new FileInfo("[ no files found ]", ""));
 			} else {
 				Arrays.sort(files);
 				File parent = d.getParentFile();
@@ -147,7 +147,7 @@ public class FileBrowser extends ListActivity
 					Log.i(TAG, "Parent: " + d.getPath() + " -> " + path);
 					if ((null == pathMatcher) ||
 							pathMatcher.matcher(path).matches())
-						al.add(new FileInfo("[DIR] ..", path));
+						mFiles.add(new FileInfo("[DIR] ..", path));
 				}
 				for (String fn : files) {
 					if (fn.startsWith("."))
@@ -157,31 +157,38 @@ public class FileBrowser extends ListActivity
 					if (f.isFile()) {
 						if ((fileMatcher == null) ||
 								fileMatcher.matcher(ffn).matches())
-							al.add(f);
+							mFiles.add(f);
 					}
 					if (f.isDirectory()) {
 						f.setDisplayName("[DIR] " + fn);
 						if ((null == pathMatcher) ||
 								pathMatcher.matcher(f.getPath()).matches())
-							al.add(f);
+							mFiles.add(f);
 					}
 				}
 			}
-			mFiles = al.toArray(new FileInfo[] {});
-			mLen = mFiles.length;
+			ArrayList<ArrayList> al;
+			al = new ArrayList<ArrayList>();
+			al.add(mFiles);
+			mCursor = new ArrayListCursor(new String[] { "name" }, al);
+		}
+		
+		public Cursor getCursor() {
+			return mCursor;
 		}
 
 		public String getString(int column)
 		{
-			return mFiles[mPos].getDisplayName();
+			return mFiles.get(mCursor.position()).getDisplayName();
 		}
 
 		public File getCurrentFile()
 		{
-			return mFiles[mPos];
+			return mFiles.get(mCursor.position());
 		}
 
-		FileInfo[] mFiles;
+		ArrayList<FileInfo> mFiles;
+		ArrayListCursor mCursor;
 	}
 
 	class FileInfo extends File {

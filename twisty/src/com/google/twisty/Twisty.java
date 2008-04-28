@@ -78,7 +78,7 @@ public class Twisty extends Activity {
         setViewVisibility(R.id.errors, View.GONE);
 
         View all = findViewById(R.id.all);
-        all.setKeyListener(new View.OnKeyListener() {
+        all.setOnKeyListener(new View.OnKeyListener() {
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 return onViewKey(v, keyCode, event);
             }
@@ -155,18 +155,17 @@ public class Twisty extends Activity {
 				StringBuilder sb = new StringBuilder();
 				
 				context.unregisterReceiver(this);
-				String sLevel = intent.getExtra("level", "").toString();
-				String sScale = intent.getExtra("scale", "").toString();
-				String state = intent.getExtra("state", "").toString();
+				int rawlevel = intent.getIntExtra("level", -1);
+				int scale = intent.getIntExtra("scale", -1);
+				String state = intent.getStringExtra("state");
 				int level = -1;  // percentage, or -1 for unknown
-				if (sLevel != null && sScale != null) {
-					level = (Integer.parseInt(sLevel) * 100) /
-							Integer.parseInt(sScale);
+				if (rawlevel >= 0 && scale > 0) {
+					level = (rawlevel * 100) / scale;
 				}
 	            sb.append("The phone");
 				if ("Overheat".equals(state)) {
 					sb.append("'s battery feels very hot!");
-				} else if ("Unknown".equals(state)) {
+				} else if ("Unknown".equals(state) || "50".equals(state)) {
 					// old emulator; maybe also when plugged in with no battery
 					sb.append(" has no battery.");
 				} else if (level >= 100) {
@@ -179,7 +178,7 @@ public class Twisty extends Activity {
 					else
 						sb.append("'s battery discharges merrily.");
 				} else {
-					sb.append(" is " + level + "% charged.");
+					sb.append("'s battery could be described as \"" + state + "\".");
 				}
 				sb.append(' ');
 				printWelcomeMessage(sb.toString());
@@ -427,19 +426,13 @@ public class Twisty extends Activity {
         super.onPrepareOptionsMenu(menu);
         menu.clear();
         if (!zmIsRunning()) {
-            menu.add(0, R.raw.advent, "Adventure")
-            .setShortcut(KeyEvent.KEYCODE_0, 0, KeyEvent.KEYCODE_A);
-        	menu.add(0, R.raw.bronze, "Bronze")
-            .setShortcut(KeyEvent.KEYCODE_1, 0, KeyEvent.KEYCODE_B);
-        	menu.add(0, R.raw.curses, "Curses")
-            .setShortcut(KeyEvent.KEYCODE_2, 0, KeyEvent.KEYCODE_C);
-            menu.add(0, MENU_PICK_FILE, "Open file...")
-            .setShortcut(KeyEvent.KEYCODE_5, 0, KeyEvent.KEYCODE_O);
+            menu.add(0, R.raw.advent, "Adventure").setShortcut('0', 'a');
+        	menu.add(0, R.raw.bronze, "Bronze").setShortcut('1', 'b');
+        	menu.add(0, R.raw.curses, "Curses").setShortcut('2', 'c');
+            menu.add(0, MENU_PICK_FILE, "Open file...").setShortcut('5', 'o');
         } else {
-            menu.add(0, MENU_RESTART, "Restart")
-            .setShortcut(KeyEvent.KEYCODE_1, 0, KeyEvent.KEYCODE_R);
-            menu.add(0, MENU_STOP, "Stop")
-            .setShortcut(KeyEvent.KEYCODE_9, 0, KeyEvent.KEYCODE_S);
+            menu.add(0, MENU_RESTART, "Restart").setShortcut('7', 'r');
+            menu.add(0, MENU_STOP, "Stop").setShortcut('9', 's');
         }
         return true;
     }
@@ -479,9 +472,12 @@ public class Twisty extends Activity {
     	// Until there's a system-provided file picker, we use our own
         Intent intent = new Intent(Intent.PICK_ACTION);
         intent.setClass(this, FileBrowser.class);
-        intent.putExtra("file-filter", ".*\\.[Zz][358]");
-        intent.putExtra("path-filter", "/sdcard(/.+)*");
-        intent.putExtra("start-dir", "/sdcard");
+        intent.putExtra("file-filter", ".+");
+//        intent.putExtra("file-filter", ".*\\.[Zz][358]");
+        intent.putExtra("path-filter", "(/.+)*");
+        intent.putExtra("start-dir", "/data");
+//        intent.putExtra("path-filter", "/sdcard(/.+)*");
+//        intent.putExtra("start-dir", "/sdcard");
         intent.putExtra("title", "Open game file (*.z3;*.z5;*.z8)");
 
         // Open the new activity
