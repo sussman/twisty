@@ -34,18 +34,18 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IntentReceiver;
-import android.content.Resources;
+import android.content.BroadcastReceiver;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
-import android.text.method.InputMethod;
-import android.text.method.TextInputMethod;
+import android.text.method.TextKeyListener;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
@@ -62,7 +62,7 @@ public class Twisty extends Activity {
 	private ZStatus status;
 	private ZMachine zm;
 	// We use im and tb to allow for full text input, without any UI feedback
-	private InputMethod im;
+	private TextKeyListener listener;
 	private SpannableStringBuilder tb;
 	private Handler handler;
 
@@ -72,8 +72,8 @@ public class Twisty extends Activity {
 		super.onCreate(icicle);
 		handler = new Handler();
 		setContentView(R.layout.twisty);
-		im = TextInputMethod.getInstance(false,
-                TextInputMethod.Capitalize.NONE);
+		// No auto-correction on listener!
+		listener = TextKeyListener.getInstance(false, TextKeyListener.Capitalize.NONE);
         tb = new SpannableStringBuilder(" ");
         setViewVisibility(R.id.errors, View.GONE);
 
@@ -123,13 +123,15 @@ public class Twisty extends Activity {
 				screen.clear();
 		        ZWindow w = new ZWindow(screen);
 		        w.resize(screen.getchars(), screen.getlines());
-		        w.bufferString("Twisty v0.03");
-		        w.newline();
-		        w.bufferString("Copyright (c) 2007 Google Inc.");
+		        w.bufferString("Twisty v0.05, (C) 2008 Google Inc.");
 		        w.newline();
 		        w.bufferString("Adapted from "
-		        			 + "Zplet, a Z-Machine interpreter in Java, "
-		        			 + "Copyright 1996, 2001 Matthew T. Russotto.");
+	        			 + "Zplet, a Z-Machine interpreter in Java: "
+	        			 + "Copyright 1996, 2001 Matthew T. Russotto.");
+		        w.newline();
+		        w.bufferString("This is open source software:");
+		        w.newline();
+		        w.bufferString("   see http://code.google.com/p/twisty");
 		        w.newline();
 		        w.newline();
 		        // TODO: make this change depending on device features
@@ -150,8 +152,8 @@ public class Twisty extends Activity {
 	}
 
 	private void monitorBatteryState() {
-		IntentReceiver battReceiver = new IntentReceiver() {
-			public void onReceiveIntent(Context context, Intent intent) {
+		BroadcastReceiver battReceiver = new BroadcastReceiver() {
+			public void onReceive(Context context, Intent intent) {
 				StringBuilder sb = new StringBuilder();
 				
 				context.unregisterReceiver(this);
@@ -184,11 +186,10 @@ public class Twisty extends Activity {
 				printWelcomeMessage(sb.toString());
 			}
 		};
-		IntentFilter battFilter = new IntentFilter(Intent.BATTERY_CHANGED_ACTION);
+		IntentFilter battFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
 		registerReceiver(battReceiver, battFilter);
 	}
 
-    @Override
     protected void onActivityResult(int requestCode, int resultCode,
     		String data, Bundle extras) {
         switch(requestCode) {
@@ -229,10 +230,10 @@ public class Twisty extends Activity {
                 Selection.setSelection(tb, 1);
             switch (event.getAction()) {
             case KeyEvent.ACTION_DOWN:
-                im.onKeyDown(v, tb, keyCode, event);
+                listener.onKeyDown(v, tb, keyCode, event);
                 break;
             case KeyEvent.ACTION_UP:
-                im.onKeyUp(v, tb, keyCode, event);
+                listener.onKeyUp(v, tb, keyCode, event);
                 break;
             }
             switch (tb.length()) {
@@ -426,21 +427,21 @@ public class Twisty extends Activity {
         super.onPrepareOptionsMenu(menu);
         menu.clear();
         if (!zmIsRunning()) {
-            menu.add(0, R.raw.advent, "Adventure").setShortcut('0', 'a');
-        	menu.add(0, R.raw.bronze, "Bronze").setShortcut('1', 'b');
-        	menu.add(0, R.raw.curses, "Curses").setShortcut('2', 'c');
-            menu.add(0, MENU_PICK_FILE, "Open file...").setShortcut('5', 'o');
+            menu.add(menu.NONE, R.raw.advent, 0, "Adventure").setShortcut('0', 'a');
+        	menu.add(menu.NONE, R.raw.bronze, 1, "Bronze").setShortcut('1', 'b');
+        	menu.add(menu.NONE, R.raw.curses, 2, "Curses").setShortcut('2', 'c');
+            menu.add(menu.NONE, MENU_PICK_FILE, 3, "Open file...").setShortcut('5', 'o');
         } else {
-            menu.add(0, MENU_RESTART, "Restart").setShortcut('7', 'r');
-            menu.add(0, MENU_STOP, "Stop").setShortcut('9', 's');
+            menu.add(menu.NONE, MENU_RESTART, 0, "Restart").setShortcut('7', 'r');
+            menu.add(menu.NONE, MENU_STOP, 1, "Stop").setShortcut('9', 's');
         }
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(Menu.Item item)
+    public boolean onOptionsItemSelected(MenuItem item)
     {
-        switch (item.getId()) {
+        switch (item.getItemId()) {
         case MENU_RESTART:
             zm.restart();
             // TODO(mariusm): only send this if the zmachine is not currently
@@ -457,7 +458,7 @@ public class Twisty extends Activity {
             break;
         default:
         	screen.clear();
-        	startzm(item.getId());
+        	startzm(item.getItemId());
         	break;
         }
         return super.onOptionsItemSelected(item);
@@ -470,7 +471,7 @@ public class Twisty extends Activity {
     	// /sdcard and /data)
     	
     	// Until there's a system-provided file picker, we use our own
-        Intent intent = new Intent(Intent.PICK_ACTION);
+        Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setClass(this, FileBrowser.class);
         intent.putExtra("file-filter", ".+");
 //        intent.putExtra("file-filter", ".*\\.[Zz][358]");
@@ -481,7 +482,7 @@ public class Twisty extends Activity {
         intent.putExtra("title", "Open game file (*.z3;*.z5;*.z8)");
 
         // Open the new activity
-        startSubActivity(intent, FILE_PICKED);
+        startActivityForResult(intent, FILE_PICKED);
         
         // When the new activity is done, onActivityResult will be called
     }

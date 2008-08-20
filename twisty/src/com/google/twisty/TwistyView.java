@@ -14,8 +14,6 @@
 
 package com.google.twisty;
 
-import java.util.Map;
-
 import com.google.twisty.zplet.ZMachineException;
 
 import russotto.zplet.screenmodel.ZScreen;
@@ -36,8 +34,8 @@ public class TwistyView extends View {
 	private static TwistyView last_created;
 
 	@SuppressWarnings("unchecked")
-	public TwistyView(Context context, AttributeSet attrs, Map inflateParams) {
-		super(context, attrs, inflateParams);
+	public TwistyView(Context context, AttributeSet attrs) {
+		super(context, attrs);
 		screen = null;
 		handler = new Handler();
 		last_created = this;

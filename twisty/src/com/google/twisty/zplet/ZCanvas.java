@@ -58,13 +58,13 @@ public class ZCanvas {
 				height += y;
 				y = 0;
 			}
-			if (x + width > bitmap.width()) {
+			if (x + width > bitmap.getWidth()) {
 				Log.w(TAG, "copy area fixing up args: width was " + width);
-				width = bitmap.width() - x;
+				width = bitmap.getWidth() - x;
 			}
-			if (y + height > bitmap.height()) {
+			if (y + height > bitmap.getHeight()) {
 				Log.w(TAG, "copy area fixing up args: height was " + height);
-				height = bitmap.height() - y;
+				height = bitmap.getHeight() - y;
 			}
 			// Copy to a temporary bitmap, then back again
             Bitmap copy = Bitmap.createBitmap(bitmap, x, y, width, height);
@@ -101,7 +101,7 @@ public class ZCanvas {
 				height = 1;
 			
 			if (width > 0 && height > 0) {
-				bitmap = Bitmap.createBitmap(width, height, false);
+				bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
 				ig = new ImageGraphics(bitmap);
 			}
 		}

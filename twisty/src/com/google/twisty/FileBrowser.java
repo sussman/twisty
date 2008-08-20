@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import android.app.ListActivity;
-import android.database.ArrayListCursor;
+import android.database.MatrixCursor;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
@@ -107,7 +107,7 @@ public class FileBrowser extends ListActivity
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		FileListCursor cur = (FileListCursor) l.obtainItem(position);
+		FileListCursor cur = (FileListCursor) l.getItemAtPosition(position);
 		File f = cur.getCurrentFile();
 		if (f.isDirectory()) {
 			Log.e(TAG, "Selected dir: " + f.getPath());
@@ -117,7 +117,9 @@ public class FileBrowser extends ListActivity
 			refresh();
 		} else if (f.isFile()) {
 			Log.e(TAG, "Selected file: " + f.getPath());
-			setResult(RESULT_OK, f.getPath());
+			// ### TODO(sussman): need to somehow convert f.getPath() into an Intent,
+			// then pass Intent as second argument to setResult().  Use putExtra()??
+			setResult(RESULT_OK);
 			finish();
 		} else {
 			Log.e(TAG, "Selected: not a file - cancelling");
@@ -167,10 +169,10 @@ public class FileBrowser extends ListActivity
 					}
 				}
 			}
-			ArrayList<ArrayList> al;
-			al = new ArrayList<ArrayList>();
-			al.add(mFiles);
-			mCursor = new ArrayListCursor(new String[] { "name" }, al);
+			//ArrayList<ArrayList> al = new ArrayList<ArrayList>();
+			//al.add(mFiles);
+			mCursor = new MatrixCursor(new String[] { "name" });
+			mCursor.addRow(mFiles);
 		}
 		
 		public Cursor getCursor() {
@@ -179,16 +181,16 @@ public class FileBrowser extends ListActivity
 
 		public String getString(int column)
 		{
-			return mFiles.get(mCursor.position()).getDisplayName();
+			return mFiles.get(mCursor.getPosition()).getDisplayName();
 		}
 
 		public File getCurrentFile()
 		{
-			return mFiles.get(mCursor.position());
+			return mFiles.get(mCursor.getPosition());
 		}
 
 		ArrayList<FileInfo> mFiles;
-		ArrayListCursor mCursor;
+		MatrixCursor mCursor;
 	}
 
 	class FileInfo extends File {
