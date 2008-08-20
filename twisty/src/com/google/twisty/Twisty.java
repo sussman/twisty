@@ -126,8 +126,9 @@ public class Twisty extends Activity {
 		        w.bufferString("Twisty v0.05, (C) 2008 Google Inc.");
 		        w.newline();
 		        w.bufferString("Adapted from "
-	        			 + "Zplet, a Z-Machine interpreter in Java: "
-	        			 + "Copyright 1996, 2001 Matthew T. Russotto.");
+	        			 + "Zplet, a Z-Machine interpreter in Java: ");
+		        w.newline();
+		        w.bufferString("   Copyright 1996, 2001 Matthew T. Russotto.");
 		        w.newline();
 		        w.bufferString("This is open source software:");
 		        w.newline();
