@@ -25,7 +25,7 @@ import com.google.twisty.zplet.Toolkit;
 import com.google.twisty.zplet.ZCanvas;
 import com.google.twisty.zplet.ZGraphics;
 
-public class ZScreen extends ZCanvas {
+public class ZScreen extends ZCanvas implements java.io.Serializable {
 		int lines;
 		int chars; /* in fixed font */
 		Font fixedfont;

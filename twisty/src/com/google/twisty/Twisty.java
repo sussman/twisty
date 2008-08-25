@@ -15,9 +15,13 @@
 package com.google.twisty;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
+import java.io.StreamCorruptedException;
 
 import com.google.twisty.zplet.Event;
 import com.google.twisty.zplet.StatusLine;
@@ -57,6 +61,7 @@ public class Twisty extends Activity {
 	private static String TAG = "Twisty";
 	private static final String FONT_NAME = "Courier";
 	private static final int FONT_SIZE = 10;
+	private static String FROZEN_GAME_FILE = "frozengame";
 	private ZScreen screen;
 	private StatusLine status_line;
 	private ZStatus status;
@@ -95,6 +100,71 @@ public class Twisty extends Activity {
             Log.e(TAG, "Failed to get prepare to play", e);
         }
     }
+	
+	/** Called when the activity is paused for any reason. */
+	@Override
+	public void onPause() {
+		super.onPause();
+		if (! zmIsRunning())
+			return;
+		// A game is process, so we 'freeze' it and stash it in persistent storage;
+		// this whole Activity might resume quickly, or it might be wholly killed.
+		// Regardless, when this Activity is either resumed or launched from scratch,
+		// We want the same to resume exactly where it left off.
+		Log.i(TAG, "Attempting to pause Twisty...");
+		zm.restart_state.save_current(); // create a 'snapshot' of execution state
+		try {
+			// open a file private to this application
+			FileOutputStream frozen_game_file = openFileOutput(FROZEN_GAME_FILE, MODE_PRIVATE);
+			// serialize the ZMachine into the file
+			ObjectOutputStream obj_out = new ObjectOutputStream(frozen_game_file);
+			obj_out.writeObject(zm);
+			Log.i(TAG, "Successfully serialized ZMachine object to file.");
+		} catch (FileNotFoundException e) {
+            fatal("Cannot create file: " + FROZEN_GAME_FILE);
+            Log.e(TAG, "Couldn't create frozen game file", e);
+        } catch (IOException e) {
+        	fatal("IOException creating ObjectOutputStream");
+        	Log.e(TAG, "Couldn't create frozen game file", e);
+        }
+	}
+	
+	/** Called when activity is about to begin execution. */
+	@Override
+	public void onResume() {
+		Log.i(TAG, "Attempting to restore a frozen game, if present...");
+		super.onResume();
+		// We don't know whether the Activity just launched from scratch, or
+		// whether we're simply resuming from a short pause.
+		// Regardless, if a serialized ZMachine is waiting for us, reconstitute it!
+		try {
+			FileInputStream frozen_game_file = openFileInput(FROZEN_GAME_FILE);
+			ObjectInputStream obj_in = new ObjectInputStream(frozen_game_file);
+			Object obj = obj_in.readObject();
+			if (obj instanceof ZMachine) {
+				ZMachine restored_zm = (ZMachine) obj;
+				zm = restored_zm;
+				zm.screen = screen;
+				// zm.status_line = status_line;
+				zm.restore(zm.restart_state);  // restore execution snapshot
+				Log.i(TAG, "Restored frozen game!");
+				deleteFile(FROZEN_GAME_FILE);
+				zm.run();
+			}
+		} catch (FileNotFoundException e) {
+			// no big deal, there must be no game-in-process to resume
+			Log.i(TAG, "No frozen game file found.");
+		} catch (StreamCorruptedException e) {
+			fatal("Can't resume game execution; problem reading object stream");
+			Log.e(TAG, "Failed to load frozen game", e);
+		} catch (IOException e) {
+			fatal("IOException reading object stream");
+			Log.e(TAG, "Failed to load frozen game", e);
+		} catch (ClassNotFoundException e) {
+			fatal("ClassNotFoundException when reading object stream");
+			Log.e(TAG, "Failed to load frozen game", e);
+		}
+	}
 	
 	private void setupWelcomeMessage() {
 		// Display a temporary welcome message
@@ -157,6 +227,7 @@ public class Twisty extends Activity {
 			public void onReceive(Context context, Intent intent) {
 				StringBuilder sb = new StringBuilder();
 				
+				// TODO:  as of the 0.9 API, this code is broken;  'state' always comes in as 'null'.
 				context.unregisterReceiver(this);
 				int rawlevel = intent.getIntExtra("level", -1);
 				int scale = intent.getIntExtra("scale", -1);

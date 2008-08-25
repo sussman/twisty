@@ -80,13 +80,13 @@ immutable.	But the arrays aren't, so don't mess with them */
 	String get_save_file_name(ZScreen parent)
 	{
 		// TODO: androidify this
-		return "/tmp/twisty.sav";
+		return "/sdcard/twisty.sav";
 	}
 	
 	public String get_restore_file_name(ZScreen parent)
 	{
 		// TODO: androidify this
-		return "/tmp/twisty.sav";
+		return "/sdcard/twisty.sav";
 	}
 
 	public boolean restore_from_disk(ZScreen parent) {
@@ -365,9 +365,6 @@ immutable.	But the arrays aren't, so don't mess with them */
 			outfile.writeByte((save_pc&0xFF0000) >>> 16);
 			outfile.writeShort(save_pc&0xFFFF);
 			outfile.closeChunk();
-//			outfile.openChunk("UMem");
-//			outfile.write(zm.memory_image, 0, zm.header.static_base());
-//			outfile.closeChunk();
 			write_cmem_chunk(outfile);
 			outfile.openChunk("Stks");
 			version = zm.header.version();

@@ -14,7 +14,7 @@
 
 package com.google.twisty.zplet;
 
-public class Font {
+public class Font implements java.io.Serializable {
 
 	public static final int PLAIN =  0x01;
 	public static final int BOLD =   0x10;
