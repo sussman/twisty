@@ -105,65 +105,12 @@ public class Twisty extends Activity {
 	@Override
 	public void onPause() {
 		super.onPause();
-		if (! zmIsRunning())
-			return;
-		// A game is process, so we 'freeze' it and stash it in persistent storage;
-		// this whole Activity might resume quickly, or it might be wholly killed.
-		// Regardless, when this Activity is either resumed or launched from scratch,
-		// We want the same to resume exactly where it left off.
-		Log.i(TAG, "Attempting to pause Twisty...");
-		zm.restart_state.save_current(); // create a 'snapshot' of execution state
-		try {
-			// open a file private to this application
-			FileOutputStream frozen_game_file = openFileOutput(FROZEN_GAME_FILE, MODE_PRIVATE);
-			// serialize the ZMachine into the file
-			ObjectOutputStream obj_out = new ObjectOutputStream(frozen_game_file);
-			obj_out.writeObject(zm);
-			Log.i(TAG, "Successfully serialized ZMachine object to file.");
-		} catch (FileNotFoundException e) {
-            fatal("Cannot create file: " + FROZEN_GAME_FILE);
-            Log.e(TAG, "Couldn't create frozen game file", e);
-        } catch (IOException e) {
-        	fatal("IOException creating ObjectOutputStream");
-        	Log.e(TAG, "Couldn't create frozen game file", e);
-        }
 	}
 	
 	/** Called when activity is about to begin execution. */
 	@Override
 	public void onResume() {
-		Log.i(TAG, "Attempting to restore a frozen game, if present...");
 		super.onResume();
-		// We don't know whether the Activity just launched from scratch, or
-		// whether we're simply resuming from a short pause.
-		// Regardless, if a serialized ZMachine is waiting for us, reconstitute it!
-		try {
-			FileInputStream frozen_game_file = openFileInput(FROZEN_GAME_FILE);
-			ObjectInputStream obj_in = new ObjectInputStream(frozen_game_file);
-			Object obj = obj_in.readObject();
-			if (obj instanceof ZMachine) {
-				ZMachine restored_zm = (ZMachine) obj;
-				zm = restored_zm;
-				zm.screen = screen;
-				// zm.status_line = status_line;
-				zm.restore(zm.restart_state);  // restore execution snapshot
-				Log.i(TAG, "Restored frozen game!");
-				deleteFile(FROZEN_GAME_FILE);
-				zm.run();
-			}
-		} catch (FileNotFoundException e) {
-			// no big deal, there must be no game-in-process to resume
-			Log.i(TAG, "No frozen game file found.");
-		} catch (StreamCorruptedException e) {
-			fatal("Can't resume game execution; problem reading object stream");
-			Log.e(TAG, "Failed to load frozen game", e);
-		} catch (IOException e) {
-			fatal("IOException reading object stream");
-			Log.e(TAG, "Failed to load frozen game", e);
-		} catch (ClassNotFoundException e) {
-			fatal("ClassNotFoundException when reading object stream");
-			Log.e(TAG, "Failed to load frozen game", e);
-		}
 	}
 	
 	private void setupWelcomeMessage() {
@@ -193,7 +140,7 @@ public class Twisty extends Activity {
 				screen.clear();
 		        ZWindow w = new ZWindow(screen);
 		        w.resize(screen.getchars(), screen.getlines());
-		        w.bufferString("Twisty v0.05, (C) 2008 Google Inc.");
+		        w.bufferString("Twisty v0.06, (C) 2008 Google Inc.");
 		        w.newline();
 		        w.bufferString("Adapted from "
 	        			 + "Zplet, a Z-Machine interpreter in Java: ");
@@ -423,7 +370,7 @@ public class Twisty extends Activity {
             }
         }
     }
-
+    
     /** Convenience helper that turns a stream into a byte array */
     byte[] suckstream(InputStream mystream) throws IOException {
         byte buffer[];
