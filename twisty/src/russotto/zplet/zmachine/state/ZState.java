@@ -13,6 +13,10 @@ import java.util.Enumeration;
 import java.util.Stack;
 
 import android.util.Log;
+import android.app.Dialog;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Context;
 
 import russotto.iff.IFFChunkInfo;
 import russotto.iff.IFFChunkNotFoundException;
@@ -79,7 +83,24 @@ immutable.	But the arrays aren't, so don't mess with them */
 
 	String get_save_file_name(ZScreen parent)
 	{
-		// TODO: androidify this
+		android.content.Context ctx = parent.getTwistyView().getContext();
+		
+		// TODO:  see http://code.google.com/android/samples/ApiDemos/src/com/android/samples/app/AlertDialogSamples.html
+		new AlertDialog.Builder(ctx)
+		.setTitle("Save Game")
+		.setMessage("Are you sure you want to save?")
+		.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		public void onClick(DialogInterface dialog, int whichButton) {
+			// do something here
+		}	
+		})
+		.setNegativeButton("No", new DialogInterface.OnClickListener() {
+		public void onClick(DialogInterface dialog, int whichButton) {
+			//do something here
+		}
+		})
+		.show();
+		
 		return "/sdcard/twisty.sav";
 	}
 	

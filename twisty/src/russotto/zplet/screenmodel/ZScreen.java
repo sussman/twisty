@@ -25,7 +25,7 @@ import com.google.twisty.zplet.Toolkit;
 import com.google.twisty.zplet.ZCanvas;
 import com.google.twisty.zplet.ZGraphics;
 
-public class ZScreen extends ZCanvas implements java.io.Serializable {
+public class ZScreen extends ZCanvas {
 		int lines;
 		int chars; /* in fixed font */
 		Font fixedfont;
@@ -37,6 +37,7 @@ public class ZScreen extends ZCanvas implements java.io.Serializable {
 		boolean bufferdone;
 		ZWindow inputwindow;
 		ZCursor inputcursor;
+		TwistyView tview;
 		int zforeground = ZColor.Z_BLACK;
 		int zbackground = ZColor.Z_WHITE;
 		Image backing_store;
@@ -117,6 +118,7 @@ public class ZScreen extends ZCanvas implements java.io.Serializable {
 
 		public ZScreen(TwistyView tv, String font_family, int font_size) {
 			super(tv);
+			tview = tv;
 			Dimension mysize = size();
 				
 			this.setFixedFont (font_family, font_size);
@@ -420,6 +422,10 @@ public class ZScreen extends ZCanvas implements java.io.Serializable {
 				repaint();
 		}
 
+		public TwistyView getTwistyView() {
+			return tview;
+		}
+		
 		public int getZForeground() 
 		{
 				return zforeground;

@@ -61,6 +61,7 @@ public class Twisty extends Activity {
 	private static String TAG = "Twisty";
 	private static final String FONT_NAME = "Courier";
 	private static final int FONT_SIZE = 10;
+	// TODO:  see issue 9 -- eventually pass this to Context.openFileOutput()
 	private static String FROZEN_GAME_FILE = "frozengame";
 	private ZScreen screen;
 	private StatusLine status_line;
