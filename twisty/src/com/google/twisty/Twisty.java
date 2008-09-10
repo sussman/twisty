@@ -93,13 +93,13 @@ public class Twisty extends Activity {
 		dialog_handler = new Handler() { 
 			public void handleMessage(Message m) {
 				if (m.what == PROMPT_FOR_SAVEFILE) {
-					//showDialog(DIALOG_YES_NO_MESSAGE);
+					showDialog(DIALOG_YES_NO_MESSAGE);
 					TwistyMessage msg = (TwistyMessage) m.obj;
 					// TODO:  put user's filename here:
 					msg.path = "/sdcard/twisty.sav";
 					// Wake up the ZMachine thread again
 					synchronized (screen) {
-						notify();
+						screen.notify();
 					}
 				}
 			} 

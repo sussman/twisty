@@ -94,7 +94,7 @@ public class ZState {
 		synchronized (parent) {
 			try {
 				Message.obtain(dialog_handler, Twisty.PROMPT_FOR_SAVEFILE, msg).sendToTarget();
-				wait();
+				parent.wait();
 			}
 			catch (InterruptedException e) { 
 			};
