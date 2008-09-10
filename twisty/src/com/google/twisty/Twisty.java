@@ -83,6 +83,7 @@ public class Twisty extends Activity {
 	private Handler welcome_handler;
 	// Passed down to ZState, so ZMachine thread can send Messages back to this thread
 	private Handler dialog_handler;
+	private TwistyMessage dialog_message; // most recent Message received
 
 	/** Called with the activity is first created. */
 	@Override
@@ -93,14 +94,8 @@ public class Twisty extends Activity {
 		dialog_handler = new Handler() { 
 			public void handleMessage(Message m) {
 				if (m.what == PROMPT_FOR_SAVEFILE) {
+					dialog_message = (TwistyMessage) m.obj;
 					showDialog(DIALOG_YES_NO_MESSAGE);
-					TwistyMessage msg = (TwistyMessage) m.obj;
-					// TODO:  put user's filename here:
-					msg.path = "/sdcard/twisty.sav";
-					// Wake up the ZMachine thread again
-					synchronized (screen) {
-						screen.notify();
-					}
 				}
 			} 
 		};
@@ -571,12 +566,22 @@ public class Twisty extends Activity {
 			.setTitle("Are you sure?")
 			.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
-					/* User clicked OK so do some stuff */
+					// TODO:  someday put user's desired filename here:
+					dialog_message.path = "/sdcard/twisty.sav";
+					// Wake up the ZMachine thread again
+					synchronized (screen) {
+						screen.notify();
+					}
 				}
 			})
 			.setNegativeButton("No", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
-	                /* User clicked Cancel so do some stuff */
+					// FAIL
+					dialog_message.path = "";
+					// Wake up the ZMachine thread again
+					synchronized (screen) {
+						screen.notify();
+					}
 				}
 			})
 			.create();
