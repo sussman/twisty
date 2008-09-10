@@ -14,6 +14,7 @@ import java.util.Vector;
 import russotto.zplet.ZColor;
 
 import android.util.Log;
+import android.os.Handler;
 
 import com.google.twisty.TwistyView;
 import com.google.twisty.zplet.Dimension;
@@ -37,7 +38,7 @@ public class ZScreen extends ZCanvas {
 		boolean bufferdone;
 		ZWindow inputwindow;
 		ZCursor inputcursor;
-		TwistyView tview;
+		Handler dialog_handler;
 		int zforeground = ZColor.Z_BLACK;
 		int zbackground = ZColor.Z_WHITE;
 		Image backing_store;
@@ -116,9 +117,9 @@ public class ZScreen extends ZCanvas {
 	     };
 		private static final String TAG = "ZScreen";
 
-		public ZScreen(TwistyView tv, String font_family, int font_size) {
+		public ZScreen(TwistyView tv, Handler handler, String font_family, int font_size) {
 			super(tv);
-			tview = tv;
+			dialog_handler = handler;
 			Dimension mysize = size();
 				
 			this.setFixedFont (font_family, font_size);
@@ -422,8 +423,9 @@ public class ZScreen extends ZCanvas {
 				repaint();
 		}
 
-		public TwistyView getTwistyView() {
-			return tview;
+		public Handler getDialogHandler() {
+			// return Twisty's main dialog handler
+			return dialog_handler;
 		}
 		
 		public int getZForeground() 

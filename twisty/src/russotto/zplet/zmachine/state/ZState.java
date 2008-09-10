@@ -13,10 +13,11 @@ import java.util.Enumeration;
 import java.util.Stack;
 
 import android.util.Log;
-import android.app.Dialog;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
+
+import com.google.twisty.Twisty;
+import com.google.twisty.TwistyMessage;
 
 import russotto.iff.IFFChunkInfo;
 import russotto.iff.IFFChunkNotFoundException;
@@ -42,9 +43,11 @@ public class ZState {
 	byte dynamic[];
 	short locals[];
 	short argcount;
+	String current_savefile_name;
 	
 	public ZState(ZMachine zm) {
 		this.zm = zm;
+		this.current_savefile_name = null;
 	}
 
 	private static Stack<Object> clonestack(Stack<Object> s) {
@@ -58,8 +61,8 @@ public class ZState {
 
 		header = new ZStateHeader(zm.memory_image);
 		dyn_size = header.static_base();
-/* clones the stack but not the Integers within.  Fortunately they are
-immutable.	But the arrays aren't, so don't mess with them */
+		/* clones the stack but not the Integers within.  Fortunately they are
+		immutable.	But the arrays aren't, so don't mess with them */
 		zstack = clonestack(zm.zstack);
 		dynamic = new byte[dyn_size];
 		System.arraycopy(zm.memory_image, 0, dynamic, 0, dyn_size);
@@ -83,25 +86,24 @@ immutable.	But the arrays aren't, so don't mess with them */
 
 	String get_save_file_name(ZScreen parent)
 	{
-		android.content.Context ctx = parent.getTwistyView().getContext();
+		TwistyMessage msg = new TwistyMessage();
+		msg.path = current_savefile_name;
+		Handler dialog_handler = parent.getDialogHandler();		
 		
-		// TODO:  see http://code.google.com/android/samples/ApiDemos/src/com/android/samples/app/AlertDialogSamples.html
-		new AlertDialog.Builder(ctx)
-		.setTitle("Save Game")
-		.setMessage("Are you sure you want to save?")
-		.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-		public void onClick(DialogInterface dialog, int whichButton) {
-			// do something here
-		}	
-		})
-		.setNegativeButton("No", new DialogInterface.OnClickListener() {
-		public void onClick(DialogInterface dialog, int whichButton) {
-			//do something here
+		// Tell Twisty to prompt the user for a filename, then block.
+		synchronized (parent) {
+			try {
+				Message.obtain(dialog_handler, Twisty.PROMPT_FOR_SAVEFILE, msg).sendToTarget();
+				wait();
+			}
+			catch (InterruptedException e) { 
+			};
 		}
-		})
-		.show();
 		
-		return "/sdcard/twisty.sav";
+		// Twisty should have modified our TwistyMessage object, and 
+		// then called notify() to wake us up.
+		current_savefile_name = msg.path;
+		return current_savefile_name;
 	}
 	
 	public String get_restore_file_name(ZScreen parent)

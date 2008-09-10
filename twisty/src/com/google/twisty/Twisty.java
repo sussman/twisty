@@ -15,17 +15,15 @@
 package com.google.twisty;
 
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-import java.io.StreamCorruptedException;
 
 import com.google.twisty.zplet.Event;
 import com.google.twisty.zplet.StatusLine;
 import com.google.twisty.zplet.ZMachineException;
+
+import com.google.twisty.TwistyMessage;
 
 import russotto.zplet.screenmodel.ZScreen;
 import russotto.zplet.screenmodel.ZStatus;
@@ -34,14 +32,19 @@ import russotto.zplet.zmachine.ZMachine;
 import russotto.zplet.zmachine.zmachine3.ZMachine3;
 import russotto.zplet.zmachine.zmachine5.ZMachine5;
 import russotto.zplet.zmachine.zmachine5.ZMachine8;
+
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.method.TextKeyListener;
@@ -61,6 +64,13 @@ public class Twisty extends Activity {
 	private static String TAG = "Twisty";
 	private static final String FONT_NAME = "Courier";
 	private static final int FONT_SIZE = 10;
+	
+	// Dialog boxes we manage
+	private static final int DIALOG_YES_NO_MESSAGE = 1;
+	
+	// Messages we receive from the ZMachine thread
+	public static final int PROMPT_FOR_SAVEFILE = 1;
+	
 	// TODO:  see issue 9 -- eventually pass this to Context.openFileOutput()
 	private static String FROZEN_GAME_FILE = "frozengame";
 	private ZScreen screen;
@@ -70,13 +80,31 @@ public class Twisty extends Activity {
 	// We use im and tb to allow for full text input, without any UI feedback
 	private TextKeyListener listener;
 	private SpannableStringBuilder tb;
-	private Handler handler;
+	private Handler welcome_handler;
+	// Passed down to ZState, so ZMachine thread can send Messages back to this thread
+	private Handler dialog_handler;
 
 	/** Called with the activity is first created. */
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-		handler = new Handler();
+		welcome_handler = new Handler();
+		
+		dialog_handler = new Handler() { 
+			public void handleMessage(Message m) {
+				if (m.what == PROMPT_FOR_SAVEFILE) {
+					//showDialog(DIALOG_YES_NO_MESSAGE);
+					TwistyMessage msg = (TwistyMessage) m.obj;
+					// TODO:  put user's filename here:
+					msg.path = "/sdcard/twisty.sav";
+					// Wake up the ZMachine thread again
+					synchronized (screen) {
+						notify();
+					}
+				}
+			} 
+		};
+		
 		setContentView(R.layout.twisty);
 		// No auto-correction on listener!
 		listener = TextKeyListener.getInstance(false, TextKeyListener.Capitalize.NONE);
@@ -132,7 +160,7 @@ public class Twisty extends Activity {
 		// Defer displaying the welcome message until all current
 		// UI operations are complete (important at activity launch
 		// time, when the view layout is incomplete).
-		handler.post(new Runnable() {
+		welcome_handler.post(new Runnable() {
 			public void run() {
 				if (zmIsRunning())
 					return;
@@ -141,7 +169,7 @@ public class Twisty extends Activity {
 				screen.clear();
 		        ZWindow w = new ZWindow(screen);
 		        w.resize(screen.getchars(), screen.getlines());
-		        w.bufferString("Twisty v0.06, (C) 2008 Google Inc.");
+		        w.bufferString("Twisty v0.07, (C) 2008 Google Inc.");
 		        w.newline();
 		        w.bufferString("Adapted from "
 	        			 + "Zplet, a Z-Machine interpreter in Java: ");
@@ -287,7 +315,7 @@ public class Twisty extends Activity {
         View v = findViewById(R.id.body);
         if (v instanceof TwistyView) {
         	TwistyView tv = (TwistyView)v;
-            screen = new ZScreen(tv, FONT_NAME, FONT_SIZE);
+            screen = new ZScreen(tv, dialog_handler, FONT_NAME, FONT_SIZE);
         	tv.setScreen(screen);
         } else {
         	fatal("Internal error: View type should be TwistyView");
@@ -533,4 +561,27 @@ public class Twisty extends Activity {
 			setupWelcomeMessage();
 		}
 	}
+	
+	/** Have our activity manage and persist dialogs, showing and hiding them */
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		switch (id) {
+		case DIALOG_YES_NO_MESSAGE:
+			return new AlertDialog.Builder(Twisty.this)
+			.setTitle("Are you sure?")
+			.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					/* User clicked OK so do some stuff */
+				}
+			})
+			.setNegativeButton("No", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+	                /* User clicked Cancel so do some stuff */
+				}
+			})
+			.create();
+		}
+		return null;
+	}
+	
 }
