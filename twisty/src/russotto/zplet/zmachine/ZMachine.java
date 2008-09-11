@@ -21,7 +21,7 @@ import russotto.zplet.screenmodel.ZStatus;
 import russotto.zplet.screenmodel.ZWindow;
 import russotto.zplet.zmachine.state.ZState;
 
-public abstract class ZMachine extends Thread implements java.io.Serializable {
+public abstract class ZMachine extends Thread {
 	public ZWindow current_window;
 	public int pc;
 	public ZWindow window[];

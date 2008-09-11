@@ -72,7 +72,7 @@ public class Twisty extends Activity {
 	public static final int PROMPT_FOR_SAVEFILE = 1;
 	
 	// TODO:  see issue 9 -- eventually pass this to Context.openFileOutput()
-	private static String FROZEN_GAME_FILE = "frozengame";
+	// private static String FROZEN_GAME_FILE = "frozengame";
 	private ZScreen screen;
 	private StatusLine status_line;
 	private ZStatus status;

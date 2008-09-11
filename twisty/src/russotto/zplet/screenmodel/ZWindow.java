@@ -12,7 +12,7 @@ import russotto.zplet.ZColor;
 
 import com.google.twisty.zplet.Font;
 
-public class ZWindow implements java.io.Serializable {
+public class ZWindow {
 		 final static int ROMAN = 0;
 		 final static int REVERSE = 1;
 		 final static int BOLD = 2;

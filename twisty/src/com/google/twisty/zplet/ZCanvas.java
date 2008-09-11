@@ -89,7 +89,7 @@ public class ZCanvas {
 
 	}
 
-	class ImageGlue implements Image, java.io.Serializable {
+	class ImageGlue implements Image {
 		private Bitmap bitmap;
 		private ImageGraphics ig;
 
