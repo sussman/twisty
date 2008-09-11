@@ -66,7 +66,7 @@ public class Twisty extends Activity {
 	private static final int FONT_SIZE = 10;
 	
 	// Dialog boxes we manage
-	private static final int DIALOG_YES_NO_MESSAGE = 1;
+	private static final int DIALOG_ENTER_FILENAME = 1;
 	
 	// Messages we receive from the ZMachine thread
 	public static final int PROMPT_FOR_SAVEFILE = 1;
@@ -95,7 +95,7 @@ public class Twisty extends Activity {
 			public void handleMessage(Message m) {
 				if (m.what == PROMPT_FOR_SAVEFILE) {
 					dialog_message = (TwistyMessage) m.obj;
-					showDialog(DIALOG_YES_NO_MESSAGE);
+					showDialog(DIALOG_ENTER_FILENAME);
 				}
 			} 
 		};
@@ -561,10 +561,11 @@ public class Twisty extends Activity {
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		switch (id) {
-		case DIALOG_YES_NO_MESSAGE:
+		case DIALOG_ENTER_FILENAME:
 			return new AlertDialog.Builder(Twisty.this)
-			.setTitle("Are you sure?")
-			.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			.setTitle("Save Game")
+			.setMessage("Enter filename to save to:")
+			.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
 					// TODO:  someday put user's desired filename here:
 					dialog_message.path = "/sdcard/twisty.sav";
@@ -574,7 +575,7 @@ public class Twisty extends Activity {
 					}
 				}
 			})
-			.setNegativeButton("No", new DialogInterface.OnClickListener() {
+			.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
 					// FAIL
 					dialog_message.path = "";
@@ -585,6 +586,9 @@ public class Twisty extends Activity {
 				}
 			})
 			.create();
+			
+			
+			
 		}
 		return null;
 	}
