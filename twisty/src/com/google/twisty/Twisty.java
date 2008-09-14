@@ -42,8 +42,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
 import android.content.res.Resources;
+import android.os.BatteryManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Selection;
@@ -52,7 +52,6 @@ import android.text.method.TextKeyListener;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -200,33 +199,52 @@ public class Twisty extends Activity {
 		BroadcastReceiver battReceiver = new BroadcastReceiver() {
 			public void onReceive(Context context, Intent intent) {
 				StringBuilder sb = new StringBuilder();
-				
-				// TODO:  as of the 0.9 API, this code is broken;  'state' always comes in as 'null'.
+
 				context.unregisterReceiver(this);
 				int rawlevel = intent.getIntExtra("level", -1);
 				int scale = intent.getIntExtra("scale", -1);
-				String state = intent.getStringExtra("state");
+				int status = intent.getIntExtra("status", -1);
+				int health = intent.getIntExtra("health", -1);
 				int level = -1;  // percentage, or -1 for unknown
 				if (rawlevel >= 0 && scale > 0) {
 					level = (rawlevel * 100) / scale;
 				}
 	            sb.append("The phone");
-				if ("Overheat".equals(state)) {
+				if (BatteryManager.BATTERY_HEALTH_OVERHEAT == health) {
 					sb.append("'s battery feels very hot!");
-				} else if ("Unknown".equals(state) || "50".equals(state)) {
-					// old emulator; maybe also when plugged in with no battery
-					sb.append(" has no battery.");
-				} else if (level >= 100) {
-					sb.append(" is fully charged.");
-				} else if ("Discharging".equals(state)) {
-					if (level == 0)
-						sb.append(" needs charging right away.");
-					else if (level > 0 && level <= 33)
-						sb.append(" is about ready to be recharged.");
-					else
-						sb.append("'s battery discharges merrily.");
 				} else {
-					sb.append("'s battery could be described as \"" + state + "\".");
+					switch(status) {
+					case BatteryManager.BATTERY_STATUS_UNKNOWN:
+						// old emulator; maybe also when plugged in with no battery
+						sb.append(" has no battery.");
+						break;
+					case BatteryManager.BATTERY_STATUS_CHARGING:
+						sb.append("'s battery");
+						if (level <= 33)
+							sb.append(" is charging, and really ought to " +
+									"remain that way for the time being.");
+						else if (level <= 84)
+							sb.append(" charges merrily.");
+						else
+							sb.append(" will soon be fully charged.");
+						break;
+					case BatteryManager.BATTERY_STATUS_DISCHARGING:
+					case BatteryManager.BATTERY_STATUS_NOT_CHARGING:
+						if (level == 0)
+							sb.append(" needs charging right away.");
+						else if (level > 0 && level <= 33)
+							sb.append(" is about ready to be recharged.");
+						else
+							sb.append("'s battery discharges merrily.");
+						break;
+					case BatteryManager.BATTERY_STATUS_FULL:
+						sb.append(" is fully charged up and ready to go on " +
+								"an adventure of some sort.");
+						break;
+					default:
+						sb.append("'s battery is indescribable!");
+						break;
+					}
 				}
 				sb.append(' ');
 				printWelcomeMessage(sb.toString());
@@ -473,13 +491,13 @@ public class Twisty extends Activity {
         super.onPrepareOptionsMenu(menu);
         menu.clear();
         if (!zmIsRunning()) {
-            menu.add(menu.NONE, R.raw.advent, 0, "Adventure").setShortcut('0', 'a');
-        	menu.add(menu.NONE, R.raw.bronze, 1, "Bronze").setShortcut('1', 'b');
-        	menu.add(menu.NONE, R.raw.curses, 2, "Curses").setShortcut('2', 'c');
-            menu.add(menu.NONE, MENU_PICK_FILE, 3, "Open file...").setShortcut('5', 'o');
+            menu.add(Menu.NONE, R.raw.advent, 0, "Adventure").setShortcut('0', 'a');
+        	menu.add(Menu.NONE, R.raw.bronze, 1, "Bronze").setShortcut('1', 'b');
+        	menu.add(Menu.NONE, R.raw.curses, 2, "Curses").setShortcut('2', 'c');
+            menu.add(Menu.NONE, MENU_PICK_FILE, 3, "Open file...").setShortcut('5', 'o');
         } else {
-            menu.add(menu.NONE, MENU_RESTART, 0, "Restart").setShortcut('7', 'r');
-            menu.add(menu.NONE, MENU_STOP, 1, "Stop").setShortcut('9', 's');
+            menu.add(Menu.NONE, MENU_RESTART, 0, "Restart").setShortcut('7', 'r');
+            menu.add(Menu.NONE, MENU_STOP, 1, "Stop").setShortcut('9', 's');
         }
         return true;
     }
