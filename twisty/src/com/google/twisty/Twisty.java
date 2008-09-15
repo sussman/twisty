@@ -68,14 +68,17 @@ public class Twisty extends Activity {
 	private static String TAG = "Twisty";
 	private static final String FONT_NAME = "Courier";
 	private static final int FONT_SIZE = 10;
+	private String savegame_dir = "";
 	private String savefile_path = "";
 	
 	// Dialog boxes we manage
-	private static final int DIALOG_ENTER_FILENAME = 1;
-	private static final int DIALOG_CANT_SAVE = 2;
+	private static final int DIALOG_ENTER_SAVEFILE = 1;
+	private static final int DIALOG_ENTER_RESTOREFILE = 2;
+	private static final int DIALOG_CANT_SAVE = 3;
 	
 	// Messages we receive from the ZMachine thread
 	public static final int PROMPT_FOR_SAVEFILE = 1;
+	public static final int PROMPT_FOR_RESTOREFILE = 2;
 	
 	// TODO:  see issue 9 -- eventually pass this to Context.openFileOutput()
 	// private static String FROZEN_GAME_FILE = "frozengame";
@@ -90,7 +93,10 @@ public class Twisty extends Activity {
 	// Passed down to ZState, so ZMachine thread can send Messages back to this thread
 	private Handler dialog_handler;
 	private TwistyMessage dialog_message; // most recent Message received
-
+	private Dialog restoredialog;
+	private DialogInterface.OnClickListener gamelist_listener;
+	private String[] gamelist;
+	
 	/** Called with the activity is first created. */
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -99,11 +105,23 @@ public class Twisty extends Activity {
 		
 		dialog_handler = new Handler() { 
 			public void handleMessage(Message m) {
+				savegame_dir = "";
+				savefile_path = "";
 				if (m.what == PROMPT_FOR_SAVEFILE) {
 					dialog_message = (TwistyMessage) m.obj;
 					promptForSavefile();
 				}
+				else if (m.what == PROMPT_FOR_RESTOREFILE) {
+					dialog_message = (TwistyMessage) m.obj;
+					promptForRestorefile();
+				}
 			} 
+		};
+		
+		gamelist_listener = new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+            	savefile_path = savegame_dir + "/" + gamelist[whichButton];
+            }
 		};
 		
 		setContentView(R.layout.twisty);
@@ -582,12 +600,12 @@ public class Twisty extends Activity {
 		}
 	}
 	
-	private void promptForSavefile() {
-		// A writable sdcard must be present to save the game.
+	// Return the path to the saved-games directory.
+	// If SDcard not present, or if /sdcard/twisty is a file, return null.
+	private String ensureSavedGamesDir() {
 		String storagestate = android.os.Environment.getExternalStorageState();
 		if (!storagestate.equals(android.os.Environment.MEDIA_MOUNTED)) {
-			showDialog(DIALOG_CANT_SAVE);
-			return;
+			return null;
 		}
 		String sdpath = android.os.Environment.getExternalStorageDirectory().getPath();
 		File savedir = new File(sdpath + "/twisty");
@@ -595,19 +613,38 @@ public class Twisty extends Activity {
 			savedir.mkdirs();
 		}
 		else if (! savedir.isDirectory()) {
-			// TODO(sussman):  pop up a different error dialog
+			return null;
+		}
+		return savedir.getPath();
+	}
+	
+	private void promptForSavefile() {
+		String dir = ensureSavedGamesDir();
+		if (dir == null) {
 			showDialog(DIALOG_CANT_SAVE);
 			return;
 		}
-		savefile_path = savedir.getPath();	
-		showDialog(DIALOG_ENTER_FILENAME);
+		savegame_dir = dir;	
+		showDialog(DIALOG_ENTER_SAVEFILE);
 	}
+	
+	private void promptForRestorefile() {
+		String dir = ensureSavedGamesDir();
+		if (dir == null) {
+			showDialog(DIALOG_CANT_SAVE);
+			return;
+		}
+		savegame_dir = dir;
+		showDialog(DIALOG_ENTER_RESTOREFILE);
+	}
+	
 	
 	/** Have our activity manage and persist dialogs, showing and hiding them */
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		switch (id) {
-		case DIALOG_ENTER_FILENAME:
+		
+		case DIALOG_ENTER_SAVEFILE:
 			LayoutInflater factory = LayoutInflater.from(this);
 			final View textEntryView = factory.inflate(R.layout.save_file_prompt, null);
 			final EditText et = (EditText) textEntryView.findViewById(R.id.savefile_entry);
@@ -616,7 +653,7 @@ public class Twisty extends Activity {
 			.setView(textEntryView)
 			.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
-					savefile_path = savefile_path + "/" + et.getText().toString();
+					savefile_path = savegame_dir + "/" + et.getText().toString();
 					// Directly modify the message-object passed to us by the z-machine thread:
 					dialog_message.path = savefile_path;
 					// Wake up the ZMachine thread again
@@ -637,10 +674,38 @@ public class Twisty extends Activity {
 			})
 			.create();
 			
+		case DIALOG_ENTER_RESTOREFILE:
+			gamelist  = new File(savegame_dir).list();
+			restoredialog = new AlertDialog.Builder(Twisty.this)
+            .setTitle("Restore Game")
+            .setSingleChoiceItems(gamelist, 0, gamelist_listener)
+            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+					// Directly modify the message-object passed to us by the z-machine thread:
+					dialog_message.path = savefile_path;
+					// Wake up the ZMachine thread again
+					synchronized (screen) {
+						screen.notify();
+					}
+                }
+            })
+            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                	// This makes op_restore() fail.
+					dialog_message.path = "";
+					// Wake up the ZMachine thread again
+					synchronized (screen) {
+						screen.notify();
+					}
+                }
+            })
+           .create();
+			return restoredialog;
+
 		case DIALOG_CANT_SAVE:
 			return new AlertDialog.Builder(Twisty.this)
-			.setTitle("Cannot Save Game")
-			.setMessage("SD card not available.")
+			.setTitle("Cannot Access Saved Games")
+			.setMessage("SD card is not available, or saved-games directory is missing.")
 			.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
 					// A path of "" makes op_save() fail.
@@ -656,4 +721,16 @@ public class Twisty extends Activity {
 		return null;
 	}
 	
+
+	/** Have our activity prepare dialogs before displaying them */
+	@Override
+	protected void onPrepareDialog(int id, Dialog dialog) {
+		super.onPrepareDialog(id, dialog);
+		switch(id) {
+		case DIALOG_ENTER_RESTOREFILE:
+			// final String[] gamelist  = new File(savegame_dir).list();
+			// TODO(sussman):  ugh, we need to use a *real* Dialog here and modify
+			//     its list of items, not an AlertDialog. 
+		}
+	}
 }

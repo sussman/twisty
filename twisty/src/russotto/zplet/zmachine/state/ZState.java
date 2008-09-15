@@ -108,8 +108,23 @@ public class ZState {
 	
 	public String get_restore_file_name(ZScreen parent)
 	{
-		// TODO: androidify this
-		return "/sdcard/twisty.sav";
+		TwistyMessage msg = new TwistyMessage();
+		Handler dialog_handler = parent.getDialogHandler();		
+		
+		// Tell Twisty to prompt the user for a filename, then block.
+		synchronized (parent) {
+			try {
+				Message.obtain(dialog_handler, Twisty.PROMPT_FOR_RESTOREFILE, msg).sendToTarget();
+				parent.wait();
+			}
+			catch (InterruptedException e) { 
+			};
+		}
+		
+		// Twisty should have modified our TwistyMessage object, and 
+		// then called notify() to wake us up.
+		current_savefile_name = msg.path;
+		return current_savefile_name;
 	}
 
 	public boolean restore_from_disk(ZScreen parent) {
