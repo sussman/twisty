@@ -14,6 +14,7 @@
 
 package com.google.twisty;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -52,9 +53,11 @@ import android.text.method.TextKeyListener;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 public class Twisty extends Activity {
@@ -65,6 +68,7 @@ public class Twisty extends Activity {
 	private static String TAG = "Twisty";
 	private static final String FONT_NAME = "Courier";
 	private static final int FONT_SIZE = 10;
+	private String savefile_path = "";
 	
 	// Dialog boxes we manage
 	private static final int DIALOG_ENTER_FILENAME = 1;
@@ -583,10 +587,20 @@ public class Twisty extends Activity {
 		String storagestate = android.os.Environment.getExternalStorageState();
 		if (!storagestate.equals(android.os.Environment.MEDIA_MOUNTED)) {
 			showDialog(DIALOG_CANT_SAVE);
+			return;
 		}
-		else {
-			showDialog(DIALOG_ENTER_FILENAME);
+		String sdpath = android.os.Environment.getExternalStorageDirectory().getPath();
+		File savedir = new File(sdpath + "/twisty");
+		if (! savedir.exists()) {
+			savedir.mkdirs();
 		}
+		else if (! savedir.isDirectory()) {
+			// TODO(sussman):  pop up a different error dialog
+			showDialog(DIALOG_CANT_SAVE);
+			return;
+		}
+		savefile_path = savedir.getPath();	
+		showDialog(DIALOG_ENTER_FILENAME);
 	}
 	
 	/** Have our activity manage and persist dialogs, showing and hiding them */
@@ -594,16 +608,17 @@ public class Twisty extends Activity {
 	protected Dialog onCreateDialog(int id) {
 		switch (id) {
 		case DIALOG_ENTER_FILENAME:
-			// LayoutInflater factory = LayoutInflater.from(this);
-			//final View textEntryView = factory.inflate(R.layout.alert_dialog_text_entry, null);
+			LayoutInflater factory = LayoutInflater.from(this);
+			final View textEntryView = factory.inflate(R.layout.save_file_prompt, null);
+			final EditText et = (EditText) textEntryView.findViewById(R.id.savefile_entry);
 			return new AlertDialog.Builder(Twisty.this)
 			.setTitle("Save Game")
-			.setMessage("Enter filename to save to:")
-			//.setView(textEntryView)
+			.setView(textEntryView)
 			.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
-					// TODO:  someday put user's desired filename here:
-					dialog_message.path = "/sdcard/twisty.sav";
+					savefile_path = savefile_path + "/" + et.getText().toString();
+					// Directly modify the message-object passed to us by the z-machine thread:
+					dialog_message.path = savefile_path;
 					// Wake up the ZMachine thread again
 					synchronized (screen) {
 						screen.notify();
