@@ -423,7 +423,7 @@ public class Twisty extends Activity {
         int currentbytes = 0;
         int bytesleft;
         int got;
-        int buffersize = 2048;
+        int buffersize = 65536;
 
         buffer = new byte[buffersize];
         bytesleft = buffersize;
