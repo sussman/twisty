@@ -57,7 +57,10 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioGroup;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 public class Twisty extends Activity {
@@ -94,8 +97,6 @@ public class Twisty extends Activity {
 	private Handler dialog_handler;
 	private TwistyMessage dialog_message; // most recent Message received
 	private Dialog restoredialog;
-	private DialogInterface.OnClickListener gamelist_listener;
-	private String[] gamelist;
 	
 	/** Called with the activity is first created. */
 	@Override
@@ -116,12 +117,6 @@ public class Twisty extends Activity {
 					promptForRestorefile();
 				}
 			} 
-		};
-		
-		gamelist_listener = new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-            	savefile_path = savegame_dir + "/" + gamelist[whichButton];
-            }
 		};
 		
 		setContentView(R.layout.twisty);
@@ -638,6 +633,18 @@ public class Twisty extends Activity {
 		showDialog(DIALOG_ENTER_RESTOREFILE);
 	}
 	
+	private void updateRadioButtons(RadioGroup rg) {
+		rg.removeAllViews();
+		int id = 0;
+		String[] gamelist  = new File(savegame_dir).list();
+		for (String filename : gamelist) {
+			RadioButton rb = new RadioButton(Twisty.this);
+			rb.setText(filename);
+			rg.addView(rb);
+			id = rb.getId();
+		}
+		rg.check(id); // by default, check the last item
+	}
 	
 	/** Have our activity manage and persist dialogs, showing and hiding them */
 	@Override
@@ -675,37 +682,50 @@ public class Twisty extends Activity {
 			.create();
 			
 		case DIALOG_ENTER_RESTOREFILE:
-			gamelist  = new File(savegame_dir).list();
-			restoredialog = new AlertDialog.Builder(Twisty.this)
-            .setTitle("Restore Game")
-            .setSingleChoiceItems(gamelist, 0, gamelist_listener)
-            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-					// Directly modify the message-object passed to us by the z-machine thread:
-					dialog_message.path = savefile_path;
-					// Wake up the ZMachine thread again
-					synchronized (screen) {
-						screen.notify();
-					}
-                }
-            })
-            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                	// This makes op_restore() fail.
-					dialog_message.path = "";
-					// Wake up the ZMachine thread again
-					synchronized (screen) {
-						screen.notify();
-					}
-                }
-            })
-           .create();
+			restoredialog = new Dialog(Twisty.this);
+			restoredialog.setContentView(R.layout.restore_file_prompt);
+			restoredialog.setTitle("Restore Saved Game");
+			android.widget.RadioGroup rg = (RadioGroup) restoredialog.findViewById(R.id.radiomenu);
+			updateRadioButtons(rg);
+			android.widget.Button okbutton = (Button) restoredialog.findViewById(R.id.restoreokbutton);
+			okbutton.setOnClickListener(new View.OnClickListener() {
+	             public void onClick(View v) {
+	            	 android.widget.RadioGroup rg = (RadioGroup) restoredialog.findViewById(R.id.radiomenu);
+	            	 int checkedid = rg.getCheckedRadioButtonId();
+	            	 if (rg.getChildCount() == 0) {  // no saved games:  FAIL
+	            		 savefile_path = "";
+	            	 } else	if (checkedid == -1) { // no game selected
+	            		 RadioButton firstbutton = (RadioButton) rg.getChildAt(0); // default to first game
+	            		 savefile_path = savegame_dir + "/" + firstbutton.getText(); 
+	            	 } else {
+	            		 RadioButton checkedbutton = (RadioButton) rg.findViewById(checkedid);
+	            		 savefile_path = savegame_dir + "/" + checkedbutton.getText();
+	            	 }
+	            	 dismissDialog(DIALOG_ENTER_RESTOREFILE);
+	            	 // Return control to the z-machine thread
+	            	 dialog_message.path = savefile_path;
+	            	 synchronized (screen) {
+	            		 screen.notify();
+	            	 }
+	             }
+	         });
+			android.widget.Button cancelbutton = (Button) restoredialog.findViewById(R.id.restorecancelbutton);
+			cancelbutton.setOnClickListener(new View.OnClickListener() {
+	             public void onClick(View v) {
+	            	 dismissDialog(DIALOG_ENTER_RESTOREFILE);
+	            	 // Return control to the z-machine thread
+	            	 dialog_message.path = "";
+	            	 synchronized (screen) {
+	            		 screen.notify();
+	            	 }
+	             }
+	         });
 			return restoredialog;
 
 		case DIALOG_CANT_SAVE:
 			return new AlertDialog.Builder(Twisty.this)
 			.setTitle("Cannot Access Saved Games")
-			.setMessage("SD card is not available, or saved-games directory is missing.")
+			.setMessage("SD card or saved-games folder is not available.")
 			.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
 					// A path of "" makes op_save() fail.
@@ -728,9 +748,8 @@ public class Twisty extends Activity {
 		super.onPrepareDialog(id, dialog);
 		switch(id) {
 		case DIALOG_ENTER_RESTOREFILE:
-			// final String[] gamelist  = new File(savegame_dir).list();
-			// TODO(sussman):  ugh, we need to use a *real* Dialog here and modify
-			//     its list of items, not an AlertDialog. 
+			android.widget.RadioGroup rg = (RadioGroup) restoredialog.findViewById(R.id.radiomenu);
+			updateRadioButtons(rg);
 		}
 	}
 }
