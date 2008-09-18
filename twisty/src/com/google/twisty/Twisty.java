@@ -183,7 +183,7 @@ public class Twisty extends Activity {
 				screen.clear();
 		        ZWindow w = new ZWindow(screen);
 		        w.resize(screen.getchars(), screen.getlines());
-		        w.bufferString("Twisty v0.07, (C) 2008 Google Inc.");
+		        w.bufferString("Twisty v0.08, (C) 2008 Google Inc.");
 		        w.newline();
 		        w.bufferString("Adapted from "
 	        			 + "Zplet, a Z-Machine interpreter in Java: ");
