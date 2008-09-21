@@ -630,9 +630,9 @@ public class Twisty extends Activity {
 		if (!storagestate.equals(android.os.Environment.MEDIA_MOUNTED)) {
 			return null;
 		}
-		String sdpath = android.os.Environment.getExternalStorageDirectory().getPath();
+		File sdroot = android.os.Environment.getExternalStorageDirectory();
 		ArrayList<String> zgamelist = new ArrayList<String>();
-		scanDir(new File(sdpath), zgamelist);
+		scanDir(sdroot, zgamelist);
 		return (String[]) zgamelist.toArray();
 	}
 	
