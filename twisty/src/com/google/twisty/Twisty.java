@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import com.google.twisty.zplet.Event;
 import com.google.twisty.zplet.StatusLine;
@@ -611,6 +612,28 @@ public class Twisty extends Activity {
 			return null;
 		}
 		return savedir.getPath();
+	}
+	
+	private void scanDir(File dir, ArrayList<String> list) {
+		File[] children = dir.listFiles();
+		for (int count = 0; count < children.length; count++) {
+			File child = children[count];
+			if (child.isFile() && child.getName().matches("*.z[1-8]"))
+				list.add(child.getPath());
+			else
+				scanDir(child, list);
+		}
+	}
+	
+	private String[] scanForZGames() {
+		String storagestate = android.os.Environment.getExternalStorageState();
+		if (!storagestate.equals(android.os.Environment.MEDIA_MOUNTED)) {
+			return null;
+		}
+		String sdpath = android.os.Environment.getExternalStorageDirectory().getPath();
+		ArrayList<String> zgamelist = new ArrayList<String>();
+		scanDir(new File(sdpath), zgamelist);
+		return (String[]) zgamelist.toArray();
 	}
 	
 	private void promptForSavefile() {
