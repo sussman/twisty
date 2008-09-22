@@ -81,6 +81,7 @@ public class Twisty extends Activity {
 	private static final int DIALOG_ENTER_RESTOREFILE = 2;
 	private static final int DIALOG_CHOOSE_ZGAME = 3;
 	private static final int DIALOG_CANT_SAVE = 4;
+	private static final int DIALOG_NO_SDCARD = 5;
 	
 	// Messages we receive from the ZMachine thread
 	public static final int PROMPT_FOR_SAVEFILE = 1;
@@ -554,7 +555,11 @@ public class Twisty extends Activity {
 
     /** Launch UI to pick a file to load and execute */
     private void pickFile() {
-    	showDialog(DIALOG_CHOOSE_ZGAME);
+    	String storagestate = android.os.Environment.getExternalStorageState();
+		if (!storagestate.equals(android.os.Environment.MEDIA_MOUNTED))
+			showDialog(DIALOG_NO_SDCARD); // no sdcard to scan
+		else
+			showDialog(DIALOG_CHOOSE_ZGAME);
     }
 
     /** Called from UI thread to request cleanup or whatever */
@@ -787,7 +792,7 @@ public class Twisty extends Activity {
 		case DIALOG_CANT_SAVE:
 			return new AlertDialog.Builder(Twisty.this)
 			.setTitle("Cannot Access Saved Games")
-			.setMessage("SD card or saved-games folder is not available.")
+			.setMessage("Saved-games folder is not available on external media.")
 			.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
 					// A path of "" makes op_save() fail.
@@ -799,6 +804,18 @@ public class Twisty extends Activity {
 				}
 			})
 			.create();
+			
+		case DIALOG_NO_SDCARD:
+			return new AlertDialog.Builder(Twisty.this)
+			.setTitle("No External Media")
+			.setMessage("Cannot find sdcard or other media.")
+			.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					// do nothing
+				}
+			})
+			.create();
+			
 		}
 		return null;
 	}
