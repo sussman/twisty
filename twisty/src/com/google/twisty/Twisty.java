@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.google.twisty.zplet.Event;
 import com.google.twisty.zplet.StatusLine;
@@ -78,7 +79,8 @@ public class Twisty extends Activity {
 	// Dialog boxes we manage
 	private static final int DIALOG_ENTER_SAVEFILE = 1;
 	private static final int DIALOG_ENTER_RESTOREFILE = 2;
-	private static final int DIALOG_CANT_SAVE = 3;
+	private static final int DIALOG_CHOOSE_ZGAME = 3;
+	private static final int DIALOG_CANT_SAVE = 4;
 	
 	// Messages we receive from the ZMachine thread
 	public static final int PROMPT_FOR_SAVEFILE = 1;
@@ -97,7 +99,11 @@ public class Twisty extends Activity {
 	// Passed down to ZState, so ZMachine thread can send Messages back to this thread
 	private Handler dialog_handler;
 	private TwistyMessage dialog_message; // most recent Message received
+	// Persistent dialogs created in onCreateDialog() and updated by onPrepareDialog()
 	private Dialog restoredialog;
+	private Dialog choosezgamedialog;
+	// A persistent map of button-ids to zgames found on the sdcard (absolute paths)
+	private HashMap<Integer, String> zgame_paths = new HashMap<Integer, String>();
 	
 	/** Called with the activity is first created. */
 	@Override
@@ -184,7 +190,7 @@ public class Twisty extends Activity {
 				screen.clear();
 		        ZWindow w = new ZWindow(screen);
 		        w.resize(screen.getchars(), screen.getlines());
-		        w.bufferString("Twisty v0.08, (C) 2008 Google Inc.");
+		        w.bufferString("Twisty v0.1, (C) 2008 Google Inc.");
 		        w.newline();
 		        w.bufferString("Adapted from "
 	        			 + "Zplet, a Z-Machine interpreter in Java: ");
@@ -548,25 +554,7 @@ public class Twisty extends Activity {
 
     /** Launch UI to pick a file to load and execute */
     private void pickFile() {
-		// TODO(mariusm): allow for multiple unrelated directories
-		// (typically we should allow the user to load games from both
-    	// /sdcard and /data)
-    	
-    	// Until there's a system-provided file picker, we use our own
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setClass(this, FileBrowser.class);
-        intent.putExtra("file-filter", ".+");
-//        intent.putExtra("file-filter", ".*\\.[Zz][358]");
-        intent.putExtra("path-filter", "(/.+)*");
-        intent.putExtra("start-dir", "/data");
-//        intent.putExtra("path-filter", "/sdcard(/.+)*");
-//        intent.putExtra("start-dir", "/sdcard");
-        intent.putExtra("title", "Open game file (*.z3;*.z5;*.z8)");
-
-        // Open the new activity
-        startActivityForResult(intent, FILE_PICKED);
-        
-        // When the new activity is done, onActivityResult will be called
+    	showDialog(DIALOG_CHOOSE_ZGAME);
     }
 
     /** Called from UI thread to request cleanup or whatever */
@@ -614,17 +602,22 @@ public class Twisty extends Activity {
 		return savedir.getPath();
 	}
 	
+	// Walk DIR recursively, adding any file matching *.z[1-8] to LIST.
 	private void scanDir(File dir, ArrayList<String> list) {
 		File[] children = dir.listFiles();
+		if (children == null)
+			return;
 		for (int count = 0; count < children.length; count++) {
 			File child = children[count];
-			if (child.isFile() && child.getName().matches("*.z[1-8]"))
+			if (child.isFile() && child.getName().matches(".*\\.z[1-8]"))
 				list.add(child.getPath());
 			else
 				scanDir(child, list);
 		}
 	}
 	
+	// Recursively can the sdcard for z-games.  Return an array of absolute paths,
+	// or null if no sdcard is available.
 	private String[] scanForZGames() {
 		String storagestate = android.os.Environment.getExternalStorageState();
 		if (!storagestate.equals(android.os.Environment.MEDIA_MOUNTED)) {
@@ -633,7 +626,7 @@ public class Twisty extends Activity {
 		File sdroot = android.os.Environment.getExternalStorageDirectory();
 		ArrayList<String> zgamelist = new ArrayList<String>();
 		scanDir(sdroot, zgamelist);
-		return (String[]) zgamelist.toArray();
+		return zgamelist.toArray(new String[0]);
 	}
 	
 	private void promptForSavefile() {
@@ -656,7 +649,9 @@ public class Twisty extends Activity {
 		showDialog(DIALOG_ENTER_RESTOREFILE);
 	}
 	
-	private void updateRadioButtons(RadioGroup rg) {
+	// Used by 'Restore Game' dialog box;  scans /sdcard/twisty and updates
+	// the list of radiobuttons.
+	private void updateRestoreRadioButtons(RadioGroup rg) {
 		rg.removeAllViews();
 		int id = 0;
 		String[] gamelist  = new File(savegame_dir).list();
@@ -665,6 +660,23 @@ public class Twisty extends Activity {
 			rb.setText(filename);
 			rg.addView(rb);
 			id = rb.getId();
+		}
+		rg.check(id); // by default, check the last item
+	}
+	
+	// Used by 'Choose ZGame' dialog box;  scans all of /sdcard for zgames,
+	// updates list of radiobuttons (and the zgame_paths HashMap).
+	private void updateZGameRadioButtons(RadioGroup rg) {
+		rg.removeAllViews();
+		zgame_paths.clear();
+		int id = 0;
+    	String[] zgames = scanForZGames();
+    	for (String path : zgames) {
+			RadioButton rb = new RadioButton(Twisty.this);
+			rb.setText(new File(path).getName());
+			rg.addView(rb);
+			id = rb.getId();
+			zgame_paths.put(id, path);
 		}
 		rg.check(id); // by default, check the last item
 	}
@@ -709,7 +721,7 @@ public class Twisty extends Activity {
 			restoredialog.setContentView(R.layout.restore_file_prompt);
 			restoredialog.setTitle("Restore Saved Game");
 			android.widget.RadioGroup rg = (RadioGroup) restoredialog.findViewById(R.id.radiomenu);
-			updateRadioButtons(rg);
+			updateRestoreRadioButtons(rg);
 			android.widget.Button okbutton = (Button) restoredialog.findViewById(R.id.restoreokbutton);
 			okbutton.setOnClickListener(new View.OnClickListener() {
 	             public void onClick(View v) {
@@ -745,6 +757,33 @@ public class Twisty extends Activity {
 	         });
 			return restoredialog;
 
+		case DIALOG_CHOOSE_ZGAME:
+			choosezgamedialog = new Dialog(Twisty.this);
+			choosezgamedialog.setContentView(R.layout.choose_zgame_prompt);
+			choosezgamedialog.setTitle("Choose Game");
+			android.widget.RadioGroup zrg = (RadioGroup) choosezgamedialog.findViewById(R.id.zgame_radiomenu);
+			updateZGameRadioButtons(zrg);
+			android.widget.Button zokbutton = (Button) choosezgamedialog.findViewById(R.id.zgameokbutton);
+			zokbutton.setOnClickListener(new View.OnClickListener() {
+	             public void onClick(View v) {
+	            	 android.widget.RadioGroup zrg = (RadioGroup) choosezgamedialog.findViewById(R.id.zgame_radiomenu);
+	            	 int checkedid = zrg.getCheckedRadioButtonId();
+	            	 dismissDialog(DIALOG_CHOOSE_ZGAME);
+	            	 String path = (String) zgame_paths.get(checkedid);
+	            	 if (path != null) {
+	            		 stopzm();
+	            		 startzm(path);
+	            	 }
+	             }
+	         });
+			android.widget.Button zcancelbutton = (Button) choosezgamedialog.findViewById(R.id.zgamecancelbutton);
+			zcancelbutton.setOnClickListener(new View.OnClickListener() {
+	             public void onClick(View v) {
+	            	 dismissDialog(DIALOG_CHOOSE_ZGAME);
+	             }
+	         });
+			return choosezgamedialog;
+			
 		case DIALOG_CANT_SAVE:
 			return new AlertDialog.Builder(Twisty.this)
 			.setTitle("Cannot Access Saved Games")
@@ -772,7 +811,12 @@ public class Twisty extends Activity {
 		switch(id) {
 		case DIALOG_ENTER_RESTOREFILE:
 			android.widget.RadioGroup rg = (RadioGroup) restoredialog.findViewById(R.id.radiomenu);
-			updateRadioButtons(rg);
+			updateRestoreRadioButtons(rg);
+			break;
+		case DIALOG_CHOOSE_ZGAME:
+			android.widget.RadioGroup zrg = (RadioGroup) choosezgamedialog.findViewById(R.id.zgame_radiomenu);
+			updateZGameRadioButtons(zrg);
+			break;
 		}
 	}
 }

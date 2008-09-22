@@ -8,11 +8,5 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="FileBrowser"
-                  android:label="@string/open_game_file">
-            <intent-filter>
-	        <action android:name="android.intent.action.PICK" />
-	    </intent-filter>
-        </activity>
     </application>
 </manifest> 
