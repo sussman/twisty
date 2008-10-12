@@ -39,6 +39,7 @@ import russotto.zplet.zmachine.zmachine5.ZMachine8;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -72,7 +73,7 @@ public class Twisty extends Activity {
 	private static final int FILE_PICKED = 104;
 	private static String TAG = "Twisty";
 	private static final String FONT_NAME = "Courier";
-	private static final int FONT_SIZE = 10;
+	private static final int FONT_SIZE = 12;
 	private String savegame_dir = "";
 	private String savefile_path = "";
 	
@@ -82,6 +83,7 @@ public class Twisty extends Activity {
 	private static final int DIALOG_CHOOSE_ZGAME = 3;
 	private static final int DIALOG_CANT_SAVE = 4;
 	private static final int DIALOG_NO_SDCARD = 5;
+	private static final int DIALOG_SCANNING_SDCARD = 6;
 	
 	// Messages we receive from the ZMachine thread
 	public static final int PROMPT_FOR_SAVEFILE = 1;
@@ -103,6 +105,7 @@ public class Twisty extends Activity {
 	// Persistent dialogs created in onCreateDialog() and updated by onPrepareDialog()
 	private Dialog restoredialog;
 	private Dialog choosezgamedialog;
+	private ProgressDialog scanningdialog;
 	// A persistent map of button-ids to zgames found on the sdcard (absolute paths)
 	private HashMap<Integer, String> zgame_paths = new HashMap<Integer, String>();
 	
@@ -191,7 +194,7 @@ public class Twisty extends Activity {
 				screen.clear();
 		        ZWindow w = new ZWindow(screen);
 		        w.resize(screen.getchars(), screen.getlines());
-		        w.bufferString("Twisty v0.1, (C) 2008 Google Inc.");
+		        w.bufferString("Twisty v0.11, (C) 2008 Google Inc.");
 		        w.newline();
 		        w.bufferString("Adapted from "
 	        			 + "Zplet, a Z-Machine interpreter in Java: ");
@@ -630,7 +633,9 @@ public class Twisty extends Activity {
 		}
 		File sdroot = android.os.Environment.getExternalStorageDirectory();
 		ArrayList<String> zgamelist = new ArrayList<String>();
+		showDialog(DIALOG_SCANNING_SDCARD);
 		scanDir(sdroot, zgamelist);
+		dismissDialog(DIALOG_SCANNING_SDCARD);
 		return zgamelist.toArray(new String[0]);
 	}
 	
@@ -788,6 +793,13 @@ public class Twisty extends Activity {
 	             }
 	         });
 			return choosezgamedialog;
+			
+		case DIALOG_SCANNING_SDCARD:
+			scanningdialog = new ProgressDialog(Twisty.this);
+			scanningdialog.setIndeterminate(true);
+			scanningdialog.setTitle("Scanning sdcard...");
+			scanningdialog.setMessage("Looking for z-games");
+			return scanningdialog;
 			
 		case DIALOG_CANT_SAVE:
 			return new AlertDialog.Builder(Twisty.this)
