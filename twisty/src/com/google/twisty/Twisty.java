@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import com.google.twisty.zplet.Event;
@@ -172,10 +173,10 @@ public class Twisty extends Activity {
 		setViewVisibility(R.id.status_v5, View.GONE);
 		// Get the battery status in order to print the
 		// welcome message with the details
-		fetchBatteryState();
+		printWelcomeMessage();
 	}
 
-	private void printWelcomeMessage(final String details) {
+	private void printWelcomeMessage() {
 		if (zmIsRunning()) {
 			Log.e(TAG, "Called printWelcomeMessage with ZM running");
 			return;
@@ -205,12 +206,14 @@ public class Twisty extends Activity {
 		w.bufferString("    see http://code.google.com/p/twisty");
 		w.newline();
 		w.newline();
+		StringBuffer phoneBlurb = new StringBuffer();
 		// TODO: make this change depending on device features
-		w.bufferString("You are holding a modern-looking phone with a "
-				+ "QWERTY keypad. "
-				+ details
-				+ "You feel an inexplicable urge to "
+		phoneBlurb.append("You are holding a modern-looking phone with a "
+				+ "QWERTY keypad. ");
+		appendBatteryState(phoneBlurb);
+		phoneBlurb.append("You feel an inexplicable urge to "
 				+ "press the phone's \"menu\" key. ");
+		w.bufferString(phoneBlurb.toString());
 		w.flush();
 	}
 
@@ -218,10 +221,9 @@ public class Twisty extends Activity {
 		return (zm != null && zm.isAlive());
 	}
 
-	private void fetchBatteryState() {
+	private void appendBatteryState(StringBuffer sb) {
 		IntentFilter battFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
 		Intent intent = registerReceiver(null, battFilter);
-		StringBuilder sb = new StringBuilder();
 
 		int rawlevel = intent.getIntExtra("level", -1);
 		int scale = intent.getIntExtra("scale", -1);
@@ -268,8 +270,7 @@ public class Twisty extends Activity {
 			break;
 			}
 		}
-		sb.append(' ');
-		printWelcomeMessage(sb.toString());
+		sb.append(" ");
 	}
 
 	protected void onActivityResult(int requestCode, int resultCode,
@@ -564,6 +565,7 @@ public class Twisty extends Activity {
 
 	/** Called from UI thread to request cleanup or whatever */
 	public void onZmFinished(final ZMachineException e) {
+		zm = null;
 		if (e != null) {
 			// Report that an error occurred
 			StringBuilder sb = new StringBuilder("Fatal error\n");
@@ -614,7 +616,7 @@ public class Twisty extends Activity {
 			return;
 		for (int count = 0; count < children.length; count++) {
 			File child = children[count];
-			if (child.isFile() && child.getName().matches(".*\\.z[1-8]"))
+			if (child.isFile() && child.getName().matches("[^.].*\\.[Zz][1-8]"))
 				list.add(child.getPath());
 			else
 				scanDir(child, list);
@@ -633,7 +635,9 @@ public class Twisty extends Activity {
 		showDialog(DIALOG_SCANNING_SDCARD);
 		scanDir(sdroot, zgamelist);
 		dismissDialog(DIALOG_SCANNING_SDCARD);
-		return zgamelist.toArray(new String[0]);
+		String[] files = zgamelist.toArray(new String[zgamelist.size()]);
+		Arrays.sort(files);
+		return files;
 	}
 
 	private void promptForSavefile() {
