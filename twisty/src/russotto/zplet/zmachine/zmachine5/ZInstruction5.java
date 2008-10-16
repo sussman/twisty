@@ -88,6 +88,7 @@ public class ZInstruction5 extends ZInstruction
 		{
 				short result;
 				
+				zm.logInstruction(opnum, count, operands);
 				switch (opnum) {
 				case OP_JE:
 						result = op_je();
@@ -673,7 +674,7 @@ public class ZInstruction5 extends ZInstruction
 
 		protected short op_buffer_mode()
 		{
-//				zm.window[LOWER_WINDOW].setbuffermode(operands[0] != 0);
+				zm.window[LOWER_WINDOW].setbuffermode(operands[0] != 0);
 				zm.window[LOWER_WINDOW].setwrapmode(operands[0] != 0);
 				return ZFALSE;
 		}

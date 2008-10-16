@@ -263,7 +263,7 @@ public class ZInstruction {
 	{
 				short result;
 
-				//				System.err.println("Executing instruction " + opnum);
+				zm.logInstruction(opnum, count, operands);
 				switch (opnum) {
 				case OP_JE:
 					result = op_je();
@@ -962,8 +962,8 @@ public class ZInstruction {
 					Log.e(TAG, "\texpected\tactual");
 					Log.e(TAG, "length\t"+filesize+"\t"+zm.memory_image.length);
 					Log.e(TAG, "checksum\t" 
-													   + Integer.toString(zm.header.checksum()&0xFFFF, 16)
-													   + "\t"+ Integer.toString(zm.checksum,16));
+						   + Integer.toString(zm.header.checksum()&0xFFFF, 16)
+						   + "\t"+ Integer.toString(zm.checksum,16));
 					return ZFALSE;
 				}
 				return ZTRUE;
@@ -1128,27 +1128,15 @@ public class ZInstruction {
 
 	protected void split_screen(int lines)
 	{
-				int cx, cy;
-
 				zm.window[UPPER_WINDOW].flush();
 				zm.window[LOWER_WINDOW].flush();
 //				System.err.println("split screen " + lines);
-				cx = zm.window[LOWER_WINDOW].getx();
-				cy = zm.window[LOWER_WINDOW].gety() + zm.window[UPPER_WINDOW].getlines();
-				cy -= lines;
-				if (cy < 0)
-						cy = 0;
-//				System.err.println("cx cy" + cx + cy);
-				zm.window[LOWER_WINDOW].moveto(0,lines);
-				zm.window[UPPER_WINDOW].moveto(0,0);
-				zm.window[LOWER_WINDOW].resize(zm.screen.getchars(),
-																	   zm.screen.getlines() - lines);
-				zm.window[UPPER_WINDOW].resize(zm.screen.getchars(),lines);
-				if (cy >= (zm.screen.getlines() - lines)) {
-					cy = zm.screen.getlines() - lines - 1;
-				}
-				zm.window[LOWER_WINDOW].movecursor(cx, cy);
-//				System.err.println("cx cy" + cx + cy);
+				zm.window[LOWER_WINDOW].moveto(0, lines);
+				zm.window[UPPER_WINDOW].moveto(0, 0);
+				// TODO: tedious cursor position calculation?
+				zm.window[UPPER_WINDOW].movecursor(0, 0);
+				zm.window[LOWER_WINDOW].resize(zm.screen.getchars(), -1);
+				zm.window[UPPER_WINDOW].resize(zm.screen.getchars(), lines);
 	}
 
 	protected short op_split_window()

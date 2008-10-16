@@ -15,23 +15,27 @@
 package com.google.twisty.zplet;
 
 public class Color {
-	Color(int argb) {
-		this.argb = argb;
-	}
-	
-	public int getARGB() {
-		return argb;
-	}
-	
-	public static final Color black   = new Color(android.graphics.Color.BLACK);
-	public static final Color red     = new Color(android.graphics.Color.RED);
-	public static final Color green   = new Color(android.graphics.Color.GREEN);
-	public static final Color blue    = new Color(android.graphics.Color.BLUE);
-	public static final Color cyan    = new Color(android.graphics.Color.CYAN);
-	public static final Color magenta = new Color(android.graphics.Color.MAGENTA);
-	public static final Color yellow  = new Color(android.graphics.Color.YELLOW);
-	public static final Color white   = new Color(android.graphics.Color.WHITE);
-	public static final Color gray    = new Color(android.graphics.Color.GRAY);
-	
-	private final int argb;
+  Color(int argb) {
+    this.argb = argb;
+  }
+
+  public int getARGB() {
+    return argb;
+  }
+
+  public static final Color black   = new Color(android.graphics.Color.BLACK);
+  public static final Color red     = new Color(android.graphics.Color.RED);
+  public static final Color green   = new Color(android.graphics.Color.GREEN);
+  public static final Color blue    = new Color(android.graphics.Color.BLUE);
+  public static final Color cyan    = new Color(android.graphics.Color.CYAN);
+  public static final Color magenta = new Color(android.graphics.Color.MAGENTA);
+  public static final Color yellow  = new Color(android.graphics.Color.YELLOW);
+  public static final Color white   = new Color(android.graphics.Color.WHITE);
+  public static final Color gray    = new Color(android.graphics.Color.GRAY);
+
+  private final int argb;
+  
+  public String toString() {
+    return "{argb=" + argb + "}";
+  }
 }

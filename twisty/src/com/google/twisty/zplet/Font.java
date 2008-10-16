@@ -14,11 +14,13 @@
 
 package com.google.twisty.zplet;
 
+import android.graphics.Typeface;
+
 public class Font {
 
-	public static final int PLAIN =  0x01;
-	public static final int BOLD =   0x10;
-	public static final int ITALIC = 0x20;
+	public static final int PLAIN =  Typeface.NORMAL;
+	public static final int BOLD =   Typeface.BOLD;
+	public static final int ITALIC = Typeface.ITALIC;
 
 	public Font(String name, int style, int size) {
 		this.name = name;
@@ -41,4 +43,19 @@ public class Font {
 	private final String name;
 	private final int style;
 	private final int size;
+
+  @Override
+  public boolean equals(Object o) {
+    if (o instanceof Font) {
+      Font f = (Font) o;
+      return (name.equals(f.name) && style == f.style && size == f.size);
+    }
+    return false;
+  }
+
+  @Override
+  public String toString() {
+    return "Font:{name=" + name + ";style=" + style + ";size=" + size + "}";
+  }
+	
 }

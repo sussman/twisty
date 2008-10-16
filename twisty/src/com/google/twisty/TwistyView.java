@@ -16,85 +16,81 @@ package com.google.twisty;
 
 import com.google.twisty.zplet.ZMachineException;
 
-import russotto.zplet.screenmodel.ZScreen;
-
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.os.Handler;
+import android.text.method.ArrowKeyMovementMethod;
+import android.text.method.MovementMethod;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.View;
+import android.widget.TextView;
 
-public class TwistyView extends View {
-	private static String TAG = "TwistyView";
+public class TwistyView extends TextView {
+  private static String TAG = "TwistyView";
 
-	private ZScreen screen;
-	private Handler handler;
-	private static TwistyView last_created;
+  private final Twisty activity;
+  private static TwistyView last_created;
 
-	@SuppressWarnings("unchecked")
-	public TwistyView(Context context, AttributeSet attrs) {
-		super(context, attrs);
-		screen = null;
-		handler = new Handler();
-		last_created = this;
-	}
+  public TwistyView(Context context, AttributeSet attrs) {
+    super(context, attrs);
+    if (context instanceof Twisty) {
+      activity = (Twisty) context;
+    } else {
+      Log.e(TAG, "TwistyView running in non-Twisty context");
+      activity = null;
+    }
+    last_created = this;
+    // TODO: enable draggable scroll etc
+  }
 
-	@Override
-	protected void onDraw(Canvas canvas) {
-		super.onDraw(canvas);
-		Bitmap bitmap = screen.getBitmap();
-		canvas.drawBitmap(bitmap, 0, 0, null);
-	}
+  @Override
+  protected boolean getDefaultEditable() {
+      return true;
+  }
 
-	@Override
-	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-		Log.i(TAG, "size change: now " + w + " x " + h);
-		if (screen != null) {
-			screen.reshape(getLeft(), getTop(), getWidth(), getHeight());
-		}
-		super.onSizeChanged(w, h, oldw, oldh);
-	}
+  @Override
+  protected MovementMethod getDefaultMovementMethod() {
+      return ArrowKeyMovementMethod.getInstance();
+  }
 
-	synchronized public void setScreen(ZScreen newscreen) {
-		screen = newscreen;
-		if (screen != null) {
-			screen.reshape(getLeft(), getTop(), getWidth(), getHeight());
-		}
-	}
+  @Override
+  public void setText(CharSequence text, BufferType type) {
+      super.setText(text, BufferType.EDITABLE);
+  }
 
-	public void invalidateSoon() {
-		handler.post(new Runnable() {
-			public void run() {
-				invalidate();
-			}
-		});
-	}
+  public static TwistyView getLastCreated() {
+    return last_created;
+  }
+  
+  /** Convenience wrapper around Activity.runOnUiThread() */
+  public void runOnUiThread(Runnable action) {
+    activity.runOnUiThread(action);
+  }
 
-	public void invalidateSoon(final int l, final int t, final int w,
-			final int h) {
-		handler.post(new Runnable() {
-			public void run() {
-				invalidate(l, t, w, h);
-			}
-		});
-	}
-	
-	public static TwistyView getLastCreated() {
-		return last_created;
-	}
+  /**
+   * Called from the zmachine's thread just before it exits, for per-view
+   * cleanup
+   * @param e an exception that caused the exit, or null for normal exit
+   */
+  public void onZmFinished(ZMachineException e) {
+  }
 
-	/**
-	 * Called from the zmachine's thread just before it exits
-	 * @param machineException
-	 */
-	public void onZmFinished(final ZMachineException e) {
-		handler.post(new Runnable() {
-			public void run() {
-				Twisty activity = (Twisty)getContext();
-				activity.onZmFinished(e);
-			}
-		});
-	}
+  /**
+   * Called from the zmachine's thread just before it exits, for activity
+   * cleanup.
+   * @param e an exception that caused the exit, or null for normal exit
+   */
+  public void tellOwnerZmFinished(final ZMachineException e) {
+    runOnUiThread(new Runnable() {
+      public void run() {
+        activity.onZmFinished(e);
+      }
+    });
+  }
+
+  public void showMore(final boolean show) {
+    runOnUiThread(new Runnable() {
+      public void run() {
+        activity.showMore(show);
+      }
+    });
+  }
 }

@@ -24,8 +24,8 @@ public class ZMachine3 extends ZMachine {
 		zd = new ZDictionary3(this);
 		globals = header.global_table();
 		window = new ZWindow[2];
-		window[0] = new ZWindow(screen);
-		window[1] = new ZWindow(screen);
+		window[0] = new ZWindow(screen, 0);
+		window[1] = new ZWindow(screen, 1);
 		window[1].set_transcripting(false);
 		current_window = window[0];
 		zi = new ZInstruction(this);
@@ -63,9 +63,9 @@ public class ZMachine3 extends ZMachine {
 
 		window[0].moveto(0,0);
 		window[1].moveto(0,0);
-		window[0].resize(screen.getchars(),screen.getlines());
+		window[0].resize(screen.getchars(), -1);
 		window[1].resize(0,0);
-		window[0].movecursor(0,window[0].getHeight()-1);
+		window[0].movecursor(-1);
 	}
 
 	public void set_header_flags() { /* at start, restart, restore */
