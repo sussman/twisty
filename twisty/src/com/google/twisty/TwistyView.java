@@ -24,73 +24,73 @@ import android.util.Log;
 import android.widget.TextView;
 
 public class TwistyView extends TextView {
-  private static String TAG = "TwistyView";
+	private static String TAG = "TwistyView";
 
-  private final Twisty activity;
-  private static TwistyView last_created;
+	private final Twisty activity;
+	private static TwistyView last_created;
 
-  public TwistyView(Context context, AttributeSet attrs) {
-    super(context, attrs);
-    if (context instanceof Twisty) {
-      activity = (Twisty) context;
-    } else {
-      Log.e(TAG, "TwistyView running in non-Twisty context");
-      activity = null;
-    }
-    last_created = this;
-    // TODO: enable draggable scroll etc
-  }
+	public TwistyView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		if (context instanceof Twisty) {
+			activity = (Twisty) context;
+		} else {
+			Log.e(TAG, "TwistyView running in non-Twisty context");
+			activity = null;
+		}
+		last_created = this;
+		// TODO: enable draggable scroll etc
+	}
 
-  @Override
-  protected boolean getDefaultEditable() {
-      return true;
-  }
+	@Override
+	protected boolean getDefaultEditable() {
+		return true;
+	}
 
-  @Override
-  protected MovementMethod getDefaultMovementMethod() {
-      return ArrowKeyMovementMethod.getInstance();
-  }
+	@Override
+	protected MovementMethod getDefaultMovementMethod() {
+		return ArrowKeyMovementMethod.getInstance();
+	}
 
-  @Override
-  public void setText(CharSequence text, BufferType type) {
-      super.setText(text, BufferType.EDITABLE);
-  }
+	@Override
+	public void setText(CharSequence text, BufferType type) {
+		super.setText(text, BufferType.EDITABLE);
+	}
 
-  public static TwistyView getLastCreated() {
-    return last_created;
-  }
-  
-  /** Convenience wrapper around Activity.runOnUiThread() */
-  public void runOnUiThread(Runnable action) {
-    activity.runOnUiThread(action);
-  }
+	public static TwistyView getLastCreated() {
+		return last_created;
+	}
 
-  /**
-   * Called from the zmachine's thread just before it exits, for per-view
-   * cleanup
-   * @param e an exception that caused the exit, or null for normal exit
-   */
-  public void onZmFinished(ZMachineException e) {
-  }
+	/** Convenience wrapper around Activity.runOnUiThread() */
+	public void runOnUiThread(Runnable action) {
+		activity.runOnUiThread(action);
+	}
 
-  /**
-   * Called from the zmachine's thread just before it exits, for activity
-   * cleanup.
-   * @param e an exception that caused the exit, or null for normal exit
-   */
-  public void tellOwnerZmFinished(final ZMachineException e) {
-    runOnUiThread(new Runnable() {
-      public void run() {
-        activity.onZmFinished(e);
-      }
-    });
-  }
+	/**
+	 * Called from the zmachine's thread just before it exits, for per-view
+	 * cleanup
+	 * @param e an exception that caused the exit, or null for normal exit
+	 */
+	public void onZmFinished(ZMachineException e) {
+	}
 
-  public void showMore(final boolean show) {
-    runOnUiThread(new Runnable() {
-      public void run() {
-        activity.showMore(show);
-      }
-    });
-  }
+	/**
+	 * Called from the zmachine's thread just before it exits, for activity
+	 * cleanup.
+	 * @param e an exception that caused the exit, or null for normal exit
+	 */
+	public void tellOwnerZmFinished(final ZMachineException e) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				activity.onZmFinished(e);
+			}
+		});
+	}
+
+	public void showMore(final boolean show) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				activity.showMore(show);
+			}
+		});
+	}
 }

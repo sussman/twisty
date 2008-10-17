@@ -66,7 +66,6 @@ public class ZViewOutput {
 			return;
 		Editable edit = getEditable();
 		if (edit != null) {
-			Log.i(TAG, "Font: " + f.toString());
 			getEditable().setSpan(new TextAppearanceSpan(f.getName(), f.getStyle(), 
 					f.getSize(), null, null),
 					curpos, curpos, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
@@ -80,7 +79,6 @@ public class ZViewOutput {
 		}
 		Editable edit = getEditable();
 		if (edit != null) {
-			Log.i(TAG, "Background: " + color.toString());
 			getEditable().setSpan(new BackgroundColorSpan(color.getARGB()),
 					curpos, curpos, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 		}
@@ -93,7 +91,6 @@ public class ZViewOutput {
 		}
 		Editable edit = getEditable();
 		if (edit != null) {
-			Log.i(TAG, "Foreground: " + color.toString());
 			getEditable().setSpan(new ForegroundColorSpan(color.getARGB()),
 					curpos, curpos, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 		}
@@ -455,12 +452,12 @@ public class ZViewOutput {
 		// auto-scroll to bottom of screen, showing --MORE-- prompt if needed.
 		// example:
 		/*
-      if (myview.needmore()) {
-        showMore(true);
-        myscreen.read_code();
-        showMore(false);
-        line_counter = 0;
-      }
+		if (myview.needmore()) {
+			showMore(true);
+			myscreen.read_code();
+			showMore(false);
+			line_counter = 0;
+		}
 		 */
 		view.runOnUiThread(new Runnable() {
 			public void run() {

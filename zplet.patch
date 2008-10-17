@@ -21,8 +21,8 @@ diff -urbw zplet-20060707/src/russotto/iff/IFFChunkNotFoundException.java twisty
       */
 diff -urbw zplet-20060707/src/russotto/iff/IFFFile.java twisty/src/russotto/iff/IFFFile.java
 --- zplet-20060707/src/russotto/iff/IFFFile.java	2001-02-26 11:18:16.000000000 -0800
-+++ twisty/src/russotto/iff/IFFFile.java	2007-11-20 10:40:04.000000000 -0800
-@@ -1,3 +1,7 @@
++++ twisty/src/russotto/iff/IFFFile.java	2008-10-17 00:19:08.000000000 -0700
+@@ -1,32 +1,65 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
 + */
@@ -30,43 +30,75 @@ diff -urbw zplet-20060707/src/russotto/iff/IFFFile.java twisty/src/russotto/iff/
  package russotto.iff;
  import java.io.*;
  import java.util.*;
-@@ -5,28 +9,28 @@
+ 
++import com.google.twisty.io.Seekable;
++import com.google.twisty.io.SeekableFactory;
++
  public class IFFFile
- 		extends RandomAccessFile
+-		extends RandomAccessFile
  {
 -    protected Stack openchunks;
-+    protected Stack<Long> openchunks;
++	protected Stack<Long> openchunks;
++	protected final RandomAccessFile file;
++	protected final Seekable seeker;
      
      public IFFFile(String name, String mode) throws IOException
      {
- 		super(name, mode);
+-		super(name, mode);
 -		openchunks = new Stack();
++		file = new RandomAccessFile(name, mode);
++		seeker = SeekableFactory.fromRandomAccessFile(file);
 +		openchunks = new Stack<Long>();
      }
  
      public IFFFile(File file, String mode) throws IOException
      {
- 		super(file, mode);
+-		super(file, mode);
 -		openchunks = new Stack();
++		this.file = new RandomAccessFile(file, mode);
++		seeker = SeekableFactory.fromRandomAccessFile(this.file);
++		openchunks = new Stack<Long>();
++	}
++	
++	public IFFFile(Seekable seeker) {
++		file = null;
++		this.seeker = seeker;
 +		openchunks = new Stack<Long>();
      }
  
      public void chunkSeek(int offset) throws IOException
      {
 -    	seek(((Long)openchunks.peek()).longValue() + 4 + offset);
-+    	seek((openchunks.peek()).longValue() + 4 + offset);
++		seek((openchunks.peek()).longValue() + 4 + offset);
      }
      
      public int getChunkPointer() throws IOException
      {
 -    	return (int)getFilePointer() - (int)((Long)openchunks.peek()).longValue() - 4;
-+    	return (int)getFilePointer() - (int)(openchunks.peek()).longValue() - 4;
++		return (int)getFilePointer() - (int)(openchunks.peek()).longValue() - 4;
++	}
++
++	public void close() throws IOException {
++		if (file != null)
++			file.close();
      }
++
++	public long getFilePointer() throws IOException {
++		return seeker.getFilePointer();
++	}
++
++	public void seek(long pos) throws IOException {
++		seeker.seek(pos);
++	}
++
++	// Does not really belong here, belongs in IFFInputFile
++	public int read(byte[] buffer, int offset, int count) throws IOException {
++		return file.read(buffer, offset, count); }
  }
  
 diff -urbw zplet-20060707/src/russotto/iff/IFFInputFile.java twisty/src/russotto/iff/IFFInputFile.java
 --- zplet-20060707/src/russotto/iff/IFFInputFile.java	2001-02-26 11:18:16.000000000 -0800
-+++ twisty/src/russotto/iff/IFFInputFile.java	2007-11-20 10:40:04.000000000 -0800
++++ twisty/src/russotto/iff/IFFInputFile.java	2008-10-16 23:42:46.000000000 -0700
 @@ -1,3 +1,7 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -75,17 +107,19 @@ diff -urbw zplet-20060707/src/russotto/iff/IFFInputFile.java twisty/src/russotto
  package russotto.iff;
  import java.io.*;
  import java.util.*;
-@@ -5,18 +9,18 @@
+@@ -5,18 +9,21 @@
  public class IFFInputFile
  		extends IFFFile
  {
 -	private Stack openchunkends;
 +	private Stack<Long> openchunkends;
++	private final DataInput input;
  	
      public IFFInputFile(File file) throws IOException
      {
  		super(file, "r");
 -		openchunkends = new Stack();
++		input = this.file;
 +		openchunkends = new Stack<Long>();
      }
      
@@ -93,20 +127,21 @@ diff -urbw zplet-20060707/src/russotto/iff/IFFInputFile.java twisty/src/russotto
      {
  		super(name, "r");
 -		openchunkends = new Stack();
++		input = this.file;
 +		openchunkends = new Stack<Long>();
      }
      
      public synchronized IFFChunkInfo readChunkInfo() throws IOException {
-@@ -26,7 +30,7 @@
+@@ -26,7 +33,7 @@
      	
      	read(chunktype, 0, 4);
      	chunkbegin = getFilePointer();
 -    	result.chunktype = new String(chunktype, 0);
-+    	result.chunktype = new String(chunktype, "US-ASCII");
++		result.chunktype = new String(chunktype, "US-ASCII");
      	result.chunklength = readInt();
  		openchunks.push(new Long(chunkbegin));
  		openchunkends.push(new Long(getFilePointer() + result.chunklength));
-@@ -37,12 +41,12 @@
+@@ -37,12 +44,12 @@
      public synchronized IFFChunkInfo skipToChunk(String type) throws IOException, IFFChunkNotFoundException {
      	IFFChunkInfo chunkinfo;
  
@@ -121,26 +156,36 @@ diff -urbw zplet-20060707/src/russotto/iff/IFFInputFile.java twisty/src/russotto
  				throw new IFFChunkNotFoundException("Chunk " + type + " not found at current level");
  			chunkinfo = readChunkInfo();
  		}
-@@ -60,13 +64,13 @@
+@@ -60,13 +67,13 @@
       	else {
  //     		throw new Exception("That's not a FORM!");
       	}
 -     	return new String(subtype, 0);
-+     	return new String(subtype, "US-ASCII");
++		return new String(subtype, "US-ASCII");
       }
  
      public synchronized void closeChunk() throws IOException {
      	long chunkend;
      	
 -    	chunkend = (((Long)openchunkends.pop()).longValue() + 1) & ~1L;
-+    	chunkend = ((openchunkends.pop()).longValue() + 1) & ~1L;
++		chunkend = ((openchunkends.pop()).longValue() + 1) & ~1L;
      	openchunks.pop();
      	// doing the seek last ensures exceptions leave stacks consistent
      	seek(chunkend);
+@@ -85,4 +92,9 @@
+ 		}
+ 		super.close();
+     }
++
++	// Selectively wrap DataInput
++	public byte readByte() throws IOException { return input.readByte(); }
++	public short readShort() throws IOException { return input.readShort(); }
++	public int readInt() throws IOException { return input.readInt(); }
+ }
 diff -urbw zplet-20060707/src/russotto/iff/IFFOutputFile.java twisty/src/russotto/iff/IFFOutputFile.java
 --- zplet-20060707/src/russotto/iff/IFFOutputFile.java	2001-02-26 11:18:16.000000000 -0800
-+++ twisty/src/russotto/iff/IFFOutputFile.java	2007-11-20 10:40:04.000000000 -0800
-@@ -1,6 +1,9 @@
++++ twisty/src/russotto/iff/IFFOutputFile.java	2008-10-17 00:27:37.000000000 -0700
+@@ -1,13 +1,21 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
 + */
@@ -148,11 +193,40 @@ diff -urbw zplet-20060707/src/russotto/iff/IFFOutputFile.java twisty/src/russott
  package russotto.iff;
  import java.io.*;
 -import java.util.*;
++
++import com.google.twisty.io.SeekableByteArrayOutputStream;
  
  public class IFFOutputFile
  		extends IFFFile
-@@ -31,8 +34,11 @@
+ {
++	private final DataOutput output;
++
+     public IFFOutputFile(File file) throws IOException
+     {
+ 		super(file, "rw");
++		output = this.file;
+     }
+     
+     public IFFOutputFile(File file, String type) throws IOException
+@@ -20,6 +28,7 @@
+     public IFFOutputFile(String name) throws IOException
+     {
+ 		super(name, "rw");
++		output = this.file;
+     }
+     
+     public IFFOutputFile(String name, String type) throws IOException
+@@ -29,10 +38,20 @@
+ 		write(getOSType(type), 0, 4);
+     }
  
++	public IFFOutputFile(SeekableByteArrayOutputStream baos, String type) throws IOException {
++		super(baos);
++		output = new DataOutputStream(baos);
++		openChunk("FORM");
++		write(getOSType(type), 0, 4);
++	}
++
      private byte[] getOSType(String s)
      {
 +		byte[] bytes = s.getBytes();
@@ -164,6 +238,19 @@ diff -urbw zplet-20060707/src/russotto/iff/IFFOutputFile.java twisty/src/russott
  		return result;
      }
  
+@@ -65,4 +84,12 @@
+ 		    closeChunk();
+ 		super.close();
+     }
++
++	public void writeByte(int val) throws IOException { output.writeByte(val); }
++	public void writeShort(int val) throws IOException { output.writeShort(val); }
++	public void writeInt(int val) throws IOException { output.writeInt(val); }
++	public void write(byte[] buffer) throws IOException { output.write(buffer); }
++	public void write(byte[] buffer, int offset, int count) throws IOException {
++		output.write(buffer, offset, count);
++	}
+ }
 Only in zplet-20060707/src/russotto/zplet: .DS_Store
 diff -urbw zplet-20060707/src/russotto/zplet/ZColor.java twisty/src/russotto/zplet/ZColor.java
 --- zplet-20060707/src/russotto/zplet/ZColor.java	2001-02-26 11:18:16.000000000 -0800
@@ -222,7 +309,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/screenmodel/NoSuchKeyException.java
  	}
 diff -urbw zplet-20060707/src/russotto/zplet/screenmodel/SyncVector.java twisty/src/russotto/zplet/screenmodel/SyncVector.java
 --- zplet-20060707/src/russotto/zplet/screenmodel/SyncVector.java	2001-02-26 11:18:16.000000000 -0800
-+++ twisty/src/russotto/zplet/screenmodel/SyncVector.java	2007-11-20 10:40:05.000000000 -0800
++++ twisty/src/russotto/zplet/screenmodel/SyncVector.java	2008-10-17 01:05:22.000000000 -0700
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -230,7 +317,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/screenmodel/SyncVector.java twisty/
  /* Zplet, a Z-Machine interpreter in Java */
  /* Copyright 1996,2001 Matthew T. Russotto */
  /* As of 23 February 2001, this code is open source and covered by the */
-@@ -5,26 +8,25 @@
+@@ -5,37 +8,40 @@
  
  package russotto.zplet.screenmodel;
  
@@ -241,6 +328,8 @@ diff -urbw zplet-20060707/src/russotto/zplet/screenmodel/SyncVector.java twisty/
 -import java.applet.Applet;
 +import java.util.NoSuchElementException;
 +import java.util.Vector;
++
++import com.google.twisty.zplet.ZMachineInterrupted;
 +
 +class SyncVector<T> extends Vector<T> {
 +	private static final long serialVersionUID = 1615647740021244904L;
@@ -266,7 +355,13 @@ diff -urbw zplet-20060707/src/russotto/zplet/screenmodel/SyncVector.java twisty/
  		try {
  			first = super.firstElement();
  		} catch (NoSuchElementException booga) {}
-@@ -35,7 +37,7 @@
+ 		try {
+ 			if (first==null) wait();
+ 			else return first;
+-		} catch (InterruptedException booga) {}
++		} catch (InterruptedException booga) {
++			throw new ZMachineInterrupted(booga);
++		}
  		return null;
  	}
  
@@ -1318,7 +1413,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZHeader.java twisty/src/ru
  	protected byte memory_image[];
 diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZInstruction.java twisty/src/russotto/zplet/zmachine/ZInstruction.java
 --- zplet-20060707/src/russotto/zplet/zmachine/ZInstruction.java	2001-02-26 11:18:16.000000000 -0800
-+++ twisty/src/russotto/zplet/zmachine/ZInstruction.java	2008-10-15 15:52:42.000000000 -0700
++++ twisty/src/russotto/zplet/zmachine/ZInstruction.java	2008-10-16 11:32:49.000000000 -0700
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1434,7 +1529,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZInstruction.java twisty/s
 -				zm.print_ascii_char((short)13);
 -				zm.stop();
 +		zm.print_ascii_string("[[ Game has ended ]]");
-+		zm.interrupt();
++		zm.quit();
  				return ZFALSE;
  	}
  
@@ -1486,7 +1581,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZInstruction.java twisty/s
  	protected short op_split_window()
 diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/russotto/zplet/zmachine/ZMachine.java
 --- zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java	2001-02-26 11:18:16.000000000 -0800
-+++ twisty/src/russotto/zplet/zmachine/ZMachine.java	2008-10-15 16:52:37.000000000 -0700
++++ twisty/src/russotto/zplet/zmachine/ZMachine.java	2008-10-17 02:23:53.000000000 -0700
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1494,7 +1589,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/r
  /* Zplet, a Z-Machine interpreter in Java */
  /* Copyright 1996,2001 Matthew T. Russotto */
  /* As of 23 February 2001, this code is open source and covered by the */
-@@ -5,12 +8,17 @@
+@@ -5,15 +8,22 @@
  
  package russotto.zplet.zmachine;
  
@@ -1511,14 +1606,20 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/r
 +import android.util.Log;
 +
 +import com.google.twisty.zplet.ZMachineException;
++import com.google.twisty.zplet.ZMachineInterrupted;
 +
 +import russotto.zplet.screenmodel.ZScreen;
 +import russotto.zplet.screenmodel.ZStatus;
 +import russotto.zplet.screenmodel.ZWindow;
  import russotto.zplet.zmachine.state.ZState;
  
- public abstract class ZMachine extends Thread {
-@@ -24,7 +32,7 @@
+-public abstract class ZMachine extends Thread {
++public abstract class ZMachine {
++	private final Thread thread;
+ 	public ZWindow current_window;
+ 	public int pc;
+ 	public ZWindow window[];
+@@ -24,7 +34,7 @@
  	public ZState restart_state;
  	protected ZStatus status_line;
  	public byte memory_image[];
@@ -1527,7 +1628,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/r
  	public Random zrandom;
  	protected int globals;
  	public short locals[];
-@@ -39,20 +47,25 @@
+@@ -39,20 +49,50 @@
  	protected ZInstruction zi;
  	protected boolean status_redirect;
  	protected String status_location;
@@ -1535,7 +1636,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/r
 +	private StringBuffer zmstring;
  
  	protected final String A2 = "0123456789.,!?_#\'\"/\\-:()";
-+	private boolean aborting;
++	private InterruptState aborting;
  
  	public final static int OP_LARGE = 0;
  	public final static int OP_SMALL = 1;
@@ -1543,8 +1644,33 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/r
  	public final static int OP_OMITTED = 3;
 +	private static final String TAG = "ZMachine";
 +	private static final String ZMLOG = "zmlog";
++
++	/*
++	 * UNSTARTED -start-> RUNNING -quit-------------> FINISHED
++	 *                    ^ | |                      /
++	 *                    |  \ \-abort-> ABORTING ->/
++	 *              RESUMING  \
++	 *                    ^    \-pause-> PAUSING
++	 *                    |               |
++	 *                 resume-- PAUSED <-/
++	 */
++	enum InterruptState {
++		UNSTARTED,
++		RUNNING,
++		ABORTING,
++		PAUSING,
++		PAUSED,
++		RESUMING,
++		FINISHED
++	}
  	
  	public ZMachine(ZScreen screen, ZStatus status_line, byte [] memory_image) {
++		thread = new Thread() {
++			@Override
++			public void run() {
++				runZM();
++			}
++		};
  				this.screen = screen;
  				this.status_line = status_line;
  				this.memory_image = memory_image;
@@ -1554,16 +1680,17 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/r
  				restart_state = new ZState(this);
  				restart_state.save_current();
  				zrandom = new Random(); /* starts in "random" mode */
-@@ -60,6 +73,8 @@
+@@ -60,6 +100,9 @@
  				outputs = new boolean[5];
  				outputs[1] = true;
  				alphabet = 0;
 +		zmlog = false;
 +		zmstring = new StringBuffer();
++		aborting = InterruptState.UNSTARTED;
  	}
  
  	public abstract void update_status_line();
-@@ -102,6 +117,15 @@
+@@ -102,6 +145,15 @@
  
  	public void print_ascii_char(short ch) {
  				int nchars;
@@ -1579,7 +1706,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/r
  				if (status_redirect) {
  					status_location += (char)ch;
  				}
-@@ -128,11 +152,14 @@
+@@ -128,11 +180,14 @@
  					}
  					outputs[2] = header.transcripting();
  					if (outputs[2] && current_window.transcripting()) {
@@ -1594,7 +1721,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/r
  					}
  				}
  	}
-@@ -159,7 +186,7 @@
+@@ -159,7 +214,7 @@
  					}
  					else if ((ch >= (int)'A') && (ch <= (int)'Z')) {
  								/* encode upper as lower.  Legal? */
@@ -1603,7 +1730,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/r
  								zchars[zi] = ch - (int)'A' + 6;
  								if ((++zi) == (nwords*3))
  									break;
-@@ -290,6 +317,7 @@
+@@ -290,6 +345,7 @@
  				int zseq;
  				int i;
  
@@ -1611,7 +1738,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/r
  				nbytes = 0;
  				build_ascii = 0;
  				alphabet = 0;
-@@ -306,38 +334,84 @@
+@@ -306,38 +362,174 @@
  					nbytes+=2;
  				}
  				while ((zseq & 0x8000) == 0);
@@ -1620,13 +1747,20 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/r
  	}
  
  	public void start() {
-+		aborting = false;
++		changeState(InterruptState.RUNNING);
  				screen.clear();
  				restart();
  				header.set_transcripting(false);
- 				super.start();
+-				super.start();
++		thread.start();
  	}
  
+-	public void run()
+-	{
++	public void join() throws InterruptedException {
++		thread.join();
++	}
++
 +	static final String[] opnames = new String[] {
 +		"", "je", "jl", "jg", "dec_chk", "inc_chk", "jin", "test", "or", "and",
 +		"test_attr", "set_attr", "clear_attr", "store", "insert_obj", "loadw",
@@ -1661,55 +1795,138 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/r
 +		"push_stack", "put_wind_prop", "print_form", "make_menu",
 +		"picture_table"
 +	};
-+
- 	public void run()
- 	{
-+		Log.i(TAG, "run() starting");
-+		// Track timing for each opcode named above
-+		ProfileStats timers = new ProfileStats(opnames.length);
++	
++	/**
++	 * Block until the state is anything but other
++	 * @param other the state we don't want to be in
++	 * @return the new state (or other if we timed out or were interrupted)
++	 */
++	private synchronized InterruptState waitForStateChange(InterruptState other) {
++		Log.i(TAG, "Waiting for something other than " + other.toString());
  				try {
--					while (true) {
++			while (aborting == other) {
++				wait();
++			}
++		} catch (InterruptedException e) {
++		}
++		Log.i(TAG, "Wait done: now " + aborting.toString());
++		return aborting;
++	}
++
++	private synchronized InterruptState changeState(InterruptState newState) {
++		Log.i(TAG, "Changing " + aborting.toString() + " -> " + newState.toString());
++		InterruptState oldState = aborting;
++		aborting = newState;
++		notifyAll();
++		return oldState;
++	}
++
++	private void mainLoop(ProfileStats timers) {
+ 					while (true) {
 -//								System.err.print("pc = ");
 -//								System.err.println(Integer.toString(pc, 16));
-+			while (!aborting && !isInterrupted()) {
-+				long t1 = System.nanoTime();
++			// reset interrupted status
++			if (Thread.interrupted()) {
++				// TODO: restore pc if we paused
++				Log.w(TAG, "Was interrupted - but not any more...");
++			}
++			InterruptState s = waitForStateChange(InterruptState.PAUSED);
++			switch (s) {
++			case ABORTING:
++				changeState(InterruptState.FINISHED);
++				return;
++			case PAUSING:
++				changeState(InterruptState.PAUSED);
++				break;
++			case RESUMING:
++				changeState(InterruptState.RUNNING);
++				// ** fall through **
++			case RUNNING:
++				try {
++					// TODO handle PAUSING: save previous pc
++					long t1 = System.nanoTime();
  								zi.decode_instruction();
  								zi.execute();
-+				long t2 = System.nanoTime();
-+				timers.add(zi.opnum, 0.000001 * (t2 - t1));
- 					}
++					long t2 = System.nanoTime();
++					timers.add(zi.opnum, 0.000001 * (t2 - t1));
++				} catch (ZMachineInterrupted zi) {
++					// we were interrupted, probably for pause or abort
++					// so absorb the exception
++				}
++				break;
++			case FINISHED:
++				// happens on a normal op_quit cycle
++				return;
++			case PAUSED:
++				// Should not happen. Recoverable bug.
++				Log.e(TAG, "State should never go PAUSED -> PAUSED");
++				break;
++			default:
++				throw new ZMachineException(pc, "Unexpected state: " + s);
++			}
++		}
++	}
++
++	private void runZM()
++	{
++		Log.i(TAG, "runZM() starting");
++		// Track timing for each opcode named above
++		ProfileStats timers = new ProfileStats(opnames.length);
++		try {
++			mainLoop(timers);
 +			timers.dump("opcode", opnames);
-+			Log.i(TAG, "run() finishing without error");
++			Log.i(TAG, "runZM() finishing without error");
 +			screen.onZmFinished(null);
++		}
++		catch (ZMachineException e) {
++			changeState(InterruptState.FINISHED);
++			Log.e(TAG, "runZM() finishing with ZM exception", e);
++			screen.onZmFinished(e);
+ 					}
++		catch (RuntimeException e) {
++			changeState(InterruptState.FINISHED);
++			Log.e(TAG, "runZM() finishing with runtime exception", e);
++			screen.onZmFinished(new ZMachineException(pc, e));
++		}
++	}
++
++	public synchronized void abort() {
++		changeState(InterruptState.ABORTING);
++		thread.interrupt();  // cancel key input
++		pc = -1;
  				}
 -				catch (ArrayIndexOutOfBoundsException booga) {
 -					System.err.print("pc = ");
 -					System.err.println(Integer.toString(pc, 16));
--					
+ 					
 -					throw booga;
-+		catch (ZMachineException e) {
-+			Log.e(TAG, "run() finishing with ZM exception", e);
-+			screen.onZmFinished(e);
-+		}
-+		catch (RuntimeException e) {
-+			Log.e(TAG, "run() finishing with runtime exception", e);
-+			screen.onZmFinished(new ZMachineException(pc, e));
++	public synchronized void quit() {
++		changeState(InterruptState.FINISHED);
  				}
 -				catch (ClassCastException booga) {
 -					System.err.print("pc = ");
 -					System.err.println(Integer.toString(pc, 16));
--					
+ 					
 -					throw booga;
++	public synchronized boolean pauseZM() {
++		if (aborting != InterruptState.RUNNING)
++			return false;
++		changeState(InterruptState.PAUSING);
++		thread.interrupt();  // cancel key input
++		// Block until the thread picks up the change
++		return (InterruptState.PAUSED == waitForStateChange(InterruptState.PAUSING));
  				}
 +
-+	public void abort() {
-+		aborting = true;
-+		interrupt();
-+		pc = -1;
++	public synchronized boolean resumeZM() {
++		if (aborting != InterruptState.PAUSED)
++			return false;
++		changeState(InterruptState.RESUMING);
++		// Block until the thread picks up the change
++		return (InterruptState.RUNNING == waitForStateChange(InterruptState.RESUMING));
  	}
  
  	void calculate_checksum() {
-@@ -371,8 +445,7 @@
+@@ -371,8 +563,7 @@
  	}
  
  	public void fatal(String s) {
@@ -1719,7 +1936,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/r
  	}
  
  	public short get_variable(short varnum) {
-@@ -421,7 +494,6 @@
+@@ -421,7 +612,6 @@
  	}
  	
  	public short get_operand(int optype) {
@@ -1727,7 +1944,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/r
  				switch (optype) {
  				case OP_SMALL:
  					return (short)(get_code_byte() & 0xFF);
-@@ -432,7 +504,112 @@
+@@ -432,7 +622,125 @@
  					return get_variable(get_code_byte());
  				}
  				/* crash */
@@ -1838,6 +2055,19 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZMachine.java twisty/src/r
 +			}
 +		}
 +		Log.v(ZMLOG, sb.toString());
++	}
++
++	/**
++	 * Is the zmachine in a state where it could execute instructions soon?
++	 */
++	public synchronized boolean isRunning() {
++		switch (aborting) {
++		case ABORTING:
++		case FINISHED:
++			return false;
++		default:
++			return true;
++		}
 +	}
  }
 diff -urbw zplet-20060707/src/russotto/zplet/zmachine/ZObjectTree.java twisty/src/russotto/zplet/zmachine/ZObjectTree.java
@@ -1956,7 +2186,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/state/ZSFrame.java twisty/
  /** ZState holds the state-of-play for the Z machine */
 diff -urbw zplet-20060707/src/russotto/zplet/zmachine/state/ZState.java twisty/src/russotto/zplet/zmachine/state/ZState.java
 --- zplet-20060707/src/russotto/zplet/zmachine/state/ZState.java	2001-02-26 11:18:16.000000000 -0800
-+++ twisty/src/russotto/zplet/zmachine/state/ZState.java	2008-10-10 16:45:28.000000000 -0700
++++ twisty/src/russotto/zplet/zmachine/state/ZState.java	2008-10-17 00:13:13.000000000 -0700
 @@ -1,3 +1,6 @@
 +/* This file was modified from the original source, please see the
 + * zplet.patch file included at the top of this source tree.
@@ -1964,7 +2194,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/state/ZState.java twisty/s
  /* Zplet, a Z-Machine interpreter in Java */
  /* Copyright 1996,2001 Matthew T. Russotto */
  /* As of 23 February 2001, this code is open source and covered by the */
-@@ -5,32 +8,52 @@
+@@ -5,32 +8,53 @@
  
  package russotto.zplet.zmachine.state;
  
@@ -1986,6 +2216,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/state/ZState.java twisty/s
 +
 +import com.google.twisty.Twisty;
 +import com.google.twisty.TwistyMessage;
++import com.google.twisty.io.SeekableByteArrayOutputStream;
 +
 +import russotto.iff.IFFChunkInfo;
 +import russotto.iff.IFFChunkNotFoundException;
@@ -2027,7 +2258,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/state/ZState.java twisty/s
  	}
  
  	public void save_current() {
-@@ -40,7 +63,7 @@
+@@ -40,7 +64,7 @@
  		dyn_size = header.static_base();
  /* clones the stack but not the Integers within.  Fortunately they are
  immutable.	But the arrays aren't, so don't mess with them */
@@ -2036,7 +2267,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/state/ZState.java twisty/s
  		dynamic = new byte[dyn_size];
  		System.arraycopy(zm.memory_image, 0, dynamic, 0, dyn_size);
  		locals = new short[zm.locals.length];
-@@ -55,47 +78,56 @@
+@@ -55,47 +79,56 @@
  		System.arraycopy(dynamic, 0, zm.memory_image, 0, dynamic.length);
  		zm.locals = new short[locals.length];
  		System.arraycopy(locals, 0, zm.locals, 0, locals.length);
@@ -2115,7 +2346,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/state/ZState.java twisty/s
  		String fname;
  		IFFInputFile infile = null;
  		IFFChunkInfo chunkinfo;
-@@ -123,7 +155,7 @@
+@@ -123,7 +156,7 @@
  		lastargmask = 0;
  		
  		version = zm.header.version();
@@ -2124,7 +2355,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/state/ZState.java twisty/s
  		try {
  			infile = new IFFInputFile(fname);
  			formtype = infile.readFORM();
-@@ -198,7 +230,7 @@
+@@ -198,7 +231,7 @@
  				infile.seek(ifhdend);
  				/* read the stacks */
  				chunkinfo = infile.skipToChunk("Stks");
@@ -2133,7 +2364,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/state/ZState.java twisty/s
  				
  				frameno = 0;
  				while (infile.getChunkPointer() < chunkinfo.chunklength) {
-@@ -270,7 +302,7 @@
+@@ -270,7 +303,7 @@
  		
  		catch (IOException excpt)
  		{
@@ -2142,7 +2373,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/state/ZState.java twisty/s
  			try {
  				if (infile != null)
  					infile.close();
-@@ -280,7 +312,7 @@
+@@ -280,7 +313,7 @@
  		}
  		catch (IFFChunkNotFoundException cnfexcpt)
  		{
@@ -2151,7 +2382,7 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/state/ZState.java twisty/s
  			try {
  				if (infile != null)
  					infile.close();
-@@ -290,7 +322,7 @@
+@@ -290,7 +323,7 @@
  		}
  		catch (SecurityException sexcpt)
  		{
@@ -2160,28 +2391,55 @@ diff -urbw zplet-20060707/src/russotto/zplet/zmachine/state/ZState.java twisty/s
  			try {
  				if (infile != null)
  					infile.close();
-@@ -340,9 +372,9 @@
+@@ -340,12 +373,35 @@
  		outfile.closeChunk();
  	}
  	
 -	public boolean disk_save(Frame parentframe, int save_pc) {
-+	public boolean disk_save(ZScreen parent, int save_pc) {
- 		String fname;
+-		String fname;
 -		Enumeration e,f;
++	public boolean disk_save(ZScreen parent, int save_pc) {
++		String fname = get_save_file_name(parent);
++		if (fname.equals("") || fname.equals("nullnull"))
++			return false;  // user didn't pick a file
++		return disk_save(fname, save_pc);
++	}
++
++	public boolean disk_save(String fname, int save_pc) {
++		try {
++			return disk_save(new IFFOutputFile(fname, "IFZS"), save_pc);
++		} catch (IOException e) {
++			return false;
++		}
++	}
++
++	public byte[] mem_save(int save_pc) {
++		SeekableByteArrayOutputStream baos = new SeekableByteArrayOutputStream();
++		try {
++			if (disk_save(new IFFOutputFile(baos, "IFZS"), save_pc))
++				return baos.toByteArray();
++		} catch (IOException e) {
++		}
++		return null;
++	}
++
++	public boolean disk_save(IFFOutputFile outfile, int save_pc) {
 +		Enumeration<Object> e,f;
  		Object el, el2;
  		int i;
- 		IFFOutputFile outfile = null;
-@@ -359,21 +391,18 @@
+-		IFFOutputFile outfile = null;
+ 		boolean framestore;
+ 		short storevar;
+ 		short argcount;
+@@ -359,21 +415,13 @@
  		boolean returnvalue = false;
  
  		try {
 -			fname = get_save_file_name(parentframe);
-+			fname = get_save_file_name(parent);
- 			if (fname.equals("") || fname.equals("nullnull"))
- 				throw new java.io.IOException("No file picked"); /* user didn't pick a file */
- 				
- 			outfile = new IFFOutputFile(fname, "IFZS");
+-			if (fname.equals("") || fname.equals("nullnull"))
+-				throw new java.io.IOException("No file picked"); /* user didn't pick a file */
+-				
+-			outfile = new IFFOutputFile(fname, "IFZS");
  			outfile.openChunk("IFhd");
 -			outfile.write(zm.memory_image, header.RELEASE, 2);
 -			outfile.write(zm.memory_image, header.SERIAL_NUMBER, 6);

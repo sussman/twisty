@@ -935,7 +935,7 @@ public class ZInstruction {
 	protected short op_quit()
 	{
 		zm.print_ascii_string("[[ Game has ended ]]");
-		zm.interrupt();
+		zm.quit();
 		return ZFALSE;
 	}
 

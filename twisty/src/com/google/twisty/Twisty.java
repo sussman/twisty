@@ -17,6 +17,7 @@ package com.google.twisty;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ import russotto.zplet.screenmodel.ZScreen;
 import russotto.zplet.screenmodel.ZStatus;
 import russotto.zplet.screenmodel.ZWindow;
 import russotto.zplet.zmachine.ZMachine;
+import russotto.zplet.zmachine.state.ZState;
 import russotto.zplet.zmachine.zmachine3.ZMachine3;
 import russotto.zplet.zmachine.zmachine5.ZMachine5;
 import russotto.zplet.zmachine.zmachine5.ZMachine8;
@@ -48,6 +50,7 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.os.BatteryManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Selection;
@@ -66,6 +69,7 @@ import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.RadioGroup.OnCheckedChangeListener;
 
 public class Twisty extends Activity {
 	private static final int MENU_PICK_FILE = 101;
@@ -75,6 +79,9 @@ public class Twisty extends Activity {
 	private static String TAG = "Twisty";
 	private static final String FIXED_FONT_NAME = "Courier";
 	private static final String ROMAN_FONT_NAME = "Helvetica";
+	private static final String RUNNING_FILE = "running_file";
+	private static final String RUNNING_RESOURCE = "running_rsrc";
+	private static final String FROZEN_GAME = "frozen_game";
 	private static final int FONT_SIZE = 12;
 	private String savegame_dir = "";
 	private String savefile_path = "";
@@ -91,8 +98,6 @@ public class Twisty extends Activity {
 	public static final int PROMPT_FOR_SAVEFILE = 1;
 	public static final int PROMPT_FOR_RESTOREFILE = 2;
 
-	// TODO:  see issue 9 -- eventually pass this to Context.openFileOutput()
-	// private static String FROZEN_GAME_FILE = "frozengame";
 	private ZScreen screen;
 	private StatusLine status_line;
 	private ZStatus status;
@@ -109,6 +114,7 @@ public class Twisty extends Activity {
 	private ProgressDialog scanningdialog;
 	// A persistent map of button-ids to zgames found on the sdcard (absolute paths)
 	private HashMap<Integer, String> zgame_paths = new HashMap<Integer, String>();
+	private Object runningProgram;
 
 	/** Called with the activity is first created. */
 	@Override
@@ -147,6 +153,7 @@ public class Twisty extends Activity {
 			InitZJApp();
 			if (screen == null)
 				return;
+			// TODO(marius): restore game state from icicle
 			setupWelcomeMessage();
 		} catch (Exception e) {
 			fatal("Oops, an error occurred preparing to play");
@@ -154,25 +161,11 @@ public class Twisty extends Activity {
 		}
 	}
 
-	/** Called when the activity is paused for any reason. */
-	@Override
-	public void onPause() {
-		super.onPause();
-	}
-
-	/** Called when activity is about to begin execution. */
-	@Override
-	public void onResume() {
-		super.onResume();
-	}
-
 	private void setupWelcomeMessage() {
 		setViewVisibility(R.id.errors, View.GONE);
 		setViewVisibility(R.id.more, View.GONE);
 		setViewVisibility(R.id.status_v3, View.GONE);
 		setViewVisibility(R.id.status_v5, View.GONE);
-		// Get the battery status in order to print the
-		// welcome message with the details
 		printWelcomeMessage();
 	}
 
@@ -218,7 +211,7 @@ public class Twisty extends Activity {
 	}
 
 	private boolean zmIsRunning() {
-		return (zm != null && zm.isAlive());
+		return (zm != null && zm.isRunning());
 	}
 
 	private void appendBatteryState(StringBuffer sb) {
@@ -370,6 +363,7 @@ public class Twisty extends Activity {
 	void startzm(String filename) {
 		if (zmIsRunning())
 			return;
+		runningProgram = filename;
 		Log.i(TAG, "Loading file: " + filename);
 		try {
 			startzm(new FileInputStream(filename));
@@ -385,6 +379,7 @@ public class Twisty extends Activity {
 	void startzm(int resource) {
 		if (zmIsRunning())
 			return;
+		runningProgram = new Integer(resource);
 		Log.i(TAG, "Loading resource: " + resource);
 		Resources r = new Resources(getAssets(),
 				new DisplayMetrics(),
@@ -482,18 +477,10 @@ public class Twisty extends Activity {
 		setItemText(R.id.errors, s);
 	}
 
-	/** Stops the currently running zmachine */
+	/** Stops the currently running zmachine. */
 	public void stopzm() {
 		if (zmIsRunning()) {
 			zm.abort();
-			// Some games need to be sent a key press or two before they will
-			// actually quit.
-			// TODO(mariusm): send one if the zmachine is not currently waiting
-			// in screen.read_code() or similar; are a second and third really
-			// ever needed?
-			sendKeyEvent(Event.KEY_PRESS, '\n');
-			sendKeyEvent(Event.KEY_PRESS, '\n');
-			sendKeyEvent(Event.KEY_PRESS, '\n');
 			try {
 				zm.join();
 			} catch (InterruptedException e) {
@@ -534,9 +521,6 @@ public class Twisty extends Activity {
 		switch (item.getItemId()) {
 		case MENU_RESTART:
 			zm.restart();
-			// TODO(mariusm): only send this if the zmachine is not currently
-			// waiting in screen.read_code() or similar.
-			sendKeyEvent(Event.KEY_PRESS, '\n');
 			break;
 		case MENU_STOP:
 			stopzm();
@@ -548,7 +532,7 @@ public class Twisty extends Activity {
 			break;
 		default:
 			screen.clear();
-		startzm(item.getItemId());
+			startzm(item.getItemId());
 		break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -556,11 +540,12 @@ public class Twisty extends Activity {
 
 	/** Launch UI to pick a file to load and execute */
 	private void pickFile() {
-		String storagestate = android.os.Environment.getExternalStorageState();
-		if (!storagestate.equals(android.os.Environment.MEDIA_MOUNTED))
-			showDialog(DIALOG_NO_SDCARD); // no sdcard to scan
-		else
+		String storagestate = Environment.getExternalStorageState();
+		if (storagestate.equals(Environment.MEDIA_MOUNTED)
+				|| storagestate.equals(Environment.MEDIA_MOUNTED_READ_ONLY))
 			showDialog(DIALOG_CHOOSE_ZGAME);
+		else
+			showDialog(DIALOG_NO_SDCARD); // no sdcard to scan
 	}
 
 	/** Called from UI thread to request cleanup or whatever */
@@ -593,12 +578,13 @@ public class Twisty extends Activity {
 
 	// Return the path to the saved-games directory.
 	// If SDcard not present, or if /sdcard/twisty is a file, return null.
-	private String ensureSavedGamesDir() {
-		String storagestate = android.os.Environment.getExternalStorageState();
-		if (!storagestate.equals(android.os.Environment.MEDIA_MOUNTED)) {
+	private String ensureSavedGamesDir(boolean write) {
+		String storagestate = Environment.getExternalStorageState();
+		if (!storagestate.equals(Environment.MEDIA_MOUNTED) &&
+				(write || storagestate.equals(Environment.MEDIA_MOUNTED_READ_ONLY))) {
 			return null;
 		}
-		String sdpath = android.os.Environment.getExternalStorageDirectory().getPath();
+		String sdpath = Environment.getExternalStorageDirectory().getPath();
 		File savedir = new File(sdpath + "/twisty");
 		if (! savedir.exists()) {
 			savedir.mkdirs();
@@ -626,11 +612,12 @@ public class Twisty extends Activity {
 	// Recursively can the sdcard for z-games.  Return an array of absolute paths,
 	// or null if no sdcard is available.
 	private String[] scanForZGames() {
-		String storagestate = android.os.Environment.getExternalStorageState();
-		if (!storagestate.equals(android.os.Environment.MEDIA_MOUNTED)) {
+		String storagestate = Environment.getExternalStorageState();
+		if (!storagestate.equals(Environment.MEDIA_MOUNTED) &&
+				!storagestate.equals(Environment.MEDIA_MOUNTED_READ_ONLY)) {
 			return null;
 		}
-		File sdroot = android.os.Environment.getExternalStorageDirectory();
+		File sdroot = Environment.getExternalStorageDirectory();
 		ArrayList<String> zgamelist = new ArrayList<String>();
 		showDialog(DIALOG_SCANNING_SDCARD);
 		scanDir(sdroot, zgamelist);
@@ -641,7 +628,7 @@ public class Twisty extends Activity {
 	}
 
 	private void promptForSavefile() {
-		String dir = ensureSavedGamesDir();
+		String dir = ensureSavedGamesDir(true);
 		if (dir == null) {
 			showDialog(DIALOG_CANT_SAVE);
 			return;
@@ -651,7 +638,7 @@ public class Twisty extends Activity {
 	}
 
 	private void promptForRestorefile() {
-		String dir = ensureSavedGamesDir();
+		String dir = ensureSavedGamesDir(false);
 		if (dir == null) {
 			showDialog(DIALOG_CANT_SAVE);
 			return;
@@ -689,7 +676,7 @@ public class Twisty extends Activity {
 			id = rb.getId();
 			zgame_paths.put(id, path);
 		}
-		rg.check(id); // by default, check the last item
+//		rg.check(id); // by default, check the last item
 	}
 
 	/** Have our activity manage and persist dialogs, showing and hiding them */
@@ -774,23 +761,14 @@ public class Twisty extends Activity {
 			choosezgamedialog.setTitle("Choose Game");
 			android.widget.RadioGroup zrg = (RadioGroup) choosezgamedialog.findViewById(R.id.zgame_radiomenu);
 			updateZGameRadioButtons(zrg);
-			android.widget.Button zokbutton = (Button) choosezgamedialog.findViewById(R.id.zgameokbutton);
-			zokbutton.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					android.widget.RadioGroup zrg = (RadioGroup) choosezgamedialog.findViewById(R.id.zgame_radiomenu);
-					int checkedid = zrg.getCheckedRadioButtonId();
+			zrg.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+				public void onCheckedChanged(RadioGroup group, int checkedId) {
 					dismissDialog(DIALOG_CHOOSE_ZGAME);
-					String path = (String) zgame_paths.get(checkedid);
+					String path = (String) zgame_paths.get(checkedId);
 					if (path != null) {
 						stopzm();
 						startzm(path);
 					}
-				}
-			});
-			android.widget.Button zcancelbutton = (Button) choosezgamedialog.findViewById(R.id.zgamecancelbutton);
-			zcancelbutton.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					dismissDialog(DIALOG_CHOOSE_ZGAME);
 				}
 			});
 			return choosezgamedialog;
@@ -853,4 +831,42 @@ public class Twisty extends Activity {
 	public void showMore(boolean show) {
 		setViewVisibility(R.id.more, show ? View.VISIBLE : View.GONE);
 	}
+
+/*
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		// Restore saved view state
+		super.onRestoreInstanceState(savedInstanceState);
+		// TODO: restore zmachine state
+	}
+*/
+
+	@Override
+	protected void onSaveInstanceState(Bundle bundle) {
+		// Save zmachine state, if any
+		if (zm != null && runningProgram != null && zm.pauseZM()) {
+			if (runningProgram instanceof String) {
+				// running a game file
+				bundle.putString(RUNNING_FILE, (String) runningProgram);
+			} else if (runningProgram instanceof Integer) {
+				// running a resource
+				bundle.putInt(RUNNING_RESOURCE, ((Integer) runningProgram).intValue());
+			}
+			// TODO(marius): Context.openFileOutput() or byte array in bundle
+			// FileOutputStream fos = openFileOutput("frozen", 0);
+			Log.i(TAG, "Saving zm state to memory");
+			ZState zs = new ZState(zm);
+			byte[] result = zs.mem_save(zm.pc);
+			if (result == null) {
+				Log.e(TAG, "Saving zm state failed");
+			} else {
+				Log.i(TAG, "Saving zm state done: result = " + result.toString() + ", size = " + result.length);
+				bundle.putByteArray(FROZEN_GAME, result);
+			}
+			zm.resumeZM();
+		}
+		// Hopefully this will save all the view states:
+		super.onSaveInstanceState(bundle);
+	}
+
 }

@@ -11,6 +11,8 @@ package russotto.zplet.screenmodel;
 import java.util.NoSuchElementException;
 import java.util.Vector;
 
+import com.google.twisty.zplet.ZMachineInterrupted;
+
 class SyncVector<T> extends Vector<T> {
 	private static final long serialVersionUID = 1615647740021244904L;
 
@@ -33,7 +35,9 @@ class SyncVector<T> extends Vector<T> {
 		try {
 			if (first==null) wait();
 			else return first;
-		} catch (InterruptedException booga) {}
+		} catch (InterruptedException booga) {
+			throw new ZMachineInterrupted(booga);
+		}
 		return null;
 	}
 

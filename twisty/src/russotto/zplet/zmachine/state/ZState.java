@@ -18,6 +18,7 @@ import android.os.Message;
 
 import com.google.twisty.Twisty;
 import com.google.twisty.TwistyMessage;
+import com.google.twisty.io.SeekableByteArrayOutputStream;
 
 import russotto.iff.IFFChunkInfo;
 import russotto.iff.IFFChunkNotFoundException;
@@ -371,13 +372,36 @@ public class ZState {
 		}
 		outfile.closeChunk();
 	}
-	
+
 	public boolean disk_save(ZScreen parent, int save_pc) {
-		String fname;
+		String fname = get_save_file_name(parent);
+		if (fname.equals("") || fname.equals("nullnull"))
+			return false;  // user didn't pick a file
+		return disk_save(fname, save_pc);
+	}
+
+	public boolean disk_save(String fname, int save_pc) {
+		try {
+			return disk_save(new IFFOutputFile(fname, "IFZS"), save_pc);
+		} catch (IOException e) {
+			return false;
+		}
+	}
+
+	public byte[] mem_save(int save_pc) {
+		SeekableByteArrayOutputStream baos = new SeekableByteArrayOutputStream();
+		try {
+			if (disk_save(new IFFOutputFile(baos, "IFZS"), save_pc))
+				return baos.toByteArray();
+		} catch (IOException e) {
+		}
+		return null;
+	}
+
+	public boolean disk_save(IFFOutputFile outfile, int save_pc) {
 		Enumeration<Object> e,f;
 		Object el, el2;
 		int i;
-		IFFOutputFile outfile = null;
 		boolean framestore;
 		short storevar;
 		short argcount;
@@ -391,11 +415,6 @@ public class ZState {
 		boolean returnvalue = false;
 
 		try {
-			fname = get_save_file_name(parent);
-			if (fname.equals("") || fname.equals("nullnull"))
-				throw new java.io.IOException("No file picked"); /* user didn't pick a file */
-				
-			outfile = new IFFOutputFile(fname, "IFZS");
 			outfile.openChunk("IFhd");
 			outfile.write(zm.memory_image, ZHeader.RELEASE, 2);
 			outfile.write(zm.memory_image, ZHeader.SERIAL_NUMBER, 6);

@@ -6,31 +6,60 @@ package russotto.iff;
 import java.io.*;
 import java.util.*;
 
+import com.google.twisty.io.Seekable;
+import com.google.twisty.io.SeekableFactory;
+
 public class IFFFile
-		extends RandomAccessFile
 {
-    protected Stack<Long> openchunks;
-    
-    public IFFFile(String name, String mode) throws IOException
-    {
-		super(name, mode);
-		openchunks = new Stack<Long>();
-    }
+	protected Stack<Long> openchunks;
+	protected final RandomAccessFile file;
+	protected final Seekable seeker;
 
-    public IFFFile(File file, String mode) throws IOException
-    {
-		super(file, mode);
+	public IFFFile(String name, String mode) throws IOException
+	{
+		file = new RandomAccessFile(name, mode);
+		seeker = SeekableFactory.fromRandomAccessFile(file);
 		openchunks = new Stack<Long>();
-    }
+	}
 
-    public void chunkSeek(int offset) throws IOException
-    {
-    	seek((openchunks.peek()).longValue() + 4 + offset);
-    }
-    
-    public int getChunkPointer() throws IOException
-    {
-    	return (int)getFilePointer() - (int)(openchunks.peek()).longValue() - 4;
-    }
+	public IFFFile(File file, String mode) throws IOException
+	{
+		this.file = new RandomAccessFile(file, mode);
+		seeker = SeekableFactory.fromRandomAccessFile(this.file);
+		openchunks = new Stack<Long>();
+	}
+	
+	public IFFFile(Seekable seeker) {
+		file = null;
+		this.seeker = seeker;
+		openchunks = new Stack<Long>();
+	}
+
+	public void chunkSeek(int offset) throws IOException
+	{
+		seek((openchunks.peek()).longValue() + 4 + offset);
+	}
+
+	public int getChunkPointer() throws IOException
+	{
+		return (int)getFilePointer() - (int)(openchunks.peek()).longValue() - 4;
+	}
+
+	public void close() throws IOException {
+		if (file != null)
+			file.close();
+	}
+
+	public long getFilePointer() throws IOException {
+		return seeker.getFilePointer();
+	}
+
+	public void seek(long pos) throws IOException {
+		seeker.seek(pos);
+	}
+
+	// Does not really belong here, belongs in IFFInputFile
+	public int read(byte[] buffer, int offset, int count) throws IOException {
+		return file.read(buffer, offset, count); }
 }
 

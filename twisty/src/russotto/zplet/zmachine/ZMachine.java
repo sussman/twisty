@@ -15,13 +15,15 @@ import java.util.Stack;
 import android.util.Log;
 
 import com.google.twisty.zplet.ZMachineException;
+import com.google.twisty.zplet.ZMachineInterrupted;
 
 import russotto.zplet.screenmodel.ZScreen;
 import russotto.zplet.screenmodel.ZStatus;
 import russotto.zplet.screenmodel.ZWindow;
 import russotto.zplet.zmachine.state.ZState;
 
-public abstract class ZMachine extends Thread {
+public abstract class ZMachine {
+	private final Thread thread;
 	public ZWindow current_window;
 	public int pc;
 	public ZWindow window[];
@@ -51,7 +53,7 @@ public abstract class ZMachine extends Thread {
 	private StringBuffer zmstring;
 
 	protected final String A2 = "0123456789.,!?_#\'\"/\\-:()";
-	private boolean aborting;
+	private InterruptState aborting;
 
 	public final static int OP_LARGE = 0;
 	public final static int OP_SMALL = 1;
@@ -60,7 +62,32 @@ public abstract class ZMachine extends Thread {
 	private static final String TAG = "ZMachine";
 	private static final String ZMLOG = "zmlog";
 
+	/*
+	 * UNSTARTED -start-> RUNNING -quit-------------> FINISHED
+	 *                    ^ | |                      /
+	 *                    |  \ \-abort-> ABORTING ->/
+	 *              RESUMING  \
+	 *                    ^    \-pause-> PAUSING
+	 *                    |               |
+	 *                 resume-- PAUSED <-/
+	 */
+	enum InterruptState {
+		UNSTARTED,
+		RUNNING,
+		ABORTING,
+		PAUSING,
+		PAUSED,
+		RESUMING,
+		FINISHED
+	}
+
 	public ZMachine(ZScreen screen, ZStatus status_line, byte [] memory_image) {
+		thread = new Thread() {
+			@Override
+			public void run() {
+				runZM();
+			}
+		};
 		this.screen = screen;
 		this.status_line = status_line;
 		this.memory_image = memory_image;
@@ -75,6 +102,7 @@ public abstract class ZMachine extends Thread {
 		alphabet = 0;
 		zmlog = false;
 		zmstring = new StringBuffer();
+		aborting = InterruptState.UNSTARTED;
 	}
 
 	public abstract void update_status_line();
@@ -339,11 +367,15 @@ public abstract class ZMachine extends Thread {
 	}
 
 	public void start() {
-		aborting = false;
+		changeState(InterruptState.RUNNING);
 		screen.clear();
 		restart();
 		header.set_transcripting(false);
-		super.start();
+		thread.start();
+	}
+	
+	public void join() throws InterruptedException {
+		thread.join();
 	}
 
 	static final String[] opnames = new String[] {
@@ -380,38 +412,124 @@ public abstract class ZMachine extends Thread {
 		"push_stack", "put_wind_prop", "print_form", "make_menu",
 		"picture_table"
 	};
+	
+	/**
+	 * Block until the state is anything but other
+	 * @param other the state we don't want to be in
+	 * @return the new state (or other if we timed out or were interrupted)
+	 */
+	private synchronized InterruptState waitForStateChange(InterruptState other) {
+		Log.i(TAG, "Waiting for something other than " + other.toString());
+		try {
+			while (aborting == other) {
+				wait();
+			}
+		} catch (InterruptedException e) {
+		}
+		Log.i(TAG, "Wait done: now " + aborting.toString());
+		return aborting;
+	}
 
-	public void run()
+	private synchronized InterruptState changeState(InterruptState newState) {
+		Log.i(TAG, "Changing " + aborting.toString() + " -> " + newState.toString());
+		InterruptState oldState = aborting;
+		aborting = newState;
+		notifyAll();
+		return oldState;
+	}
+
+	private void mainLoop(ProfileStats timers) {
+		while (true) {
+			// reset interrupted status
+			if (Thread.interrupted()) {
+				// TODO: restore pc if we paused
+				Log.w(TAG, "Was interrupted - but not any more...");
+			}
+			InterruptState s = waitForStateChange(InterruptState.PAUSED);
+			switch (s) {
+			case ABORTING:
+				changeState(InterruptState.FINISHED);
+				return;
+			case PAUSING:
+				changeState(InterruptState.PAUSED);
+				break;
+			case RESUMING:
+				changeState(InterruptState.RUNNING);
+				// ** fall through **
+			case RUNNING:
+				try {
+					// TODO handle PAUSING: save previous pc
+					long t1 = System.nanoTime();
+					zi.decode_instruction();
+					zi.execute();
+					long t2 = System.nanoTime();
+					timers.add(zi.opnum, 0.000001 * (t2 - t1));
+				} catch (ZMachineInterrupted zi) {
+					// we were interrupted, probably for pause or abort
+					// so absorb the exception
+				}
+				break;
+			case FINISHED:
+				// happens on a normal op_quit cycle
+				return;
+			case PAUSED:
+				// Should not happen. Recoverable bug.
+				Log.e(TAG, "State should never go PAUSED -> PAUSED");
+				break;
+			default:
+				throw new ZMachineException(pc, "Unexpected state: " + s);
+			}
+		}
+	}
+
+	private void runZM()
 	{
-		Log.i(TAG, "run() starting");
+		Log.i(TAG, "runZM() starting");
 		// Track timing for each opcode named above
 		ProfileStats timers = new ProfileStats(opnames.length);
 		try {
-			while (!aborting && !isInterrupted()) {
-				long t1 = System.nanoTime();
-				zi.decode_instruction();
-				zi.execute();
-				long t2 = System.nanoTime();
-				timers.add(zi.opnum, 0.000001 * (t2 - t1));
-			}
+			mainLoop(timers);
 			timers.dump("opcode", opnames);
-			Log.i(TAG, "run() finishing without error");
+			Log.i(TAG, "runZM() finishing without error");
 			screen.onZmFinished(null);
 		}
 		catch (ZMachineException e) {
-			Log.e(TAG, "run() finishing with ZM exception", e);
+			changeState(InterruptState.FINISHED);
+			Log.e(TAG, "runZM() finishing with ZM exception", e);
 			screen.onZmFinished(e);
 		}
 		catch (RuntimeException e) {
-			Log.e(TAG, "run() finishing with runtime exception", e);
+			changeState(InterruptState.FINISHED);
+			Log.e(TAG, "runZM() finishing with runtime exception", e);
 			screen.onZmFinished(new ZMachineException(pc, e));
 		}
 	}
 
-	public void abort() {
-		aborting = true;
-		interrupt();
+	public synchronized void abort() {
+		changeState(InterruptState.ABORTING);
+		thread.interrupt();  // cancel key input
 		pc = -1;
+	}
+
+	public synchronized void quit() {
+		changeState(InterruptState.FINISHED);
+	}
+
+	public synchronized boolean pauseZM() {
+		if (aborting != InterruptState.RUNNING)
+			return false;
+		changeState(InterruptState.PAUSING);
+		thread.interrupt();  // cancel key input
+		// Block until the thread picks up the change
+		return (InterruptState.PAUSED == waitForStateChange(InterruptState.PAUSING));
+	}
+
+	public synchronized boolean resumeZM() {
+		if (aborting != InterruptState.PAUSED)
+			return false;
+		changeState(InterruptState.RESUMING);
+		// Block until the thread picks up the change
+		return (InterruptState.RUNNING == waitForStateChange(InterruptState.RESUMING));
 	}
 
 	void calculate_checksum() {
@@ -611,5 +729,18 @@ public abstract class ZMachine extends Thread {
 			}
 		}
 		Log.v(ZMLOG, sb.toString());
+	}
+
+	/**
+	 * Is the zmachine in a state where it could execute instructions soon?
+	 */
+	public synchronized boolean isRunning() {
+		switch (aborting) {
+		case ABORTING:
+		case FINISHED:
+			return false;
+		default:
+			return true;
+		}
 	}
 }
