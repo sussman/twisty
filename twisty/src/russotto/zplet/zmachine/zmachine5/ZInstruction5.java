@@ -88,7 +88,7 @@ public class ZInstruction5 extends ZInstruction
 		{
 				short result;
 				
-				zm.logInstruction(opnum, count, operands);
+				zm.logInstruction(this);
 				switch (opnum) {
 				case OP_JE:
 						result = op_je();
@@ -460,7 +460,7 @@ public class ZInstruction5 extends ZInstruction
 						   hey, it could happen */
 				}
 				else {
-						zm.zstack.push(new ZFrameBound(isstore()));
+						zm.zstack.push(ZFrameBound.get(isstore()));
 						if (isstore())
 							zm.zstack.push(new Integer(storevar));
 						zm.zstack.push(new Integer(opnum));
@@ -904,7 +904,7 @@ public class ZInstruction5 extends ZInstruction
 				return result;
 		}
 
-		protected void setupbs() {
+		protected static void setupbs() {
 		/* Sets up store and branch instructions */
 				branch5[OP_JE] = true;
 				branch5[OP_JL] = true;

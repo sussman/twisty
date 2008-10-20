@@ -57,9 +57,5 @@ public class IFFFile
 	public void seek(long pos) throws IOException {
 		seeker.seek(pos);
 	}
-
-	// Does not really belong here, belongs in IFFInputFile
-	public int read(byte[] buffer, int offset, int count) throws IOException {
-		return file.read(buffer, offset, count); }
 }
 

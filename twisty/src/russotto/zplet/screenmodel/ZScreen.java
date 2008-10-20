@@ -8,8 +8,9 @@
 
 package russotto.zplet.screenmodel;
 
+import java.util.LinkedList;
 import java.util.NoSuchElementException;
-import java.util.Vector;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import russotto.zplet.ZColor;
 import android.os.Handler;
@@ -18,12 +19,13 @@ import android.util.Log;
 import com.google.twisty.zplet.Event;
 import com.google.twisty.zplet.Font;
 import com.google.twisty.zplet.ZMachineException;
+import com.google.twisty.zplet.ZMachineInterrupted;
 import com.google.twisty.zplet.ZViewOutput;
 
 public class ZScreen {
 	private final ZViewOutput[] views;
-	SyncVector<Integer> inputcodes;
-	Vector<Integer> bufferedcodes;
+	LinkedBlockingQueue<Short> inputcodes;
+	LinkedList<Short> bufferedcodes;
 	boolean bufferdone;
 	ZWindow inputwindow;
 	Font fixedfont;
@@ -112,8 +114,8 @@ public class ZScreen {
 		setFixedFont(fixedFontFamily, font_size);
 		setVariableFont(fixedFontFamily, font_size);
 
-		inputcodes = new SyncVector<Integer>();
-		bufferedcodes = new Vector<Integer>();
+		inputcodes = new LinkedBlockingQueue<Short>();
+		bufferedcodes = new LinkedList<Short>();
 		default_foreground = ZColor.Z_BLACK;
 		default_background = ZColor.Z_WHITE;
 	}
@@ -191,16 +193,14 @@ public class ZScreen {
 	}
 
 	public boolean keyDown(Event e, int key) {
-
 		short code;
 
-		/* TODO: e, key to code */
 		try {
 			if (e.id == Event.KEY_PRESS)
 				code = unicode_to_zascii((char)key);
 			else /* if (e.action == Event.KEY_ACTION) */
 				code = fkey_to_zascii(key);
-			inputcodes.syncAddElement(new Integer(code));
+			inputcodes.offer(new Short(code));
 		}
 		catch (NoSuchKeyException excpt) {
 			Log.w(TAG, "No such key in keyDown: " + key);
@@ -214,17 +214,16 @@ public class ZScreen {
 	}
 
 	public short read_code() {
-		Integer thecode = null;
-
-		while (thecode == null) {
-			thecode = inputcodes.syncPopFirstElement();
+		try {
+			return inputcodes.take().shortValue();
+		} catch (InterruptedException e) {
+			throw new ZMachineInterrupted();
 		}
-		return (short)thecode.intValue();
 	}
 
 	public short read_buffered_code() { /* should really be synched */
-		Integer thecode;
-		int incode;
+		Short thecode;
+		short incode;
 
 		inputwindow.flush();
 
@@ -235,8 +234,7 @@ public class ZScreen {
 			inputwindow.showCursor(false);
 			if ((incode == 8) || (incode == 127)) {
 				try {
-					thecode = bufferedcodes.lastElement();
-					bufferedcodes.removeElementAt(bufferedcodes.size() - 1);
+					thecode = bufferedcodes.removeLast();
 					inputwindow.flush();
 					inputwindow.backspace();
 					inputwindow.flush();
@@ -252,14 +250,13 @@ public class ZScreen {
 						inputwindow.newline();
 				}
 				else {
-					inputwindow.printzascii((short)incode);
+					inputwindow.printzascii(incode);
 					inputwindow.flush();
 				}
-				bufferedcodes.addElement(new Integer(incode));
+				bufferedcodes.addLast(new Short(incode));
 			}
 		}
-		thecode = bufferedcodes.firstElement();
-		bufferedcodes.removeElementAt(0);
+		thecode = bufferedcodes.removeFirst();
 		if (bufferedcodes.isEmpty()) {
 			bufferdone = false;
 		}
@@ -310,8 +307,8 @@ public class ZScreen {
 	}
 
 	public void clearInputQueues() {
-		bufferedcodes.removeAllElements();
-		inputcodes.removeAllElements();
+		bufferedcodes.clear();
+		inputcodes.clear();
 	}
 
 	public void clear() {

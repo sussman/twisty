@@ -263,7 +263,7 @@ public class ZInstruction {
 	{
 				short result;
 
-				zm.logInstruction(opnum, count, operands);
+				zm.logInstruction(this);
 				switch (opnum) {
 				case OP_JE:
 					result = op_je();
@@ -895,17 +895,6 @@ public class ZInstruction {
 				if (restore_state.restore_from_disk(zm.screen)) {
 					zm.restore(restore_state);
 					decode_second_half();
-					
-//					branchoffset = zm.get_code_byte();
-//					branchtype = (branchoffset&0x80) != 0;
-//					if ((branchoffset & 0x40) != 0) /* positive 6-bit number */
-//								branchoffset &= 0x3F;
-//					else if ((branchoffset & 0x20) != 0) /* negative 14-bit number */
-//								branchoffset = (short)(0xC000 |
-//																	   ((branchoffset << 8) |
-//																				(((short)zm.get_code_byte()) & 0xFF)));
-//					else /* positive 14-bit number */
-//								branchoffset = (short)(((branchoffset&0x3F) << 8) | (((short)zm.get_code_byte())&0xFF));
 					return ZRESTORE_SUCCESS;
 				}
 				return ZFALSE;
@@ -994,7 +983,7 @@ public class ZInstruction {
 					zm.set_variable(storevar, ZFALSE);
 				}
 				else {
-					zm.zstack.push(new ZFrameBound(isstore()));
+					zm.zstack.push(ZFrameBound.get(isstore()));
 					zm.zstack.push(new Integer(storevar));
 					zm.zstack.push(new Integer(zm.pc));
 					zm.zstack.push(zm.locals);
@@ -1187,7 +1176,7 @@ public class ZInstruction {
 				return ZNOTDONE;
 	}
 
-	protected void setupbs() {
+	protected static void setupbs() {
 	/* Sets up store and branch instructions */
 		branch[OP_JE] = true;
 		branch[OP_JL] = true;

@@ -18,7 +18,9 @@ import android.os.Message;
 
 import com.google.twisty.Twisty;
 import com.google.twisty.TwistyMessage;
+import com.google.twisty.io.SeekableByteArrayInputStream;
 import com.google.twisty.io.SeekableByteArrayOutputStream;
+import com.google.twisty.zplet.ZMachineInterrupted;
 
 import russotto.iff.IFFChunkInfo;
 import russotto.iff.IFFChunkNotFoundException;
@@ -97,8 +99,9 @@ public class ZState {
 				Message.obtain(dialog_handler, Twisty.PROMPT_FOR_SAVEFILE, msg).sendToTarget();
 				parent.wait();
 			}
-			catch (InterruptedException e) { 
-			};
+			catch (InterruptedException e) {
+				throw new ZMachineInterrupted();
+			}
 		}
 		
 		// Twisty should have modified our TwistyMessage object, and 
@@ -118,8 +121,9 @@ public class ZState {
 				Message.obtain(dialog_handler, Twisty.PROMPT_FOR_RESTOREFILE, msg).sendToTarget();
 				parent.wait();
 			}
-			catch (InterruptedException e) { 
-			};
+			catch (InterruptedException e) {
+				throw new ZMachineInterrupted();
+			}
 		}
 		
 		// Twisty should have modified our TwistyMessage object, and 
@@ -128,9 +132,7 @@ public class ZState {
 		return current_savefile_name;
 	}
 
-	public boolean restore_from_disk(ZScreen parent) {
-		String fname;
-		IFFInputFile infile = null;
+	public boolean restore_from_iff(IFFInputFile infile) {
 		IFFChunkInfo chunkinfo;
 		String formtype;
 		boolean returnvalue = false;
@@ -156,9 +158,7 @@ public class ZState {
 		lastargmask = 0;
 		
 		version = zm.header.version();
-		fname = get_restore_file_name(parent);
 		try {
-			infile = new IFFInputFile(fname);
 			formtype = infile.readFORM();
 			if (formtype.equals("IFZS")) {
 				/* find the IFHD */
@@ -250,12 +250,12 @@ public class ZState {
 					
 					if (frameno > 0) { /* no frame header for dummy frame */
 						if ((flags & QUETZAL_PROCEDURE) == QUETZAL_PROCEDURE) {
-							zstack.push(new ZFrameBound(false));
+							zstack.push(ZFrameBound.FALSE);
 							if (version > 3)
 								zstack.push(new Integer(ZInstruction5.OP_CALL_VN));  /* not entirely correct, but close enough */
 						}
 						else {
-							zstack.push(new ZFrameBound(true));
+							zstack.push(ZFrameBound.TRUE);
 							zstack.push(new Integer(resultvar));
 							if (version > 3)
 								zstack.push(new Integer(ZInstruction.OP_CALL_1S));  /* not entirely correct, but close enough */
@@ -345,7 +345,27 @@ public class ZState {
 		}
 		return returnvalue;
 	}
-	
+
+	public boolean restore_from_disk(ZScreen parent) {
+		String fname;
+		
+		fname = get_restore_file_name(parent);
+		try {
+			return restore_from_iff(new IFFInputFile(fname));
+		} catch (IOException e) {
+			return false;
+		}
+	}
+
+	public boolean restore_from_mem(byte[] frozen_game) {
+		SeekableByteArrayInputStream is = new SeekableByteArrayInputStream(frozen_game);
+		try {
+			return restore_from_iff(new IFFInputFile(is));
+		} catch (IOException e) {
+			return false;
+		}
+	}
+
 	private void write_cmem_chunk(IFFOutputFile outfile) throws IOException {
 		int i;
 		int runsize;

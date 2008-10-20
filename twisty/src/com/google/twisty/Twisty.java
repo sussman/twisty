@@ -17,7 +17,6 @@ package com.google.twisty;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -76,6 +75,8 @@ public class Twisty extends Activity {
 	private static final int MENU_STOP = 102;
 	private static final int MENU_RESTART = 103;
 	private static final int FILE_PICKED = 104;
+	private static final int DEBUG_ZM_DUMP = 105;
+	
 	private static String TAG = "Twisty";
 	private static final String FIXED_FONT_NAME = "Courier";
 	private static final String ROMAN_FONT_NAME = "Helvetica";
@@ -115,6 +116,7 @@ public class Twisty extends Activity {
 	// A persistent map of button-ids to zgames found on the sdcard (absolute paths)
 	private HashMap<Integer, String> zgame_paths = new HashMap<Integer, String>();
 	private Object runningProgram;
+	private Runnable preStartZM;
 
 	/** Called with the activity is first created. */
 	@Override
@@ -153,8 +155,9 @@ public class Twisty extends Activity {
 			InitZJApp();
 			if (screen == null)
 				return;
-			// TODO(marius): restore game state from icicle
-			setupWelcomeMessage();
+			if (!unfreezeZM(icicle)) {
+				setupWelcomeMessage();
+			}
 		} catch (Exception e) {
 			fatal("Oops, an error occurred preparing to play");
 			Log.e(TAG, "Failed to get prepare to play", e);
@@ -429,9 +432,19 @@ public class Twisty extends Activity {
 						Integer.toString(zmemimage[0]) + ")");
 			}
 			if (zm != null) {
+				prepareToStartZM();  // this can null out zm for failure
+			}
+			if (zm != null) {
 				//zm.zmlog = true;  // Kills game performance. Debugging only.
 				zm.start();
 			}
+		}
+	}
+
+	private void prepareToStartZM() {
+		if (preStartZM != null) {
+			preStartZM.run();
+			preStartZM = null;
 		}
 	}
 
@@ -511,6 +524,7 @@ public class Twisty extends Activity {
 		} else {
 			menu.add(Menu.NONE, MENU_RESTART, 0, "Restart").setShortcut('7', 'r');
 			menu.add(Menu.NONE, MENU_STOP, 1, "Stop").setShortcut('9', 's');
+			// menu.add(Menu.NONE, DEBUG_ZM_DUMP, 2, "Dump");
 		}
 		return true;
 	}
@@ -529,6 +543,16 @@ public class Twisty extends Activity {
 			break;
 		case MENU_PICK_FILE:
 			pickFile();
+			break;
+		case DEBUG_ZM_DUMP:
+			String[] l = zm.zmLogEntries.toArray(new String[0]);
+			zm.zmLogEntries.clear();
+			ZViewOutput o = zm.screen.getView(0);
+			for (String s : l) {
+				o.output(s, false, null);
+				o.newline();
+			}
+			zm.zmLog = true;
 			break;
 		default:
 			screen.clear();
@@ -676,7 +700,6 @@ public class Twisty extends Activity {
 			id = rb.getId();
 			zgame_paths.put(id, path);
 		}
-//		rg.check(id); // by default, check the last item
 	}
 
 	/** Have our activity manage and persist dialogs, showing and hiding them */
@@ -869,4 +892,39 @@ public class Twisty extends Activity {
 		super.onSaveInstanceState(bundle);
 	}
 
+	private boolean unfreezeZM(Bundle icicle) {
+		if (icicle == null)
+			return false;
+		String filename = icicle.getString(RUNNING_FILE);
+		int rsrc = icicle.getInt(RUNNING_RESOURCE, -1);
+		final byte[] frozen_game = icicle.getByteArray(FROZEN_GAME);
+		if (frozen_game == null)
+			return false;
+		Log.i(TAG, "unfreezing running game");
+		preStartZM = new Runnable() {
+			public void run() {
+				Log.i(TAG, "unfreeze: restoring");
+				ZState zs = new ZState(zm);
+				if (zs.restore_from_mem(frozen_game)) {
+					zm.restore(zs);
+					Log.i(TAG, "unfreeze: successful");
+				} else {
+					Log.w(TAG, "unfreeze: restore failed");
+					zm = null;
+					setupWelcomeMessage();
+				}
+			}
+		};
+		boolean result = false;
+		if (rsrc != -1) {
+			startzm(rsrc);
+			result = true;
+		} else if (filename != null){
+			startzm(filename);
+			result = true;
+		}
+		preStartZM = null;
+		Log.i(TAG, "unfreeze: finished");
+		return result;
+	}
 }

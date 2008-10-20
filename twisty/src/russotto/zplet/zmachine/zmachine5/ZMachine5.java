@@ -14,6 +14,42 @@ import russotto.zplet.zmachine.ZMachine;
 import russotto.zplet.zmachine.state.ZState;
 
 public class ZMachine5 extends ZMachine {
+	static final String[] opnames5 = new String[] {
+		"", "je", "jl", "jg", "dec_chk", "inc_chk", "jin", "test", "or", "and",
+		"test_attr", "set_attr", "clear_attr", "store", "insert_obj", "loadw",
+		"loadb", "get_prop", "get_prop_addr", "get_next_prop", "add", "sub",
+		"mul", "div", "mod", "call_2s", "call_2n", "set_colour", "throw", "",
+		"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+		"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+		"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+		"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+		"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+		"", "", "", "", "", "", "", "",
+		"jz", "get_sibling", "get_child", "get_parent", "get_prop_len", "inc",
+		"dec", "print_addr", "call_1s", "remove_obj", "print_obj", "ret",
+		"jump", "print_paddr", "load", "call_1n", "", "", "", "", "", "", "",
+		"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+		"", "", "", "", "", "", "",
+		"rtrue", "rfalse", "print", "print_ret", "nop", "save", "restore",
+		"restart", "ret_popped", "catch", "quit", "new_line",
+		"show_status", "verify", "(extended)", "piracy", "", "", "", "", "",
+		"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+		"", "", "", "", "", "", "", "", "",
+		"call", "storew", "storeb", "put_prop", "aread", "print_char",
+		"print_num", "random", "push", "pull", "split_window", "set_window",
+		"call_vs2", "erase_window", "erase_line", "set_cursor", "get_cursor",
+		"set_text_style", "buffer_mode", "output_stream", "input_stream",
+		"sound_effect", "read_char", "scan_table", "not", "call_vn",
+		"call_vn2", "tokenise", "encode_text", "copy_table", "print_table",
+		"check_arg_count", "save", "restore", "log_shift", "art_shift",
+		"set_font", "draw_picture", "picture_data", "erase_picture",
+		"set_margins", "save_undo", "restore_undo", "print_unicode",
+		"check_unicode", "", "", "",
+		"move_window", "window_size", "window_style", "get_wind_prop",
+		"scroll_window", "pop_stack", "read_mouse", "mouse_window",
+		"push_stack", "put_wind_prop", "print_form", "make_menu",
+		"picture_table"
+	};
 
 		public short argcount;
 		ZState undo_state = null;
@@ -107,6 +143,11 @@ public class ZMachine5 extends ZMachine {
 				}
 				undo_state.save_current();
 				return 1;
+		}
+
+		@Override
+		public String[] getOpnames() {
+			return opnames5;
 		}
 }
 

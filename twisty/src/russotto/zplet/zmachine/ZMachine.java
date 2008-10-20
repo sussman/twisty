@@ -9,6 +9,7 @@
 package russotto.zplet.zmachine;
 
 import java.util.EmptyStackException;
+import java.util.LinkedList;
 import java.util.Random;
 import java.util.Stack;
 
@@ -49,8 +50,9 @@ public abstract class ZMachine {
 	protected ZInstruction zi;
 	protected boolean status_redirect;
 	protected String status_location;
-	public boolean zmlog;
-	private StringBuffer zmstring;
+	public boolean zmLog;
+	private StringBuffer zmLogString;
+	public CircularList<String> zmLogEntries;
 
 	protected final String A2 = "0123456789.,!?_#\'\"/\\-:()";
 	private InterruptState aborting;
@@ -100,8 +102,9 @@ public abstract class ZMachine {
 		outputs = new boolean[5];
 		outputs[1] = true;
 		alphabet = 0;
-		zmlog = false;
-		zmstring = new StringBuffer();
+		zmLog = false;
+		zmLogString = new StringBuffer();
+		zmLogEntries = new CircularList<String>(1000);
 		aborting = InterruptState.UNSTARTED;
 	}
 
@@ -145,11 +148,11 @@ public abstract class ZMachine {
 
 	public void print_ascii_char(short ch) {
 		int nchars;
-		if (zmlog) {
+		if (zmLog) {
 			if (ch >= 20 && ch <= 127) {
-				zmstring.append((char) ch);
+				zmLogString.append((char) ch);
 			} else {
-				zmstring.append('<')
+				zmLogString.append('<')
 				.append(Integer.toHexString(ch))
 				.append('>');
 			}	
@@ -345,7 +348,7 @@ public abstract class ZMachine {
 		int zseq;
 		int i;
 
-		zmstring.setLength(0);
+		zmLogString.setLength(0);
 		nbytes = 0;
 		build_ascii = 0;
 		alphabet = 0;
@@ -377,41 +380,8 @@ public abstract class ZMachine {
 	public void join() throws InterruptedException {
 		thread.join();
 	}
-
-	static final String[] opnames = new String[] {
-		"", "je", "jl", "jg", "dec_chk", "inc_chk", "jin", "test", "or", "and",
-		"test_attr", "set_attr", "clear_attr", "store", "insert_obj", "loadw",
-		"loadb", "get_prop", "get_prop_addr", "get_next_prop", "add", "sub",
-		"mul", "div", "mod", "call_2s", "call_2n", "set_colour", "throw", "",
-		"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-		"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-		"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-		"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-		"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-		"", "", "", "", "", "", "", "", "jz", "get_sibling", "get_child",
-		"get_parent", "get_prop_len", "inc", "dec", "print_addr", "call_1s",
-		"remove_obj", "print_obj", "ret", "jump", "print_paddr", "load",
-		"not/call_1n", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-		"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-		"rtrue", "rfalse", "print", "print_ret", "nop", "save", "restore",
-		"restart", "ret_popped", "pop/catch", "quit", "new_line",
-		"show_status", "verify", "(extended)", "piracy", "", "", "", "", "",
-		"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-		"", "", "", "", "", "", "", "", "", "call", "storew", "storeb",
-		"put_prop", "sread", "print_char", "print_num", "random", "push",
-		"pull", "split_window", "set_window", "call_vs2", "erase_window",
-		"erase_line", "set_cursor", "get_cursor", "set_text_style",
-		"buffer_mode", "output_stream", "input_stream", "sound_effect",
-		"read_char", "scan_table", "not", "call_vn", "call_vn2", "tokenise",
-		"encode_text", "copy_table", "print_table", "check_arg_count", "save",
-		"restore", "log_shift", "art_shift", "set_font", "draw_picture",
-		"picture_data", "erase_picture", "set_margins", "save_undo",
-		"restore_undo", "print_unicode", "check_unicode", "", "", "",
-		"move_window", "window_size", "window_style", "get_wind_prop",
-		"scroll_window", "pop_stack", "read_mouse", "mouse_window",
-		"push_stack", "put_wind_prop", "print_form", "make_menu",
-		"picture_table"
-	};
+	
+	public abstract String[] getOpnames();
 	
 	/**
 	 * Block until the state is anything but other
@@ -419,14 +389,13 @@ public abstract class ZMachine {
 	 * @return the new state (or other if we timed out or were interrupted)
 	 */
 	private synchronized InterruptState waitForStateChange(InterruptState other) {
-		Log.i(TAG, "Waiting for something other than " + other.toString());
 		try {
 			while (aborting == other) {
 				wait();
 			}
 		} catch (InterruptedException e) {
+			// TODO: figure out exactly when this can happen, and what to do
 		}
-		Log.i(TAG, "Wait done: now " + aborting.toString());
 		return aborting;
 	}
 
@@ -486,6 +455,7 @@ public abstract class ZMachine {
 	{
 		Log.i(TAG, "runZM() starting");
 		// Track timing for each opcode named above
+		String[] opnames = getOpnames();
 		ProfileStats timers = new ProfileStats(opnames.length);
 		try {
 			mainLoop(timers);
@@ -691,34 +661,69 @@ public abstract class ZMachine {
 		}
 	}
 
-	public void logPrintedString() {
-		if (!zmlog)
-			return;
-		StringBuffer sb = new StringBuffer(Integer.toHexString(pc))
-		.append("# ")
-		.append(zmstring);
-		zmstring.setLength(0);
-		Log.v(ZMLOG, sb.toString());
+	public class CircularList<T extends Object> {
+		private static final long serialVersionUID = -4894945721696387127L;
+		private final int limit;
+		private final LinkedList<T> contents;
+
+		CircularList(int limit) {
+			this.limit = limit;
+			contents = new LinkedList<T>();
+		}
+
+		public void add(T object) {
+			contents.addLast(object);
+			while (contents.size() > limit)
+				contents.removeFirst();
+		}
+		
+		public T[] toArray(T[] t) {
+			return contents.toArray(t);
+		}
+		
+		public void clear() {
+			contents.clear();
+		}
 	}
 
-	public void logInstruction(int opnum, int count, short[] operands) {
-		if (!zmlog)
+	public void logPrintedString() {
+		if (!zmLog)
 			return;
 		StringBuffer sb = new StringBuffer(Integer.toHexString(pc))
+		.append("# ");
+		if (zmLogString.length() > 80) {
+			// Trim middle so whole length is 80
+			zmLogString.replace(37, zmLogString.length() - 37, " .... ");
+		}
+		sb.append(zmLogString);
+		zmLogString.setLength(0);
+		String s = sb.toString();
+		zmLogEntries.add(s);
+		// Log.v(ZMLOG, s);
+	}
+
+	public void logInstruction(ZInstruction zi) {
+		if (!zmLog)
+			return;
+		String opname = getOpnames()[zi.opnum];
+		StringBuffer sb = new StringBuffer();
+		for (int i = zstack.size(); i > 0; --i)
+			sb.append(' ');
+		sb.append(Integer.toHexString(pc))
 		.append(": ")
-		.append(ZMachine.opnames[opnum]);
-		switch(opnum) {
+		.append(opname);
+		switch(zi.opnum) {
 		case ZInstruction.OP_PRINT_CHAR:
-			if (operands[0] >= 32 && operands[0] <= 127) {
+			if (zi.operands[0] >= 32 && zi.operands[0] <= 127) {
 				sb.append(" \'")
-				.append((char) operands[0])
+				.append((char) zi.operands[0])
 				.append('\'');
 				break;
 			}
 			// ** fall through **
 		default:
-			for (int i = 0; i < count; i++) {
-				int o = operands[i];
+			for (int i = 0; i < zi.count; i++) {
+				int o = zi.operands[i];
 				if (o < 0) {
 					sb.append(" -")
 					.append(Integer.toHexString(-o));
@@ -727,8 +732,30 @@ public abstract class ZMachine {
 					.append(Integer.toHexString(o));
 				}
 			}
+			if (zi.isbranch()) {
+				int o = zi.branchoffset;
+				if (o < 0) {
+					sb.append(" b=-")
+					.append(Integer.toHexString(-o));
+				} else {
+					sb.append(" b=")
+					.append(Integer.toHexString(o));
+				}
+			}
+			if (zi.isstore()) {
+				int o = zi.storevar;
+				if (o < 0) {
+					sb.append(" s=-")
+					.append(Integer.toHexString(-o));
+				} else {
+					sb.append(" s=")
+					.append(Integer.toHexString(o));
+				}
+			}
 		}
-		Log.v(ZMLOG, sb.toString());
+		String s = sb.toString();
+		zmLogEntries.add(s);
+		// Log.v(ZMLOG, s);
 	}
 
 	/**

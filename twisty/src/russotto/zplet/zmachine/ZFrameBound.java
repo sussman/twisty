@@ -12,10 +12,17 @@ package russotto.zplet.zmachine;
 public class ZFrameBound
 {
 	private boolean store;
+	public static ZFrameBound FALSE = new ZFrameBound(false);
+	public static ZFrameBound TRUE = new ZFrameBound(true);
 	
-	public ZFrameBound(boolean store) {
+	private ZFrameBound(boolean store) {
 		this.store = store;
 	}
+
+	public static ZFrameBound get(boolean store) {
+		return store ? TRUE : FALSE;
+	}
+
 	public boolean isstore() {
 		return store;
 	}

@@ -4,26 +4,54 @@
 
 package russotto.iff;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
+
+import com.google.twisty.io.SeekableByteArrayInputStream;
 
 public class IFFInputFile
 extends IFFFile
 {
 	private Stack<Long> openchunkends;
 	private final DataInput input;
+	private final Method reader;
+	private final Object readerObject;
 
-	public IFFInputFile(File file) throws IOException
+	public IFFInputFile(File f) throws IOException
 	{
-		super(file, "r");
-		input = this.file;
+		super(f, "r");
+		input = file;
+		readerObject = file;
+		reader = getReadMethod(readerObject);
 		openchunkends = new Stack<Long>();
 	}
 
 	public IFFInputFile(String name) throws IOException
 	{
 		super(name, "r");
-		input = this.file;
+		input = file;
+		readerObject = file;
+		reader = getReadMethod(readerObject);
 		openchunkends = new Stack<Long>();
+	}
+
+	public IFFInputFile(SeekableByteArrayInputStream bais) throws IOException {
+		super(bais);
+		input = new DataInputStream(bais);
+		readerObject = bais;
+		reader = getReadMethod(readerObject);
+		openchunkends = new Stack<Long>();
+	}
+
+	private static Method getReadMethod(Object o) {
+		try {
+			return o.getClass().getMethod("read", byte[].class, int.class, int.class);
+		} catch (SecurityException e) {
+			throw new RuntimeException(e);
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public synchronized IFFChunkInfo readChunkInfo() throws IOException {
@@ -91,6 +119,28 @@ extends IFFFile
 			}
 		}
 		super.close();
+	}
+
+	/**
+	 * Uses reflection to read from the underlying input. We do it this way
+	 * because ByteArrayInputStream and RandomAccessFile share identical
+	 * read() methods but not a common interface.
+	 */
+	public int read(byte[] buffer, int offset, int count) throws IOException {
+		try {
+			Object r = reader.invoke(readerObject, buffer, offset, count);
+			if (r instanceof Integer)
+				return ((Integer) r).intValue();
+			throw new RuntimeException("Incorrect return type from read()");
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
+		} catch (InvocationTargetException e) {
+			if (e.getCause() instanceof IOException)
+				throw (IOException) e.getCause();
+			throw new RuntimeException(e);
+		}
 	}
 
 	// Selectively wrap DataInput
