@@ -55,7 +55,7 @@ public abstract class ZMachine {
 	public CircularList<String> zmLogEntries;
 
 	protected final String A2 = "0123456789.,!?_#\'\"/\\-:()";
-	private InterruptState aborting;
+	private InterruptState runState;
 
 	public final static int OP_LARGE = 0;
 	public final static int OP_SMALL = 1;
@@ -105,7 +105,7 @@ public abstract class ZMachine {
 		zmLog = false;
 		zmLogString = new StringBuffer();
 		zmLogEntries = new CircularList<String>(1000);
-		aborting = InterruptState.UNSTARTED;
+		runState = InterruptState.UNSTARTED;
 	}
 
 	public abstract void update_status_line();
@@ -390,19 +390,20 @@ public abstract class ZMachine {
 	 */
 	private synchronized InterruptState waitForStateChange(InterruptState other) {
 		try {
-			while (aborting == other) {
+			while (runState == other) {
 				wait();
 			}
 		} catch (InterruptedException e) {
+			Log.w(TAG, "Untested condition: interrupted in waitForStateChange/" + other.toString());
 			// TODO: figure out exactly when this can happen, and what to do
 		}
-		return aborting;
+		return runState;
 	}
 
 	private synchronized InterruptState changeState(InterruptState newState) {
-		Log.i(TAG, "Changing " + aborting.toString() + " -> " + newState.toString());
-		InterruptState oldState = aborting;
-		aborting = newState;
+		Log.i(TAG, "Changing " + runState.toString() + " -> " + newState.toString());
+		InterruptState oldState = runState;
+		runState = newState;
 		notifyAll();
 		return oldState;
 	}
@@ -411,7 +412,6 @@ public abstract class ZMachine {
 		while (true) {
 			// reset interrupted status
 			if (Thread.interrupted()) {
-				// TODO: restore pc if we paused
 				Log.w(TAG, "Was interrupted - but not any more...");
 			}
 			InterruptState s = waitForStateChange(InterruptState.PAUSED);
@@ -426,6 +426,7 @@ public abstract class ZMachine {
 				changeState(InterruptState.RUNNING);
 				// ** fall through **
 			case RUNNING:
+				int oldpc = pc;
 				try {
 					// TODO handle PAUSING: save previous pc
 					long t1 = System.nanoTime();
@@ -434,8 +435,9 @@ public abstract class ZMachine {
 					long t2 = System.nanoTime();
 					timers.add(zi.opnum, 0.000001 * (t2 - t1));
 				} catch (ZMachineInterrupted zi) {
-					// we were interrupted, probably for pause or abort
-					// so absorb the exception
+					// the current instruction did not complete, so rerun it
+					// (this only affects input instructions, should be safe)
+					pc = oldpc;
 				}
 				break;
 			case FINISHED:
@@ -486,7 +488,7 @@ public abstract class ZMachine {
 	}
 
 	public synchronized boolean pauseZM() {
-		if (aborting != InterruptState.RUNNING)
+		if (runState != InterruptState.RUNNING)
 			return false;
 		changeState(InterruptState.PAUSING);
 		thread.interrupt();  // cancel key input
@@ -495,7 +497,7 @@ public abstract class ZMachine {
 	}
 
 	public synchronized boolean resumeZM() {
-		if (aborting != InterruptState.PAUSED)
+		if (runState != InterruptState.PAUSED)
 			return false;
 		changeState(InterruptState.RESUMING);
 		// Block until the thread picks up the change
@@ -762,7 +764,7 @@ public abstract class ZMachine {
 	 * Is the zmachine in a state where it could execute instructions soon?
 	 */
 	public synchronized boolean isRunning() {
-		switch (aborting) {
+		switch (runState) {
 		case ABORTING:
 		case FINISHED:
 			return false;

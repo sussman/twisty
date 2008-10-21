@@ -76,6 +76,7 @@ public class Twisty extends Activity {
 	private static final int MENU_RESTART = 103;
 	private static final int FILE_PICKED = 104;
 	private static final int DEBUG_ZM_DUMP = 105;
+	private static final int DEBUG_PAUSE_RESUME = 106;
 	
 	private static String TAG = "Twisty";
 	private static final String FIXED_FONT_NAME = "Courier";
@@ -525,6 +526,7 @@ public class Twisty extends Activity {
 			menu.add(Menu.NONE, MENU_RESTART, 0, "Restart").setShortcut('7', 'r');
 			menu.add(Menu.NONE, MENU_STOP, 1, "Stop").setShortcut('9', 's');
 			// menu.add(Menu.NONE, DEBUG_ZM_DUMP, 2, "Dump");
+			// menu.add(Menu.NONE, DEBUG_PAUSE_RESUME, 3, "Pause/Resume");
 		}
 		return true;
 	}
@@ -543,6 +545,13 @@ public class Twisty extends Activity {
 			break;
 		case MENU_PICK_FILE:
 			pickFile();
+			break;
+		case DEBUG_PAUSE_RESUME:
+			if (zm.pauseZM()) {
+				zm.resumeZM();
+			} else {
+				fatal("pause failed");
+			}
 			break;
 		case DEBUG_ZM_DUMP:
 			String[] l = zm.zmLogEntries.toArray(new String[0]);
