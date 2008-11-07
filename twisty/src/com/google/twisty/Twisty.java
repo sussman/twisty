@@ -1,4 +1,4 @@
-//   Copyright 2007 Google Inc.
+//   Copyright 2007-8 Google Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -519,7 +519,7 @@ public class Twisty extends Activity {
 		menu.clear();
 		if (!zmIsRunning()) {
 			menu.add(Menu.NONE, R.raw.advent, 0, "Adventure").setShortcut('0', 'a');
-			menu.add(Menu.NONE, R.raw.bronze, 1, "Bronze").setShortcut('1', 'b');
+			menu.add(Menu.NONE, R.raw.anchor, 1, "Anchorhead").setShortcut('1', 'b');
 			menu.add(Menu.NONE, R.raw.curses, 2, "Curses").setShortcut('2', 'c');
 			menu.add(Menu.NONE, MENU_PICK_FILE, 3, "Open file...").setShortcut('5', 'o');
 		} else {

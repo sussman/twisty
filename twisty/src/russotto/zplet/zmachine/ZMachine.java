@@ -62,7 +62,7 @@ public abstract class ZMachine {
 	public final static int OP_VARIABLE = 2;
 	public final static int OP_OMITTED = 3;
 	private static final String TAG = "ZMachine";
-	private static final String ZMLOG = "zmlog";
+	// private static final String ZMLOG = "zmlog";
 
 	/*
 	 * UNSTARTED -start-> RUNNING -quit-------------> FINISHED
