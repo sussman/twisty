@@ -575,8 +575,27 @@ public class Twisty extends Activity {
 	private void pickFile() {
 		String storagestate = Environment.getExternalStorageState();
 		if (storagestate.equals(Environment.MEDIA_MOUNTED)
-				|| storagestate.equals(Environment.MEDIA_MOUNTED_READ_ONLY))
-			showDialog(DIALOG_CHOOSE_ZGAME);
+				|| storagestate.equals(Environment.MEDIA_MOUNTED_READ_ONLY)) {
+			final ProgressDialog pd = ProgressDialog.show(Twisty.this,
+					"Scanning sdcard", "Searching for z-games...", true);
+			Thread t = new Thread() {
+				public void run() {
+					try {
+						Thread.sleep(4000);
+					} catch (Exception e) {
+						fatal("Exception during sleep!");
+					}
+					pd.dismiss();
+				}
+			};
+			t.start();
+
+			// spin off worker thread to scan for z-games
+			// when worker thread is done, have it signal main thread to (1) dismiss progress dialog 
+			//     and (2) show the CHOOSE_ZGAME dialog instead
+			// (CHOOSE_ZGAME dialog should assume zgames list already exists.)
+			//showDialog(DIALOG_CHOOSE_ZGAME);
+		}	
 		else
 			showDialog(DIALOG_NO_SDCARD); // no sdcard to scan
 	}
@@ -652,9 +671,7 @@ public class Twisty extends Activity {
 		}
 		File sdroot = Environment.getExternalStorageDirectory();
 		ArrayList<String> zgamelist = new ArrayList<String>();
-		showDialog(DIALOG_SCANNING_SDCARD);
 		scanDir(sdroot, zgamelist);
-		dismissDialog(DIALOG_SCANNING_SDCARD);
 		String[] files = zgamelist.toArray(new String[zgamelist.size()]);
 		Arrays.sort(files);
 		return files;
@@ -807,7 +824,7 @@ public class Twisty extends Activity {
 
 		case DIALOG_SCANNING_SDCARD:
 			scanningdialog = new ProgressDialog(Twisty.this);
-			scanningdialog.setIndeterminate(true);
+			scanningdialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 			scanningdialog.setTitle("Scanning sdcard...");
 			scanningdialog.setMessage("Looking for z-games");
 			return scanningdialog;
