@@ -95,9 +95,10 @@ public class Twisty extends Activity {
 	private static final int DIALOG_CANT_SAVE = 4;
 	private static final int DIALOG_NO_SDCARD = 5;
 
-	// Messages we receive from the ZMachine thread
+	// Messages we receive from external threads, via our Handler
 	public static final int PROMPT_FOR_SAVEFILE = 1;
 	public static final int PROMPT_FOR_RESTOREFILE = 2;
+	public static final int PROMPT_FOR_ZGAME = 3;
 
 	private ZScreen screen;
 	private StatusLine status_line;
@@ -112,6 +113,8 @@ public class Twisty extends Activity {
 	// Persistent dialogs created in onCreateDialog() and updated by onPrepareDialog()
 	private Dialog restoredialog;
 	private Dialog choosezgamedialog;
+	// All z-games discovered when we last scanned the sdcard
+	private String[] discovered_zgames;
 	// A persistent map of button-ids to zgames found on the sdcard (absolute paths)
 	private HashMap<Integer, String> zgame_paths = new HashMap<Integer, String>();
 	private Object runningProgram;
@@ -134,6 +137,9 @@ public class Twisty extends Activity {
 				else if (m.what == PROMPT_FOR_RESTOREFILE) {
 					dialog_message = (TwistyMessage) m.obj;
 					promptForRestorefile();
+				}
+				else if (m.what == PROMPT_FOR_ZGAME) {
+					showDialog(DIALOG_CHOOSE_ZGAME);
 				}
 			} 
 		};
@@ -185,7 +191,7 @@ public class Twisty extends Activity {
 		w.set_text_style(ZWindow.BOLD);
 		w.bufferString("                                      ");
 		w.newline();
-		w.bufferString("  Twisty v0.11, (C) 2008 Google Inc.  ");
+		w.bufferString("  Twisty v0.5, (C) 2008 Google Inc.  ");
 		w.newline();
 		w.bufferString("                                      ");
 		w.newline();
@@ -575,24 +581,18 @@ public class Twisty extends Activity {
 		if (storagestate.equals(Environment.MEDIA_MOUNTED)
 				|| storagestate.equals(Environment.MEDIA_MOUNTED_READ_ONLY)) {
 			final ProgressDialog pd = ProgressDialog.show(Twisty.this,
-					"Scanning sdcard", "Searching for z-games...", true);
+					"Scanning Media", "Searching for Z-Games...", true);
 			Thread t = new Thread() {
 				public void run() {
-					try {
-						Thread.sleep(4000);
-					} catch (Exception e) {
-						fatal("Exception during sleep!");
-					}
+					// populate our list of zgames:
+					discovered_zgames = scanForZGames();
 					pd.dismiss();
+					Message msg = new Message();
+			        msg.what = PROMPT_FOR_ZGAME;
+			        dialog_handler.sendMessage(msg);
 				}
 			};
 			t.start();
-
-			// spin off worker thread to scan for z-games
-			// when worker thread is done, have it signal main thread to (1) dismiss progress dialog 
-			//     and (2) show the CHOOSE_ZGAME dialog instead
-			// (CHOOSE_ZGAME dialog should assume zgames list already exists.)
-			//showDialog(DIALOG_CHOOSE_ZGAME);
 		}	
 		else
 			showDialog(DIALOG_NO_SDCARD); // no sdcard to scan
@@ -716,8 +716,7 @@ public class Twisty extends Activity {
 		rg.removeAllViews();
 		zgame_paths.clear();
 		int id = 0;
-		String[] zgames = scanForZGames();
-		for (String path : zgames) {
+		for (String path : discovered_zgames) {
 			RadioButton rb = new RadioButton(Twisty.this);
 			rb.setText(new File(path).getName());
 			rg.addView(rb);
