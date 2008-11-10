@@ -94,7 +94,6 @@ public class Twisty extends Activity {
 	private static final int DIALOG_CHOOSE_ZGAME = 3;
 	private static final int DIALOG_CANT_SAVE = 4;
 	private static final int DIALOG_NO_SDCARD = 5;
-	private static final int DIALOG_SCANNING_SDCARD = 6;
 
 	// Messages we receive from the ZMachine thread
 	public static final int PROMPT_FOR_SAVEFILE = 1;
@@ -113,7 +112,6 @@ public class Twisty extends Activity {
 	// Persistent dialogs created in onCreateDialog() and updated by onPrepareDialog()
 	private Dialog restoredialog;
 	private Dialog choosezgamedialog;
-	private ProgressDialog scanningdialog;
 	// A persistent map of button-ids to zgames found on the sdcard (absolute paths)
 	private HashMap<Integer, String> zgame_paths = new HashMap<Integer, String>();
 	private Object runningProgram;
@@ -821,13 +819,6 @@ public class Twisty extends Activity {
 				}
 			});
 			return choosezgamedialog;
-
-		case DIALOG_SCANNING_SDCARD:
-			scanningdialog = new ProgressDialog(Twisty.this);
-			scanningdialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-			scanningdialog.setTitle("Scanning sdcard...");
-			scanningdialog.setMessage("Looking for z-games");
-			return scanningdialog;
 
 		case DIALOG_CANT_SAVE:
 			return new AlertDialog.Builder(Twisty.this)
