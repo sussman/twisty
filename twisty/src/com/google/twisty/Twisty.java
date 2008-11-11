@@ -46,6 +46,8 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.BatteryManager;
 import android.os.Bundle;
@@ -182,6 +184,15 @@ public class Twisty extends Activity {
 			Log.e(TAG, "Called printWelcomeMessage with ZM running");
 			return;
 		}
+		
+		// What version of Twisty is running?
+		PackageInfo pkginfo = null;
+		try {
+			pkginfo = this.getPackageManager().getPackageInfo("com.google.twisty", 0);
+		} catch (PackageManager.NameNotFoundException e) {
+			fatal("Couldn't determine Twisty version.");
+		}
+			
 		// TODO: Make this part be zcode and a little more interactive
 		// so a pedantic user could type "press menu key"
 		screen.clear();
@@ -191,18 +202,19 @@ public class Twisty extends Activity {
 		w.set_text_style(ZWindow.BOLD);
 		w.bufferString("                                      ");
 		w.newline();
-		w.bufferString("  Twisty v0.5, (C) 2008 Google Inc.  ");
+		w.bufferString("  Twisty " + pkginfo.versionName 
+				+ ", (C) Google Inc.         ");
 		w.newline();
 		w.bufferString("                                      ");
 		w.newline();
 		w.set_text_style(ZWindow.ROMAN);
 		w.bufferString("Adapted from:");
 		w.newline();
-		w.bufferString("    Zplet, a Z-Machine interpreter in Java:");
+		w.bufferString("    Zplet, a Z-Machine interpreter in Java");
 		w.newline();
-		w.bufferString("    Copyright 1996, 2001 Matthew T. Russotto.");
+		w.bufferString("    (C) Matthew T. Russotto.");
 		w.newline();
-		w.bufferString("This is open source software:");
+		w.bufferString("This is open source software;");
 		w.newline();
 		w.bufferString("    see http://code.google.com/p/twisty");
 		w.newline();
