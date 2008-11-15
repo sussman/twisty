@@ -79,6 +79,7 @@ public class Twisty extends Activity {
 	private static final int FILE_PICKED = 104;
 	private static final int DEBUG_ZM_DUMP = 105;
 	private static final int DEBUG_PAUSE_RESUME = 106;
+	private static final int MENU_SHOW_HELP = 107;
 	
 	private static String TAG = "Twisty";
 	private static final String FIXED_FONT_NAME = "Courier";
@@ -227,6 +228,55 @@ public class Twisty extends Activity {
 		phoneBlurb.append("You feel an inexplicable urge to "
 				+ "press the phone's \"menu\" key. ");
 		w.bufferString(phoneBlurb.toString());
+		w.flush();
+	}
+	
+	private void printHelpMessage() {
+		if (zmIsRunning()) {
+			Log.e(TAG, "Called printHelpMessage with ZM running");
+			return;
+		}
+		
+		ZWindow w = new ZWindow(screen, 0);
+		w.set_text_style(ZWindow.ROMAN);
+		w.newline();
+		w.newline();
+		w.bufferString("-------------------------------------");
+		w.newline();
+		w.bufferString("Concepts stream into your mind:");
+		w.newline();
+		w.newline();
+		w.bufferString("Interactive Fiction (IF) is its own genre of game: an artful crossing ");
+		w.bufferString("of storytelling and puzzle-solving. ");
+		w.bufferString("Read the Wikipedia entry on 'Interactive ");
+		w.bufferString("Fiction' to learn more.");
+		w.newline();
+		w.newline();
+		w.bufferString("You are the protagonist of the story. Your job is to explore the ");
+		w.bufferString("environment, interact with people and things, solve puzzles, and move ");
+		w.bufferString("the story forward.  The interpreter is limited to a small set of ");
+		w.bufferString("vocabulary, typically of the form 'verb noun'.  To get started:");
+		w.newline();
+		w.newline();
+		w.bufferString("  * north, east, up, down, enter...");
+		w.newline();
+		w.bufferString("  * look, look under rug, examine pen");
+		w.newline();
+		w.bufferString("  * take ball, drop hat, inventory");
+		w.newline();
+		w.bufferString("  * Janice, tell me about the woodshed");
+		w.newline();
+		w.bufferString("  * save, restore");
+		w.newline();
+		w.newline();
+		w.bufferString("For a more detailed tutorial, type 'help' inside the Curses or Anchorhead games.");
+		w.newline();
+		w.newline();
+		w.bufferString("Twisty comes with three built-in games, but if you visit sites like ");
+		w.bufferString("www.ifarchive.org or ifdb.tads.org, you can download ");
+		w.bufferString("more games that end with either .z3, .z5, or .z8, copy them to your sdcard, then open them in Twisty.");
+		w.newline();
+		w.newline();
 		w.flush();
 	}
 
@@ -538,6 +588,7 @@ public class Twisty extends Activity {
 			menu.add(Menu.NONE, R.raw.anchor, 1, "Anchorhead").setShortcut('1', 'b');
 			menu.add(Menu.NONE, R.raw.curses, 2, "Curses").setShortcut('2', 'c');
 			menu.add(Menu.NONE, MENU_PICK_FILE, 3, "Open file...").setShortcut('5', 'o');
+			menu.add(Menu.NONE, MENU_SHOW_HELP, 4, "Help!?").setShortcut('6', 'h');
 		} else {
 			menu.add(Menu.NONE, MENU_RESTART, 0, "Restart").setShortcut('7', 'r');
 			menu.add(Menu.NONE, MENU_STOP, 1, "Stop").setShortcut('9', 's');
@@ -561,6 +612,9 @@ public class Twisty extends Activity {
 			break;
 		case MENU_PICK_FILE:
 			pickFile();
+			break;
+		case MENU_SHOW_HELP:
+			printHelpMessage();
 			break;
 		case DEBUG_PAUSE_RESUME:
 			if (zm.pauseZM()) {
@@ -857,7 +911,6 @@ public class Twisty extends Activity {
 				}
 			})
 			.create();
-
 		}
 		return null;
 	}
