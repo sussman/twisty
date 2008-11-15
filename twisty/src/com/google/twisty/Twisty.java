@@ -204,7 +204,7 @@ public class Twisty extends Activity {
 		w.bufferString("                                      ");
 		w.newline();
 		w.bufferString("  Twisty " + pkginfo.versionName 
-				+ ", (C) Google Inc.         ");
+				+ ", (C) Google Inc.       ");
 		w.newline();
 		w.bufferString("                                      ");
 		w.newline();
