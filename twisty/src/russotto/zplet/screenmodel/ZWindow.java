@@ -10,8 +10,8 @@ package russotto.zplet.screenmodel;
 
 import russotto.zplet.ZColor;
 
-import com.google.twisty.zplet.Font;
-import com.google.twisty.zplet.ZViewOutput;
+import com.google.code.twisty.zplet.Font;
+import com.google.code.twisty.zplet.ZViewOutput;
 
 public class ZWindow {
 	public final static int ROMAN = 0;

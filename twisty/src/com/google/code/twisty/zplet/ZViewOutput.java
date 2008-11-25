@@ -1,8 +1,8 @@
-package com.google.twisty.zplet;
+package com.google.code.twisty.zplet;
 
 import russotto.zplet.ZColor;
 
-import com.google.twisty.TwistyView;
+import com.google.code.twisty.TwistyView;
 
 import android.graphics.Rect;
 import android.text.Editable;

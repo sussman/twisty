@@ -16,11 +16,11 @@ import android.util.Log;
 import android.os.Handler;
 import android.os.Message;
 
-import com.google.twisty.Twisty;
-import com.google.twisty.TwistyMessage;
-import com.google.twisty.io.SeekableByteArrayInputStream;
-import com.google.twisty.io.SeekableByteArrayOutputStream;
-import com.google.twisty.zplet.ZMachineInterrupted;
+import com.google.code.twisty.Twisty;
+import com.google.code.twisty.TwistyMessage;
+import com.google.code.twisty.io.SeekableByteArrayInputStream;
+import com.google.code.twisty.io.SeekableByteArrayOutputStream;
+import com.google.code.twisty.zplet.ZMachineInterrupted;
 
 import russotto.iff.IFFChunkInfo;
 import russotto.iff.IFFChunkNotFoundException;

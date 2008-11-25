@@ -5,7 +5,7 @@
 package russotto.iff;
 import java.io.*;
 
-import com.google.twisty.io.SeekableByteArrayOutputStream;
+import com.google.code.twisty.io.SeekableByteArrayOutputStream;
 
 public class IFFOutputFile
 extends IFFFile

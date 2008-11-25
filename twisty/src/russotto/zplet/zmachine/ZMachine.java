@@ -15,8 +15,8 @@ import java.util.Stack;
 
 import android.util.Log;
 
-import com.google.twisty.zplet.ZMachineException;
-import com.google.twisty.zplet.ZMachineInterrupted;
+import com.google.code.twisty.zplet.ZMachineException;
+import com.google.code.twisty.zplet.ZMachineInterrupted;
 
 import russotto.zplet.screenmodel.ZScreen;
 import russotto.zplet.screenmodel.ZStatus;

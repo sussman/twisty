@@ -1,4 +1,4 @@
-package com.google.twisty.io;
+package com.google.code.twisty.io;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

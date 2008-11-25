@@ -12,11 +12,11 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-package com.google.twisty.io;
+package com.google.code.twisty;
 
-import java.io.IOException;
-
-public interface Seekable {
-	public long getFilePointer() throws IOException;
-	public void seek(long pos) throws IOException;
+public class TwistyMessage {
+	// a path specified by a user
+	public String path;
+	
+	// TODO:  add more fields here if we ever need them...
 }

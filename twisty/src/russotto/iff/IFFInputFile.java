@@ -8,7 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import com.google.twisty.io.SeekableByteArrayInputStream;
+import com.google.code.twisty.io.SeekableByteArrayInputStream;
 
 public class IFFInputFile
 extends IFFFile

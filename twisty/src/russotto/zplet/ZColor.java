@@ -8,7 +8,7 @@
 
 package russotto.zplet;
 
-import com.google.twisty.zplet.Color;
+import com.google.code.twisty.zplet.Color;
 
 public class ZColor {
 	public final static int Z_CURRENT = 0;

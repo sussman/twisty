@@ -12,10 +12,29 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-package com.google.twisty.zplet;
+package com.google.code.twisty.zplet;
 
-public interface Label {
+public class ZMachineException extends RuntimeException {
+	private static final long serialVersionUID = 293492265628801027L;
 
-	void setText(String value);
+	public ZMachineException(int pc, Exception reason) {
+		super(reason);
+		this.pc = pc;
+	}
+	
+	public ZMachineException() {
+		pc = -1;
+	}
+	
+	public ZMachineException(int pc, String message) {
+		super(message);
+		this.pc = pc;
+	}
+
+	private final int pc;
+
+	public int getPc() {
+		return pc;
+	}
 
 }

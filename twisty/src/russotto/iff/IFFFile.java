@@ -6,8 +6,8 @@ package russotto.iff;
 import java.io.*;
 import java.util.*;
 
-import com.google.twisty.io.Seekable;
-import com.google.twisty.io.SeekableFactory;
+import com.google.code.twisty.io.Seekable;
+import com.google.code.twisty.io.SeekableFactory;
 
 public class IFFFile
 {

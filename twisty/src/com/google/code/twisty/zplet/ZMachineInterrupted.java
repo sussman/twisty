@@ -1,4 +1,4 @@
-package com.google.twisty.zplet;
+package com.google.code.twisty.zplet;
 
 public class ZMachineInterrupted extends RuntimeException {
 	private static final long serialVersionUID = -8679657711588998700L;

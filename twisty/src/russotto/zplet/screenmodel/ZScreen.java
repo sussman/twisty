@@ -16,11 +16,11 @@ import russotto.zplet.ZColor;
 import android.os.Handler;
 import android.util.Log;
 
-import com.google.twisty.zplet.Event;
-import com.google.twisty.zplet.Font;
-import com.google.twisty.zplet.ZMachineException;
-import com.google.twisty.zplet.ZMachineInterrupted;
-import com.google.twisty.zplet.ZViewOutput;
+import com.google.code.twisty.zplet.Event;
+import com.google.code.twisty.zplet.Font;
+import com.google.code.twisty.zplet.ZMachineException;
+import com.google.code.twisty.zplet.ZMachineInterrupted;
+import com.google.code.twisty.zplet.ZViewOutput;
 
 public class ZScreen {
 	private final ZViewOutput[] views;

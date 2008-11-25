@@ -8,7 +8,7 @@
 
 package russotto.zplet.screenmodel;
 
-import com.google.twisty.zplet.Label;
+import com.google.code.twisty.zplet.Label;
 
 public class ZStatus {
 		 boolean timegame;

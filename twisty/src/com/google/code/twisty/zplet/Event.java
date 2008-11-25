@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-package com.google.twisty.zplet;
+package com.google.code.twisty.zplet;
 
 import android.view.KeyEvent;
 

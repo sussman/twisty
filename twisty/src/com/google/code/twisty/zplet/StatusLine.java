@@ -12,9 +12,9 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-package com.google.twisty.zplet;
+package com.google.code.twisty.zplet;
 
-import com.google.twisty.R;
+import com.google.code.twisty.R;
 
 import android.app.Activity;
 import android.os.Handler;

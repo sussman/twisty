@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-package com.google.twisty.io;
+package com.google.code.twisty.io;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
