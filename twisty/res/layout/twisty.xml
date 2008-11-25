@@ -22,11 +22,11 @@
       android:background="@drawable/error_bg" 
       android:textColor="@drawable/error_fg"
       android:id="@+id/errors"/>
-    <com.google.twisty.TwistyView android:id="@+id/status_v5"
+    <com.google.code.twisty.TwistyView android:id="@+id/status_v5"
       android:layout_width="fill_parent" android:layout_height="wrap_content"
       android:layout_weight="0"
       android:background="@drawable/status_bg" android:typeface="monospace"/>
-    <com.google.twisty.TwistyView android:id="@+id/body"
+    <com.google.code.twisty.TwistyView android:id="@+id/body"
       android:layout_width="fill_parent" android:layout_height="wrap_content"
       android:layout_weight="1"
       android:background="@drawable/body_bg"

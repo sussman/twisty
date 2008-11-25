@@ -189,7 +189,7 @@ public class Twisty extends Activity {
 		// What version of Twisty is running?
 		PackageInfo pkginfo = null;
 		try {
-			pkginfo = this.getPackageManager().getPackageInfo("com.google.twisty", 0);
+			pkginfo = this.getPackageManager().getPackageInfo("com.google.code.twisty", 0);
 		} catch (PackageManager.NameNotFoundException e) {
 			fatal("Couldn't determine Twisty version.");
 		}
@@ -204,7 +204,7 @@ public class Twisty extends Activity {
 		w.bufferString("                                      ");
 		w.newline();
 		w.bufferString("  Twisty " + pkginfo.versionName 
-				+ ", (C) Google Inc.       ");
+				+ ", (C) Google Inc.         ");
 		w.newline();
 		w.bufferString("                                      ");
 		w.newline();
