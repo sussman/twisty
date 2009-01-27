@@ -1,0 +1,65 @@
+
+Status file for the Russian translation of the Subversion
+documentation.
+
+Status of translation for each file is stored in svn-property 'status'.
+For looking or changing this status use corresponding svn commands.
+For example:
+
+  svn propget status book/ch00.xml
+
+0. Urgent needs
+
+   book/ch00.xml:
+     - Finish translation of svn.preface.acks, somewhat depends on
+       ru/ProperNames.
+
+1. Synchronisation history against the English version
+
+  The revision number for the last synchronisation is stored in
+  svn-property 'last-sync', for each file separately.
+
+2. Possible values of property 'status':
+
+  Finished
+
+      These files have been translated, edited, proofread and are in
+      sync with 'last-sync' revision number.
+
+  Needs update
+
+      These files have been "Finished" before, but recent changes are not
+      yet translated.
+
+  Translation in progress
+
+      These files are partially translated and work is continued by the
+      specified commiter, or they are in process of being updated.
+
+  Forsaken
+
+      These files are partially translated and wait for someone
+      interested enough to continue.
+
+  Not translated
+
+      These files have never been translated.
+
+  Ready for editing
+
+      These files are ready for editing, translation work is finished on
+      them for now.
+
+  Editing in progress
+
+      These files are being proofread and edited now.
+
+3. Technical errors
+
+  The following files have markup problems, screaming for attention.
+
+  [none yet]
+
+
+$Id$
+vim: set tw=72 nowrap et sw=2 ts=2 sts=2 fo+=2w fenc=utf8 :

@@ -1,0 +1,247 @@
+﻿<appendix id="svn.3rdparty">
+  <title>第三方工具</title>
+
+  <simplesect>
+
+    <para>Subversion的模块设计（在<xref
+      linkend="svn.developer.layerlib"/>讨论过）和语言绑定的能力（在<xref linkend="svn.developer.usingapi.otherlangs"/>描述过）使的我们可以作为扩展和后端支持来替代软件的某些部分，在这个附录里，我们会简略介绍一些使用Subversion功能的第三方的工具。关于更新的信息，可以在Subversion的网站（<ulink
+        url="http://subversion.tigris.org/project_links.html"/>）查看。
+     </para>
+
+  </simplesect>
+
+  <!-- ******************************************************************* -->
+  <!-- *** SECTION 1:  CLIENTS AND PLUGINS                             *** -->
+  <!-- ******************************************************************* -->
+  <sect1 id="svn-ap-d-sect-1">
+    <title>客户端和插件</title>
+
+    <variablelist>
+      <varlistentry>
+        <term>AnkhSVN (<systemitem
+          class="url">http://ankhsvn.tigris.org/</systemitem>)</term>
+        <listitem><para>Subversion的Microsoft Visual Studio
+          .NET插件</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>JSVN (<systemitem
+          class="url">http://jsvn.alternatecomputing.com/</systemitem>)</term>
+        <listitem><para>Subversion的Java客户端，包括了IDEA的插件</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>psvn.el (<systemitem
+          class="url">http://xsteve.nit.at/prg/vc_svn/</systemitem>)</term>
+        <listitem><para>Subversion为emacs的接口</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>RapidSVN (<systemitem
+          class="url">http://rapidsvn.tigris.org/</systemitem>)</term>
+        <listitem><para>跨平台的Subversion图形化工具，基于WxPython库</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>Subclipse (<systemitem
+          class="url">http://subclipse.tigris.org/</systemitem>)</term>
+        <listitem><para>Subversion关于Eclipse环境的插件</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>Subway (<systemitem
+          class="url">http://nidaros.homedns.org/subway/</systemitem>)</term>
+        <listitem><para>Microsoft SCC为Subversion的提供者</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>sourcecross.org (<systemitem
+          class="url">http://www.sourcecross.org/</systemitem>)</term>
+        <listitem><para>Microsoft SCC为Subversion的提供者</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>Supervision (<systemitem
+          class="url">http://supervision.tigris.org/</systemitem>)</term>
+        <listitem><para>Subversion的Java/Swing可视化客户端</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>Sven (<systemitem
+          class="url">http://www.nikwest.de/Software/#SvenOverview</systemitem>)</term>
+        <listitem><para>Subversion在Mac OS X的Cocoa框架的本地图形化界面</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>Svn4Eclipse (<systemitem
+          class="url">http://svn4eclipse.tigris.org/</systemitem>)</term>
+        <listitem><para>Subversion为Eclipse
+          IDE的插件</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>Svn-Up (<systemitem
+          class="url">http://svnup.tigris.org/</systemitem>)</term>
+        <listitem><para>Java为基础的Subversion图形化界面和IDEA的插件</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>TortoiseSVN (<systemitem
+          class="url">http://tortoisesvn.tigris.org/</systemitem>)</term>
+        <listitem><para>Subversion客户端，使用Microsoft
+          Windows的shell扩展实现</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>WorkBench (<systemitem
+          class="url">http://pysvn.tigris.org/</systemitem>)</term>
+        <listitem><para>跨平台的Python基础建立在Subversion之上的软件开发图形化界面
+          </para></listitem>
+      </varlistentry>
+
+    </variablelist>
+  </sect1>
+  
+  <!-- ******************************************************************* -->
+  <!-- *** SECTION 2:  LANGUAGE BINDINGS                               *** -->
+  <!-- ******************************************************************* -->
+  <sect1 id="svn-ap-d-sect-2">
+    <title>语言绑定</title>
+
+    <variablelist>
+
+      <varlistentry>
+        <term>PySVN (<systemitem
+          class="url">http://pysvn.tigris.org/</systemitem>)</term>
+        <listitem><para>Subversion客户端API的面向对象的Python绑定
+          </para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>Subversion (<systemitem
+          class="url">http://subversion.tigris.org/</systemitem>)</term>
+        <listitem><para>Subversion的Python、Perl和Java的绑定，作为核心C的API的映射
+          </para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>SVNCPP (<systemitem
+          class="url">http://rapidsvn.tigris.org/</systemitem>)</term>
+        <listitem><para>Subversion客户端的C++面向对象绑定</para></listitem>
+      </varlistentry>
+
+    </variablelist>
+  </sect1>
+  
+  <!-- ******************************************************************* -->
+  <!-- *** SECTION 3:  REPOSITORY CONVERTERS                           *** -->
+  <!-- ******************************************************************* -->
+  <sect1 id="svn-ap-d-sect-3">
+    <title>版本库转化</title>
+
+    <variablelist>
+
+      <varlistentry>
+        <term>cvs2svn (<systemitem
+          class="url">http://cvs2svn.tigris.org/</systemitem>)</term>
+        <listitem><para>CVS到Subversion的转化</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>vss2svn (<systemitem
+          class="url">http://vss2svn.tigris.org/</systemitem>)</term>
+        <listitem><para>Microsoft SourceSafe到Subversion的转化</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>Subversion VCP Plugin (<systemitem
+          class="url">http://svn.clkao.org/revml/branches/svn-perl/</systemitem>)</term>
+        <listitem><para>VCP的CVS到Subversion插件</para></listitem>
+      </varlistentry>
+
+    </variablelist>
+  </sect1>
+  
+  <!-- ******************************************************************* -->
+  <!-- *** SECTION 4:  HIGHER LEVEL TOOLS                              *** -->
+  <!-- ******************************************************************* -->
+  <sect1 id="svn-ap-d-sect-4">
+    <title>高级工具</title>
+
+    <variablelist>
+
+      <varlistentry>
+        <term>Trac (<systemitem
+          class="url">http://projects.edgewall.com/trac</systemitem>)</term>
+        <listitem><para>最低限要求的web基础的项目管理和bug/问题追踪系统，包括了版本控制界面并集成了Wiki支持。
+        </para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>Scmbug (<systemitem
+          class="url">http://freshmeat.net/projects/scmbug/</systemitem>)</term>
+        <listitem><para>包括bug追踪的软件配置管理软件，支持Subversion</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>Subissue (<systemitem
+          class="url">http://subissue.tigris.org/</systemitem>)</term>
+        <listitem><para>直接追踪Subversion版本库的问题</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>Subwiki (<systemitem
+          class="url">http://subwiki.tigris.org/</systemitem>)</term>
+        <listitem><para>使用Subversion作为数据版本库的Wiki</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>svk (<systemitem
+          class="url">http://svk.elixus.org/</systemitem>)</term>
+        <listitem><para>基于Subversion的分布式版本控制工具</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>submaster (<systemitem
+          class="url">http://www.rocklinux.org/submaster.html</systemitem>)</term>
+        <listitem><para>基于Subversion的分布式软件开发系统</para></listitem>
+      </varlistentry>
+
+    </variablelist>
+  </sect1>
+  
+  <!-- ******************************************************************* -->
+  <!-- *** SECTION 5:  REPOSITORY BROWSING TOOLS                       *** -->
+  <!-- ******************************************************************* -->
+  <sect1 id="svn-ap-d-sect-5">
+    <title>版本库浏览工具</title>
+
+    <variablelist>
+
+      <varlistentry>
+        <term>SVN::Web (<systemitem
+          class="url">http://svn.elixus.org/repos/member/clkao/</systemitem>)</term>
+        <listitem><para>Perl基础的Subversion版本库Web界面</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>ViewCVS (<systemitem
+          class="url">http://viewcvs.sourceforge.net/</systemitem>)</term>
+        <listitem><para>Python基础的CGI脚本，用来浏览CVS和Subversion版本库</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>WebSVN (<systemitem
+          class="url">http://websvn.tigris.org/</systemitem>)</term>
+        <listitem><para>PHP基础的Subversion版本库浏览器</para></listitem>
+      </varlistentry>
+
+    </variablelist>
+  </sect1>
+</appendix>
+
+<!--
+local variables: 
+sgml-parent-document: ("book.xml" "appendix")
+end:
+-->

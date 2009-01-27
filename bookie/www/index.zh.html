@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html lang="zh_cn">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>使用Subversion进行版本控制</title>
+<link rel="stylesheet" href="./styles.css" type="text/css" />
+</head>
+
+<body>
+
+<div id="leftcolumn">
+
+<script type="text/javascript"><!--
+google_ad_client = "pub-6182915639339595";
+google_ad_width = 120;
+google_ad_height = 600;
+google_ad_format = "120x600_as";
+google_ad_type = "text";
+google_ad_channel ="";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+
+<p><a href="http://www.onShore.com/"><img 
+      src="./images/onShore.jpg"
+      alt="Hosted by onShore" /></a></p>
+<p><a href="/buy/"><img 
+      src="./images/gngrey120x60.gif" 
+      alt="Buy the Book from Amazon Now!" /></a></p>
+<p><a href="http://creativecommons.org/licenses/by/2.0/"><img 
+      src="./images/somerights20.png"
+      alt="Some Rights Reserved" /></a></p>
+</div>
+
+<table id="pagetable">
+<tr>
+<td id="content">
+
+<h1 class="bar">&nbsp;</h1>
+<h1 class="tagline">下一代的开源版本控制</h1>
+<h1 class="title1">使用Subversion进行版本控制</h1>
+<h1 class="title2">Subversion</h1>
+
+<!-- CONTENT STARTS -->
+
+<h2>介绍</h2>
+
+<p>这是<span style="text-decoration:
+   underline">使用Subversion进行版本控制</span>的在线主页，这是一本关于
+   <a href="http://subversion.tigris.org/">Subversion</a>的
+   <a href="http://svnbook.red-bean.com/zh/1.1/ape.html">自由</a>图书
+   <a href="http://subversion.tigris.org/">Subversion</a>，Subversion
+   被设计为CVS的替代产品。你可能从本页的布局上也猜到了，本书通过<a 
+   href="http://www.oreilly.com/catalog/0596004486/">O'Reilly 
+   Media</a>出版。</p>
+
+<p>这里放置了本书的HTML和PDF版本（当然如果你喜欢你也可以<a 
+   href="/buy/">购买</a>一个拷贝），我们会尽全力保持最新，
+   Subversion的开发还在继续，产品会不断增加新的特性，我们会不断记录这些修改。
+   </p>
+   
+<p>本书的中文翻译由<a 
+   href="http://www.subversion.org.cn/">Subversion中文站</a>的成员维护，在<a 
+   href="http://www.subversion.org.cn/svnbook/">这里</a>有这本书最新的在线版本和可以下载的版本。
+   </p>
+
+<h2>本书的在线版本</h2>
+
+<p>有下面版本的在线图书：</p>
+
+<div id="versionlist" class="versionlist">
+
+<h3>Subversion 1.1（最终版）</h3>
+
+<ul>
+<li>本书的<a href="http://www.subversion.org.cn/svnbook/1.1/svn-book.html">单页HTML版本</a>
+    (1.0MB)。</li>
+<li>本书的<a href="http://www.subversion.org.cn/svnbook/1.1/index.html">多页HTML版本</a>
+    。</li>
+<li>本书的<a href="http://www.subversion.org.cn/svnbook/1.1/svn-book.pdf">PDF版本</a>
+    (1.5MB)。</li>
+<li>本书的<a
+    href="http://svn.red-bean.com/svnbook/trunk/src/zh/book/">Docbook 
+    XML源文件</a>。</li>
+</ul>
+
+<h3>每夜构建（针对 Subversion 1.2）</h3>
+<p>这个版本还在进行中，所以请不要<strong>把本版本记录到书签</strong>。</p>
+
+<ul>
+<li>本书的<a href="http://www.subversion.org.cn/svnbook/nightly/svn-book.html">单页HTML版本</a>
+    。</li>
+<li>本书的<a href="http://www.subversion.org.cn/svnbook/nightly/index.html">多页HTML版本</a>
+    。</li>
+<li>本书的<a
+    href="http://svn.red-bean.com/svnbook/trunk/src/zh/book/">Docbook 
+    XML源文件</a>。</li>
+</ul>
+
+</div>
+
+<h2>反馈/贡献</h2>
+
+<p>作为本书和站点的反馈，可以访问
+   <tt>&#115;&#118;&#110;&#98;&#111;&#111;&#107;&#45;&#100;&#101;&#118;&#64;&#114;&#101;&#100;&#45;&#98;&#101;&#97;&#110;&#46;&#99;&#111;&#109;</tt>
+   [<a
+   href="&#104;&#116;&#116;&#112;&#58;&#47;&#47;&#119;&#119;&#119;&#46;&#114;&#101;&#100;&#45;&#98;&#101;&#97;&#110;&#46;&#99;&#111;&#109;&#47;&#109;&#97;&#105;&#108;&#109;&#97;&#110;&#47;&#108;&#105;&#115;&#116;&#105;&#110;&#102;&#111;&#47;&#115;&#118;&#110;&#98;&#111;&#111;&#107;&#45;&#100;&#101;&#118;">列表信息</a>].
+   如果你发现了本书的错误（O'Reilly的发行版本或其他的），你可以在下面选择一件事情尝试：
+   </p>
+
+<ol>
+<li>检出XML源文件来查看问题是否依旧。你可以用Subversion本身得到这些文件，
+    通过检出我们在<tt>http://svn.red-bean.com/svnbook/trunk/</tt>的trunk
+    目录。如果在最新的原文件中问题依旧，请在上面提到的邮件组里报告，如果
+    你有修正这个问题的任何意见，那更好&mdash;只需要在你的邮件里包含一份
+    补丁文件（在邮件的标题也要包括<tt>[PATCH]</tt>）。</li>
+<li>如果问题出现在出版的图书中，可以到O'Reilly本书的<a
+    href="http://www.oreilly.com/catalog/0596004486/errata/">勘误表</a>
+    报告还没有报告的错误。</li>
+</ol>
+
+<h2>那些是海龟吗？</h2>
+
+<p>为什么，是的，他们确实是海龟，那是出版商为本书选择的动物，在你问我们“为什么”
+   之前，我们要说我们确实不知道，这个很酷，我们的妻子们很高兴没有选择一只
+   恶心的动物来代表Subversion。</p>
+
+<!-- CONTENT ENDS -->
+
+<h1 class="authorlist">Ben Collins-Sussman,<br />Brian W. Fitzpatrick
+                       &amp; C. Michael Pilato</h1>
+
+<hr />
+
+<p>本页还有其他语言的版本:<br />
+
+<!-- TRANSLATORS: titles here are in your native language; link text
+     is in the language of the linked page. -->
+
+   <a href="index.en.html" title="English" 
+      hreflang="en" lang="en" rel="alternate">English</a> |
+   <a href="index.es.html" title="Spanish" 
+      hreflang="es" lang="es" rel="alternate">español</a> |
+   <a href="index.it.html" title="Italian" 
+      hreflang="it" lang="it" rel="alternate">Italiano</a> |
+   <a href="index.ja.html" title="Japanese"
+      hreflang="ja" lang="ja" rel="alternate">&#26085;&#26412;&#35486;</a> |
+   <a href="index.nb.html" title="norsk" 
+      hreflang="nb" lang="nb" rel="alternate">norsk</a> |
+   <a href="index.pt_BR.html" title="Portuguese" 
+      hreflang="pt-BR" lang="pt-BR" rel="alternate">Português</a> |
+   <a href="index.ru.html" title="Russian"
+      hreflang="ru" lang="ru" rel="alternate"
+      >&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;</a> 
+</p>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>

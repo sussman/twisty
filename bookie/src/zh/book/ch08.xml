@@ -1,0 +1,1037 @@
+﻿<chapter id="svn.developer">
+  <title>开发者信息</title>
+  
+  <simplesect>
+    <para>Subversion是一个开源的软件项目，使用Apache样式的软件许可证。这个项目由位于加利福尼亚的CollabNet, Inc.软件开发公司资助。这个关于Subversion开发的社区一直欢迎新成员贡献自己的时间和注意力。鼓励志愿者做他们能做的任何帮助，不管是发现和诊断bug，精炼已存的代码还是补充新的特性。
+   </para>
+    
+    <para>本章是为那些希望实际参与源代码编写来帮助Subversion不断进步的人们准备的。我们要知道，在这里我们会涉及到许多软件内在的细节，在开发Subversion本身&mdash;或利用Subversion库开发全新工具时&mdash;所用到的许多核心技术。如果你无法预测你是否会以这种层级参与到这个软件中来，那么也可以随意跳过这一章，而你作为一个Subversion用户的体验不会受到任何影响。
+   </para>
+
+  </simplesect>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.developer.layerlib">
+    <title>分层的库设计</title>
+
+    <para>Subversion有一个模块化的设计，通过一套C库<footnote><para>译者：这里的“库（library）”指函数库，与文中大量出现的“版本库（Repository）”不同，一般情况下，作为独词出现的“库”应属于前者。</para>
+	</footnote>来实现。每一个库都有一套定义良好的目标与接口，据称，大部分模块都属于三层中的某一层&mdash;版本库层、版本库访问（RA）层或是客户端层。我们很快就会考察这些层，但首先让我们看一下<xref linkend="svn.developer.layerlib.tbl-1"/>中的有关于Subversion库的摘要目录，为了一致性，我们将通过它们的无扩展Unix库名（例如libsvn_fs、libsvn_wc和mod_dav_svn）来引用它们。</para>
+
+    <table id="svn.developer.layerlib.tbl-1">
+      <title>Subversion库的摘要目录</title>
+      <tgroup cols="2">
+        <thead>
+          <row>
+            <entry>库</entry>
+            <entry>描述</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>libsvn_client</entry> 
+            <entry>客户端程序的主要接口</entry>
+          </row>
+          <row>
+            <entry>libsvn_delta</entry>
+            <entry>目录树和文本区别程序</entry>
+          </row>
+          <row>
+            <entry>libsvn_diff</entry>
+            <entry>Contextual differencing and merging routines</entry>
+          </row>
+          <row>
+            <entry>libsvn_fs</entry>
+            <entry>Subversion文件系统库和模块加载器</entry>
+          </row>
+          <row>
+            <entry>libsvn_fs_base</entry>
+            <entry>Berkeley DB文件系统后端</entry>
+          </row>
+          <row>
+            <entry>libsvn_fs_fs</entry>
+            <entry>本地文件系统（FSFS）后端</entry>
+          </row>
+          <row>
+            <entry>libsvn_ra</entry>
+            <entry>版本库访问通用组件和模块装载器</entry>
+          </row>
+          <row>
+            <entry>libsvn_ra_dav</entry>
+            <entry>WebDAV版本库访问模块</entry>
+          </row>
+          <row>
+            <entry>libsvn_ra_local</entry>
+            <entry>本地版本库访问模块</entry>
+          </row>
+          <row>
+            <entry>libsvn_ra_svn</entry>
+            <entry>一个自定义版本库访问模块</entry>
+          </row>
+          <row>
+            <entry>libsvn_repos</entry>
+            <entry>版本库接口</entry>
+          </row>
+          <row>
+            <entry>libsvn_subr</entry>
+            <entry>各色各样的有用的子程序</entry>
+          </row>
+          <row>
+            <entry>libsvn_wc</entry>
+            <entry>工作拷贝管理库</entry>
+          </row>
+          <row>
+            <entry>mod_authz_svn</entry>
+            <entry>使用WebDAV访问Subversion版本库的Apache授权模块</entry>
+          </row>
+          <row>
+            <entry>mod_dav_svn</entry>
+            <entry>影射WebDAV操作为Subversion操作的Apache模块</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table>
+
+    <para>单词<quote>各色各样的</quote>只在列表<xref linkend="svn.developer.layerlib.tbl-1"/>中出现过一次是一个好的迹象。Subversion开发团队非常注意将功能归入合适的层和库，或许模块化设计最大的好处就是从开发者的角度看减少了复杂性。作为一个开发者，你可以很快就描画出一副<quote>大图像</quote>，以便于你更精确地，也相对容易地找出某一功能所在的位置。</para>
+
+    <para>模块化的另一个好处是我们有能力去构造一个全新的，能够完全实现相同API功能的库，以替换整个给定的模块，而又不会影响基础代码。在某种意义上，Subversion已经这样做了。libsvn_ra_dav、libsvn_ra_local和libsvn_ra_svn all都实现了相同的接口，三者均与版本库层进行通讯&mdash;libsvn_ra_dav和libsvn_ra_svn通过网络，而libsvn_ra_local则是直接连接，libsvn_fs_base和libsvn_fs_fs是另外两个例子。
+   </para>
+
+    <para>客户端设计本身就给模块化设计理念增色不少，Subversion目前只是附带了一个命令行方式的客户端，但已经出现了一些由第三方开发的GUI客户端程序，这些GUI客户端程序全都使用了与原装命令行客户端程序相同的API。为了开发一个实用的Subversion客户端程序，对于绝大部分功能，仅使用Subversion的libsvn_client库就够了（见<xref
+      linkend="svn.developer.layerlib.client"/>）。</para>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.developer.layerlib.repos">
+      <title>版本库层</title>
+
+      <para>当提到Subversion版本库层时，我们通常会讨论两个库&mdash;版本库（函数）库和文件系统（函数）库。这两个库为你的版本控制数据的各个修订版本提供了存储和报告机制，该层通过版本库访问层连接到客户层，而且，从Subversion用户的角度看，这是资料存储过程中的<quote>链接的另一端</quote>。</para>
+
+      <para>Subversion文件系统通过libsvn_fs API来访问，它并不是一个安装在操作系统之上的内核级的文件系统（例如Linux ext2或NTFS），而是一个虚拟文件系统。它并未将<quote>文件</quote>和<quote>目录</quote>保存为真实的文件和目录（也就是用你熟知的shell程序可以浏览的那种），而是采用了一种抽象的后端存储方式，这个后端存储方式有两种&mdash;一个是Berkeley DB数据库环境，另一个是普通文件表示。（要了解更多关于版本库后端的信息，请看<xref
+        linkend="svn.reposadmin.basics.backends"/>）。除此之外，开发社区也非常有兴趣考虑在Subversion的未来版本 中提供某种使用其它后端数据库系统的能力，也许是开放式数据库连接（ODBC）的机制。</para>
+
+      <para>libsvn_fs支持的文件系统API包含了所有其他文件系统的功能：你可以创建和删除文件和目录、拷贝和移动、修改文件内容等等。它也包含了一些不太常用的特性，如对任意文件和目录添加、修改和删除元数据（<quote>properties</quote>）的能力。此外，Subversion文件系统是一个版本化的文件系统，意味着你修改你的目录树时，Subversion会记住修改以前的样子。等等，可以回到所有初始化版本库之后（且仅仅之后）的版本。</para>
+
+      <para>所有你对目录树的修改包含在Subversion事务的上下文中，下面描述了修改文件系统的例程：
+      </para>
+
+      <orderedlist>
+        <listitem>
+          <para>开始Subversion事务。</para>
+        </listitem>
+        <listitem>
+          <para>作出修改（添加、删除、属性修改等等。）。</para>
+        </listitem>
+        <listitem>
+          <para>提交事务。</para>
+        </listitem>
+      </orderedlist>
+
+      <para>一旦你提交了你的事务，你的文件系统修改就会永久的作为历史保存起来，每个这样的周期会产生一个新的树，所有的修订版本都是永远可以访问的一个不变的快照。</para>
+
+      <sidebar>
+        <title>事务其它</title>
+
+        <para>Subversion的事务概念，特别是在libsvn_fs中的数据库附近的代码，很容易与低层提供支持的数据库事务混淆。两种类型事务都提供了原子和隔离操作，换句话说，事务给你能力可以用<quote>全部或者没有</quote>样式执行一系列的动作&mdash;所有的动作都完全成功，或者是所有的<emphasis>没有</emphasis>发生&mdash;而且不会干扰别人操作数据。
+       </para>
+
+        <para>数据库事务通常围绕着一些对数据库本身的数据修改相关的小操作（如修改表行的内容），Subversion是更大范围的事务，围绕着一些高一级的操作，如下一个修订版本文件系统的一组文件和目录的修改。如果这还不是很混乱，考虑这个：Subversion在创建Subversion事务（所以如果Subversion创建事务失败，数据库会看起来我们从来没有尝试创建）时会使用一个数据库事务！
+       </para>
+
+        <para>很幸运的是用户的文件系统API，数据库提供的事务支持本身几乎完全从外表隐藏（也是一个完全模块化的模式所应该的）。只有当你开始研究文件系统本身的实现时，这些事情才可见（或者是开始感兴趣）。
+       </para>
+
+      </sidebar>
+
+      <para>大多数文件系统接口提供的功能作为一个动作发生在一个文件系统路径上，也就是，从文件系统的外部，描述和访问文件和目录独立版本的主要机制是经过如<filename>/foo/bar</filename>的路径，就像你在喜欢的shell程序中定位文件和目录。你通过传递它们的路径到相应的API功能来添加新的文件和目录，查询这些信息也是同样的机制。
+     </para>
+
+      <para>不像大多数文件系统，尽管，一个单独的路径不足以在Subversion定位一个文件或目录，可以把目录树看作一个二维的系统，一个节点的兄弟代表了一种从左到右的动作，并且递减到子目录是一个向下的动作，<xref linkend="svn.developer.layerlib.repos.dia-1"/>展示了一个典型的树的形式。
+     </para>
+
+      <figure id="svn.developer.layerlib.repos.dia-1">
+        <title>二维的文件目录</title>
+        <graphic fileref="images/ch08dia1.png"/>
+      </figure>
+
+      <para>当然，Subversion文件系统有一个其它文件系统所没有的第三维&mdash;时间！
+        <footnote>
+          <para>我们理解这一定会给科幻小说迷带来一个震撼，他们认为时间是<emphasis>第四</emphasis>维的，我们要为提出这样一个不同理论的断言而伤害了他们的作出道歉。
+         </para>
+        </footnote>
+        在一个文件系统接口，几乎所有的功能都有个<parameter>路径</parameter>参数，也期望一个<parameter>root</parameter>参数。<structname>svn_fs_root_t</structname>参数不仅描述了一个修订版本或一个Subversion事务（通常正好是一个修订版本），而且提供了用来区分修订版本32的<filename>/foo/bar</filename>和修订版本98在同样路径的三维上下文环境。<xref
+        linkend="svn.developer.layerlib.repos.dia-2"/>展示了修订版本历史作为添加的纬度进入到Subversion文件系统领域。
+        </para>
+
+      <figure id="svn.developer.layerlib.repos.dia-2">
+        <title>版本时间&mdash;第三维！</title>
+        <graphic fileref="images/ch08dia2.png"/>
+      </figure>
+
+      <!-- Perhaps dig into the DAG/tree layers a bit here, talking
+           about the hard-link design and how that affords such
+           pleasures as cheap copies.  If "bubble-up" isn't covered
+           twelve other times in the book, maybe give it a go here. -->
+
+      <para>像之前我们提到的，libsvn_fs的API感觉像是其它文件系统，只是有一个美妙的版本化能力。它设计为为所有对版本化的文件系统有兴趣的程序使用，不是巧合，Subversion本身也对这个功能很有兴趣。但是虽然文件系统API一定必须对基本的文件和目录版本化提供足够的支持，Subversion需要的更多&mdash;这是libsvn_repos到来的地方。
+     </para>
+
+      <para>Subversion版本库库（libsvn_repos）是文件系统功能的一个基本包裹库，这个库负责创建版本库布局，确定底层的文件系统已经初始化等等。Libsvn_repos也实现了一组钩子&mdash;当特定动作发生时版本库执行的脚本。这些脚本用来通知，授权或者任何版本库管理员期望的目的。版本库库提供的这些功能和小工具与版本化的文件系统关系不大，所以放到了自己的库里。
+     </para>
+      
+      <para>希望使用libsvn_repos的API的开发者会发现它不是文件系统的一个完全包裹，只有文件系统常规周期中的主要事件使用版本库接口包裹，如包括Subversion事务的创建和提交，修订版本属性的修改。这些特别的事件使用版本库库包裹是因为它们有一些关联的钩子，在将来，别的事件也将会使用版本库API包裹。所有其它的文件系统交互会直接通过libsvn_fs的API发生。
+     </para>
+
+      <para>举个例子，这里是使用版本库和文件系统接口创建文件系统新修订版本的代码块，新版本包括添加一个新目录。注意这个例子（和其它本书中的代码），这个<function>SVN_ERR()</function>宏只是简单的检查是否有一个非成功的错误从包裹的函数中返回，如果存在就会返回错误。
+     </para>
+
+      <example id="svn.developer.layerlib.repos.ex-1">
+        <title>使用版本库层</title>
+
+        <programlisting>
+/* Create a new directory at the path NEW_DIRECTORY in the Subversion
+   repository located at REPOS_PATH.  Perform all memory allocation in
+   POOL.  This function will create a new revision for the addition of
+   NEW_DIRECTORY.  */
+static svn_error_t *
+make_new_directory (const char *repos_path,
+                    const char *new_directory,
+                    apr_pool_t *pool)
+{
+  svn_error_t *err;
+  svn_repos_t *repos;
+  svn_fs_t *fs;
+  svn_revnum_t youngest_rev;
+  svn_fs_txn_t *txn;
+  svn_fs_root_t *txn_root;
+  const char *conflict_str;
+
+  /* Open the repository located at REPOS_PATH.  */
+  SVN_ERR (svn_repos_open (&amp;repos, repos_path, pool));
+
+  /* Get a pointer to the filesystem object that is stored in
+     REPOS.  */
+  fs = svn_repos_fs (repos);
+
+  /* Ask the filesystem to tell us the youngest revision that
+     currently exists.  */
+  SVN_ERR (svn_fs_youngest_rev (&amp;youngest_rev, fs, pool));
+
+  /* Begin a new transaction that is based on YOUNGEST_REV.  We are
+     less likely to have our later commit rejected as conflicting if we
+     always try to make our changes against a copy of the latest snapshot
+     of the filesystem tree.  */
+  SVN_ERR (svn_fs_begin_txn (&amp;txn, fs, youngest_rev, pool));
+
+  /* Now that we have started a new Subversion transaction, get a root
+     object that represents that transaction.  */
+  SVN_ERR (svn_fs_txn_root (&amp;txn_root, txn, pool));
+  
+  /* Create our new directory under the transaction root, at the path
+     NEW_DIRECTORY.  */
+  SVN_ERR (svn_fs_make_dir (txn_root, new_directory, pool));
+
+  /* Commit the transaction, creating a new revision of the filesystem
+     which includes our added directory path.  */
+  err = svn_repos_fs_commit_txn (&amp;conflict_str, repos, 
+                                 &amp;youngest_rev, txn, pool);
+  if (! err)
+    {
+      /* No error?  Excellent!  Print a brief report of our success.  */
+      printf ("Directory '%s' was successfully added as new revision "
+              "'%ld'.\n", new_directory, youngest_rev);
+    }
+  else if ((err-&gt;apr_err == SVN_ERR_FS_CONFLICT)
+    {
+      /* Uh-oh.  Our commit failed as the result of a conflict
+         (someone else seems to have made changes to the same area 
+         of the filesystem that we tried to modify).  Print an error
+         message.  */
+      printf ("A conflict occurred at path '%s' while attempting "
+              "to add directory '%s' to the repository at '%s'.\n", 
+              conflict_str, new_directory, repos_path);
+    }
+  else
+    {
+      /* Some other error has occurred.  Print an error message.  */
+      printf ("An error occurred while attempting to add directory '%s' "
+              "to the repository at '%s'.\n", 
+              new_directory, repos_path);
+    }
+
+  /* Return the result of the attempted commit to our caller.  */
+  return err;
+} 
+</programlisting>
+      </example>
+
+      <para>在前面的代码片断中，同时调用了版本库和文件系统接口，我们可以正像这样简单的用<function>svn_fs_commit_txn()</function>提交事务。但是文件系统的API对版本库库的钩子一无所知，如果你希望你的Subversion版本库在每次提交一个事务时自动执行一些非Subversion的任务（例如，给开发者邮件组发送一个描述事务修改的邮件），你需要使用libsvn_repos包裹的功能版本&mdash;<function>svn_repos_fs_commit_txn()</function>。这个功能会实际上首先运行一个如果存在的<literal>pre-commit</literal>钩子脚本，然后提交事务，最后会运行一个<literal>post-commit</literal>钩子脚本。钩子提供了一种特别的报告机制，不是真的属于核心文件系统库本身。（关于Subversion版本库钩子的更多信息，见<xref
+        linkend="svn.reposadmin.create.hooks" />。）</para>
+      
+      <para>钩子机制需求是从文件系统代码的其它部分中抽象出单独的版本库库的一个原因，libsvn_repos的API提供了许多其他有用的工具，它们可以做到：
+     </para>
+
+      <orderedlist>
+        <listitem>
+          <para>在Subversion版本库和版本库包括的文件系统的上创建、打开、销毁和执行恢复步骤。</para>
+        </listitem>
+        <listitem>
+          <para>描述两个文件系统树的区别。</para>
+        </listitem>
+        <listitem>
+          <para>关于所有（或者部分）修订版本中的文件系统中的一组文件的提交日志信息的查询</para>
+        </listitem>
+        <listitem>
+          <para>产生可读的文件系统<quote>导出</quote>，一个文件系统修订版本的完整展现。
+          </para>
+        </listitem>
+        <listitem>
+          <para>解析导出格式，加载导出的版本到一个不同的Subversion版本库。
+          </para>
+        </listitem>
+      </orderedlist>
+
+      <para>伴随着Subversion的发展，版本库库会随着文件系统提供更多的功能和配置选项而不断成长。
+      </para>
+
+    </sect2>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.developer.layerlib.ra">
+      <title>版本库访问层</title>
+
+      <para>如果说Subversion版本库层是在<quote>这条线的另一端</quote>，那版本库访问层就是这条线。负责在客户端库和版本库之间编码数据，这一层包括libsvn_ra模块加载模块，RA模块本身（现在包括了libsvn_ra_dav、libsvn_ra_local和libsvn_ra_svn），和所有一个或多个RA模块需要的附加库，例如与Apache模块mod_dav_svn通讯的libsvn_ra_dav或者是libsvn_ra_svn的服务器，<command>svnserve</command>。
+     </para>
+
+      <para>因为Subversion使用URL来识别版本库资源，URL模式的协议部分（通常是<literal>file:</literal>、<literal>http:</literal>、<literal>https:</literal>或<literal>svn:</literal>）用来监测那个RA模块用来处理通讯。每个模块注册一组它们知道如何<quote>说话</quote>的协议，所以RA加载器可以在运行中监测在手边的任务中使用哪个模块。通过运行<command>svn --version</command>，你可以监测Subversion命令行客户端所支持的RA模块和它们声明支持的协议：</para>
+     
+      <screen>
+$ svn --version
+svn, version 1.2.3 (r15833)
+   compiled Sep 13 2005, 22:45:22
+
+Copyright (C) 2000-2005 CollabNet.
+Subversion is open source software, see http://subversion.tigris.org/
+This product includes software developed by CollabNet (http://www.Collab.Net/).
+
+The following repository access (RA) modules are available:
+
+* ra_dav : Module for accessing a repository via WebDAV (DeltaV) protocol.
+  - handles 'http' scheme
+  - handles 'https' scheme
+* ra_svn : Module for accessing a repository using the svn network protocol.
+  - handles 'svn' scheme
+* ra_local : Module for accessing a repository on local disk.
+  - handles 'file' scheme
+
+</screen>
+    
+      <sect3 id="svn.developer.layerlib.ra.dav">
+        <title>RA-DAV（使用HTTP/DAV版本库访问）</title>
+
+        <para>libsvn_ra_dav库是给在不同机器使用<literal>http:</literal>或<literal>https:</literal>协议访问服务器的用户设计的，为了理解这个模块的工作，我们首先要知道这种版本库访问层中的特定配置的关键组成部分&mdash;强大的Apache HTTP服务器，和Neon HTTP/WebDAV客户端库。</para>
+  
+        <para>Subversion的主要网络服务器是Apache HTTP服务器，Apache是久经考验的用来认真使用的开源服务器，它可以支撑很大的网络压力并且可以运行在多种平台。Apache服务器支持多种认证协议，而且可以通过模块扩展使用其它协议。它也支持流水线和缓存之类的网络优化。通过将Apache作为服务器，Subversion轻易得到这些特性。而且因为许多防火墙已经允许HTTP通过，系统管理员通常不会改变防火墙设置来允许Subversion工作。</para>
+  
+        <para>Subversion使用HTTP和WebDAV（和DeltaV）来与Apache服务器通讯，你可以在本章的WebDAV读到更多信息，但简而言之，WebDAV和DeltaV是标准HTTP 1.1协议的扩展，允许在web上对文件进行分享和版本操作。Apache 2.0版随着一个mod_dav，一个Apache理解HTTP DAV扩展的模块，Subversion本身提供了mod_dav_svn，尽管，这是另一个Apache模块，它与mod_dav结合（实际上mod_dav_svn是作为后端支持）使用来提供Subversion对WebDAV和DeltaV的实现。</para>
+
+        <para>当与版本库通过HTTP通讯时，RA加载器库选择libsvn_ra_dav作为正确的访问模块，Subversion客户端调用原始的RA接口，libsvn_ra_dav把这些调用（包含了大量Subversion操作）影射为一系列HTTP/WebDAV请求。使用Neon库，libsvn_ra_dav把这些请求传递到Apache服务器，Apache接受到这些请求（就像平时web服务器常做的那样处理原始的HTTP请求），注意到这些请求的URL已经配置为DAV的位置（使用<filename>httpd.conf</filename>的<literal>&lt;Location&gt;</literal>指示），并且会使用自己的mod_dav模块来处理。当正确的配置了mod_dav使之知道了使用mod_dav_svn来处理所有文件系统相关的要求，而不是使用默认的Apache自带的原始mod_dav_fs来处理。所以最终客户端是与mod_dav_svn通讯，直接与Subversion版本库层绑定。</para>
+  
+        <para>有一个实际交换发生的简单描述，举个例子，Subversion版本库可以使用Apache的授权指示进行保护。这会导致初始的与版本库的通讯会被Apache的授权基础拒绝，在此刻，libsvn_ra_dav将提供不足鉴定的通知返回，并且回调客户端层来得到一些更新的认证数据。如果数据是正确提供，而且用户有访问的权限，会赋予libsvn_ra_dav的下一个对原操作的自动尝试权限，并且一切会很好。如果足够的认证信息不能提供，请求会最后失败，客户端也会报告给用户失败信息。</para>
+  
+        <!-- A diagram here? -->
+  
+        <para>通过使用Neon和Apache，Subversion在许多其它领域的轻易得到复杂的功能。举个例子，如果Neon找到OpenSSL库，它允许Subversion客户端尝试与Apache服务器（它自己的mod_ssl<quote>可以说这个语言</quote>）使用SSL加密的通讯。Neon本身和Apache的mod_deflate都可以理解<quote>deflate</quote>算法（PKZIP和gzip共同使用的程序），所以请求可以压缩块方式传输。其它Subversion今后希望支持的复杂特性包括，自动处理服务器重定向（举个例子，当版本库转移到一个新的规范URL）和利用HTTP流水线的能力。
+       </para>
+  
+        <!-- Talk about another difference between CVS and Subversion.
+             CVS users had to specify which auth mechanism to use
+             (with :ext: vs. :pserver:) and whether or not to use
+             compressed communications (with the -z option).  In
+             Subversion, Apache takes some of that responsibility.
+             The server will tell the client whether it can understand
+             compression, and ... hmm.  Is this really true? -->
+
+      </sect3>
+
+      <sect3 id="svn.developer.layerlib.ra.svn">
+        <title>RA-SVN（自定义协议版本库访问）</title>
+
+        <para>作为标准HTTP/WebDAV协议的补充，Subversion也提供了一个使用自定义协议的RA实现，libsvn_ra_svn模块实现了自己的网络套接字连接，与一个独立服务器通讯&mdash;<filename>svnserve</filename>程序&mdash;在存放版本库的机器上。客户端可以使用<literal>svn://</literal>访问版本库。
+       </para>
+
+        <para>这个RA实现缺乏前面小节提到的Apache的大多数优点；然而虽然如此，系统管理员会非常有兴趣，因为这配置和运行异常的简单；设置一个<filename>svnserve</filename>几乎是立刻的，它与Apache相比也是非常的小（从代码长度这方面说），让它非常容易进行安全或其它方面原因的审核。此外，一些系统管理员或许已经有了一个SSH安全基础，希望Subversion使用它，客户端使用ra_svn可以容易的使用SSH封装这个协议。
+       </para>
+
+      </sect3>
+
+      <sect3 id="svn.developer.layerlib.ra.local">
+        <title>RA-Local（直接版本库访问）</title>
+
+        <para>并不是所有与Subversion版本库的通讯需要服务器进程和一个网络层。用户如果只是希望简单的访问本地磁盘的版本库，他们会使用<literal>file:</literal>的URL和libsvn_ra_local提供的功能。RA模块直接与版本库和文件系统库绑定，所以不需要网络通讯。
+       </para>
+
+        <para>Subversion需要服务器名称成为<literal>file:</literal>的URL的一部分，是<literal>localhost</literal>或者是为空。换句话说，你的URL必须看起来如<literal>file://localhost/path/to/repos</literal>或者<literal>file:///path/to/repos</literal>。
+       </para>
+
+        <para>也必须意识到Subversion的<literal>file:</literal> URL不能和在普通的web服务器中的<literal>file:</literal> URL一样工作。当你尝试在web服务器查看一个<literal>file:</literal>的URL，它会通过直接检测文件系统读取和显示那个位置的文件内容，但是Subversion的资源存在于虚拟文件系统（见<xref
+          linkend="svn.developer.layerlib.repos" />）中，你的浏览器不会理解怎样读取这个文件系统。
+          </para>
+
+      </sect3>
+
+      <sect3 id="svn.developer.layerlib.ra.yours">
+        <title>你的RA库在这里</title>
+
+        <para>对那些一直希望使用另一个协议来访问Subversion版本库的人，正好是为什么版本库访问层是模块化的！开发者可以简单的编写一个新的库来在一侧实现RA接口并且与另一侧的版本库通讯。你的新库可以使用存在的网络协议，或者发明你自己的。你可以使用进程间的通讯调用，或者&mdash;让我们发狂，我们会吗？&mdash;你甚至可以实现一个电子邮件为基础的协议，Subversion提供了API，你提供创造性。
+       </para>
+
+      </sect3>
+    </sect2>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.developer.layerlib.client">
+      <title>客户端层</title>
+      
+      <para>在客户端这一面，Subversion工作拷贝是所有动作发生的地方。大多数客户端库实现的功能是为了管理工作拷贝的目的实现的&mdash;满是文件子目录的目录是一个或多个版本库位置的可编辑的本地<quote>影射</quote>&mdash;从版本库访问层来回传递修改。
+     </para>
+
+      <para>Subversion的工作拷贝库，libsvn_wc直接负责管理工作拷贝的数据，为了完成这一点，库会在工作拷贝的每个目录的特殊子目录中保存关于工作拷贝的管理性信息。这个子目录叫做<filename>.svn</filename>，出现在所有工作拷贝目录里，保存了各种记录了状态和用来在私有工作区工作的文件和目录。对那些熟悉CVS的用户，<filename>.svn</filename>子目录与<filename>CVS</filename>工作拷贝管理目录的作用类似，关于<filename>.svn</filename>管理区域的更多信息，见本章的<xref
+        linkend="svn.developer.insidewc"/>。
+        </para>
+
+      <para>Subversion客户端库libsvn_client具备最广泛的职责；它的工作是结合工作拷贝库和版本库访问库的功能，然后为希望普通版本控制的应用提供最高级的API。举个例子，<function>svn_client_checkout()</function>方法是用一个URL作为参数，传递这个URL到RA层然后在特定版本库打开一个会话。然后向版本库要求一个特定的目录树，然后把目录树发送给工作拷贝库，然后把完全的工作拷贝写到磁盘（<filename>.svn</filename>目录和一切）。</para>
+
+      <para>客户端库是为任何程序使用设计的，尽管Subversion的源代码包括了一个标准的命令行客户端，用客户端库编写GUI客户端也是很简单，Subversion新的GUI（或者任何新的客户端，真的）不需要紧密围绕包含的命令行客户端&mdash;他们对具有相同功能、数据和回调机制的libsvn_client的API有完全的访问权利。
+     </para>
+
+      <sidebar>
+        <title>直接绑定&mdash;关于正确性</title>
+
+        <para>为什么GUI程序要直接访问libsvn_client而不以命令行客户端的包裹运行？除了效率以外，这也关系到潜在的正确性问题。一个命令行客户端程序（如Subversion提供的）如果绑定了客户端库，需要将反馈和请求数据字节从C翻译为可读的输出，这种翻译是有损耗的，程序不能得到API所提供的所有信息，或者是得到紧凑的信息。
+       </para>
+
+        <para>如果你已经包裹了这样一个命令行程序，第二个程序只能访问已经经过解释的（如我们提到的，不完全）信息，需要<emphasis>再次</emphasis>转化为<emphasis>它本身的</emphasis>展示格式。由于各层的包裹，原始数据的完整性越来越难以保证，结果很像对喜欢的录音带或录像带反复的拷贝（一个拷贝&hellip;）。
+       </para>
+
+      </sidebar>
+
+    </sect2>
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.developer.usingapi">
+    <title>使用API</title>
+
+    <para>使用Subversion库API开发应用看起来相当的直接，所有的公共头文件放在源文件的<filename>subversion/include</filename>目录，从源代码编译和安装Subversion本身，需要这些头文件拷贝到系统位置。这些头文件包括了所有用户可以访问的功能和类型。
+   </para>
+
+    <para>你首先应该注意Subversion的数据类型和方法是命名空间保护的，每一个公共Subversion对象名以<literal>svn_</literal>开头，然后紧跟一个这个对象定义（如<literal>wc</literal>、<literal>client</literal>和<literal>fs</literal>其他）所在的库的简短编码，然后是一个下划线（<literal>_</literal>）和后面的对象名称。半公开的方法（库使用，但是但库之外代码不可以使用并且只可以在库自己的目录看到）与这个命名模式不同，并不是库代码之后紧跟一个下划线，他们是用两个下划线（<literal>__</literal>）。给定源文件的私有方法没有特殊前缀，使用<literal>static</literal>声明。当然，一个编译器不会关心命名习惯，只是用来区分给定方法或数据类型。
+   </para>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.developer.usingapi.apr">
+      <title>Apache可移植运行库</title>
+      <para>伴随Subversion自己的数据类型，你会看到许多<literal>apr</literal>开头的数据类型引用&mdash;来自Apache可移植运行库（APR）的对象。APR是Apache可移植运行库，源自为了服务器代码的多平台性，尝试将不同的操作系统特定字节与操作系统无关代码隔离。结果就提供了一个基础API的库，只有一些适度区别&mdash;或者是广泛的&mdash;来自各个操作系统。Apache HTTP服务器很明显是APR库的第一个用户，Subversion开发者立刻发现了使用APR库的价值。意味着Subversion没有操作系统特定的代码，也意味着Subversion客户端可以在Server存在的平台编译和运行。当前这个列表包括，各种类型的Unix、Win32、OS/2和Mac OS X。
+     </para>
+
+      <para>除了提供了跨平台一致的系统调用，
+        <footnote>
+          <para>Subversion使用尽可能多ANSI系统调用和数据类型。
+          </para>
+        </footnote>
+        APR给Subversion对多种数据类型有快速的访问，如动态数组和哈希表。Subversion在代码中广泛使用这些类型，但是或许大多数普遍深入的APR数据类型可以在所有的Subversion的API原型中发现，是<structname>apr_pool_t</structname>&mdash;APR内存池，Subversion使用内部缓冲池用来进行内存分配（除非外部库在API传递参数时需要一个不同的内存管理模式），
+        <footnote>
+          <para>Neon和Berkeley DB就是这种库的例子。</para>
+        </footnote>
+        而且一个人如果针对Subversion的API编码不需要做同样的事情，他们可以在需要时给API提供缓冲池，这意味着Subversion的API使用者也必须链接到APR，必须调用<function>apr_initialize()</function>来初始化APR字系统，然后必须得到一个缓冲池用来进行Subversion的API调用。详情见<xref linkend="svn.developer.pools"/>。
+       </para>
+
+    </sect2>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.developer.usingapi.urlpath">
+      <title>URL和路径需求</title>
+
+      <para>因为分布式版本控制操作是Subversion存在的重点，有意义来关注一下国际化（i18n）支持。毕竟，当<quote>分布式</quote>或许意味着<quote>横跨办公室</quote>，它也意味着<quote>横跨全球</quote>。为了更容易一点，Subversion的所有公共接口只接受路径参数,这些参数是传统的，使用UTF-8编码。这意味着，举个例子，任何新的使用libsvn_client接口客户端库，在把这些参数传递给Subversion库前，需要首先将路径从本地代码转化为UTF-8代码，然后将Subversion传递回来的路径转换为本地代码，很幸运，Subversion提供了一组任何程序可以使用的转化方法（见<filename>subversion/include/svn_utf.h</filename>）。</para>
+
+      <para>同样，Subversion的API需要所有的URL参数是正确的URI编码，所以，我们不会传递<systemitem
+        class="url">file:///home/username/My File.txt</systemitem>作为<literal>My File.txt</literal>的URL，而会传递<systemitem
+        class="url">file:///home/username/My%20File.txt</systemitem>。再次，Subversion提供了一些你可以使用的助手方法&mdash;<function>svn_path_uri_encode()</function>和<function>svn_path_uri_decode()</function>，分别用来URI的编码和解码。
+       </para>
+    </sect2>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.developer.usingapi.otherlangs">
+      <title>使用C和C++以外的语言</title> 
+
+      <para>除C语言以外，如果你对使用其他语言结合Subversion库感兴趣&mdash;如Python脚本或是Java应用&mdash;Subversion通过简单包裹生成器（SWIG）提供了最初的支持。Subversion的SWIG绑定位于<filename>subversion/bindings/swig</filename>，并且慢慢的走向成熟进入可用状态。这个绑定允许你直接调用Subversion的API方法，使用包裹器会把脚本数据类型转化为Subversion需要的C语言库类型。</para>
+
+      <para>通过语言绑定访问Subversion的API有一个明显的好处&mdash;简单性。通常来讲，Python和Perl之类的语言比C和C++更加的灵活和简单，这些语言的高级数据类型和上下文驱动类型更加易于处理用户提供的信息，就像你知道的，人们精于把程序搞坏，脚本语言可以更优雅的处理这些错误信息，当然，灵活性经常带来性能的损失，这就是为什么使用紧密优化的，C基础的接口和库组件，然后与一种高效的、灵活的绑定语言，是这样的吸引人。</para>
+
+
+      <para>让我们看看Subversion的Python SWIG绑定的实例，这个例子迭代遍历最新的修订版本，并且打印遍历到的路径。</para>
+
+      <example id="svn.developer.usingapi.otherlangs.ex-1">
+        <title>使用Python处理版本库层</title>
+
+        <programlisting>
+#!/usr/bin/python
+
+"""Crawl a repository, printing versioned object path names."""
+
+import sys
+import os.path
+import svn.fs, svn.core, svn.repos
+
+def crawl_filesystem_dir(root, directory, pool):
+    """Recursively crawl DIRECTORY under ROOT in the filesystem, and return
+    a list of all the paths at or below DIRECTORY.  Use POOL for all 
+    allocations."""
+
+    # Print the name of this path.
+    print directory + "/"
+    
+    # Get the directory entries for DIRECTORY.
+    entries = svn.fs.svn_fs_dir_entries(root, directory, pool)
+
+    # Use an iteration subpool.
+    subpool = svn.core.svn_pool_create(pool)
+
+    # Loop over the entries.
+    names = entries.keys()
+    for name in names:
+        # Clear the iteration subpool.
+        svn.core.svn_pool_clear(subpool)
+
+        # Calculate the entry's full path.
+        full_path = directory + '/' + name
+
+        # If the entry is a directory, recurse.  The recursion will return
+        # a list with the entry and all its children, which we will add to
+        # our running list of paths.
+        if svn.fs.svn_fs_is_dir(root, full_path, subpool):
+            crawl_filesystem_dir(root, full_path, subpool)
+        else:
+            # Else it's a file, so print its path here.
+            print full_path
+
+    # Destroy the iteration subpool.
+    svn.core.svn_pool_destroy(subpool)
+
+def crawl_youngest(pool, repos_path):
+    """Open the repository at REPOS_PATH, and recursively crawl its
+    youngest revision."""
+    
+    # Open the repository at REPOS_PATH, and get a reference to its
+    # versioning filesystem.
+    repos_obj = svn.repos.svn_repos_open(repos_path, pool)
+    fs_obj = svn.repos.svn_repos_fs(repos_obj)
+
+    # Query the current youngest revision.
+    youngest_rev = svn.fs.svn_fs_youngest_rev(fs_obj, pool)
+    
+    # Open a root object representing the youngest (HEAD) revision.
+    root_obj = svn.fs.svn_fs_revision_root(fs_obj, youngest_rev, pool)
+
+    # Do the recursive crawl.
+    crawl_filesystem_dir(root_obj, "", pool)
+    
+if __name__ == "__main__":
+    # Check for sane usage.
+    if len(sys.argv) != 2:
+        sys.stderr.write("Usage: %s REPOS_PATH\n"
+                         % (os.path.basename(sys.argv[0])))
+        sys.exit(1)
+
+    # Call the app-wrapper, which takes care of APR initialization/shutdown
+    # and the creation and cleanup of our top-level memory pool.
+    svn.core.run_app(crawl_youngest, os.path.normpath(sys.argv[1]))
+
+</programlisting>
+      </example>
+
+      <para>This same program in C would need to deal with custom
+        datatypes (such as those provided by the APR library) for
+        representing the hash of entries and the list of paths, but
+        Python has hashes (called <quote>dictionaries</quote>) and
+        lists as built-in datatypes, and provides a rich collection of
+        functions for operating on those types.  So SWIG (with the
+        help of some customizations in Subversion's language bindings
+        layer) takes care of mapping those custom datatypes into the
+        native datatypes of the target language.  This provides a more
+        intuitive interface for users of that language.</para>
+
+      <para>The Subversion Python bindings can be used for working
+        copy operations, too.  In the previous section of this
+        chapter, we mentioned the <filename>libsvn_client</filename>
+        interface, and how it exists for the sole purpose of
+        simplifying the process of writing a Subversion client.  The
+        following is a brief example of how that library can be
+        accessed via the SWIG bindings to recreate a scaled-down
+        version of the <command>svn status</command> command.</para>
+
+
+<example id="svn.developer.usingapi.otherlangs.ex-2">
+        <title>A Python Status Crawler</title>
+
+        <programlisting>
+#!/usr/bin/env python
+
+"""Crawl a working copy directory, printing status information."""
+
+import sys
+import os.path
+import getopt
+import svn.core, svn.client, svn.wc
+
+def generate_status_code(status):
+    """Translate a status value into a single-character status code,
+    using the same logic as the Subversion command-line client."""
+
+    if status == svn.wc.svn_wc_status_none:
+        return ' '
+    if status == svn.wc.svn_wc_status_normal:
+        return ' '
+    if status == svn.wc.svn_wc_status_added:
+        return 'A'
+    if status == svn.wc.svn_wc_status_missing:
+        return '!'
+    if status == svn.wc.svn_wc_status_incomplete:
+        return '!'
+    if status == svn.wc.svn_wc_status_deleted:
+        return 'D'
+    if status == svn.wc.svn_wc_status_replaced:
+        return 'R'
+    if status == svn.wc.svn_wc_status_modified:
+        return 'M'
+    if status == svn.wc.svn_wc_status_merged:
+        return 'G'
+    if status == svn.wc.svn_wc_status_conflicted:
+        return 'C'
+    if status == svn.wc.svn_wc_status_obstructed:
+        return '~'
+    if status == svn.wc.svn_wc_status_ignored:
+        return 'I'
+    if status == svn.wc.svn_wc_status_external:
+        return 'X'
+    if status == svn.wc.svn_wc_status_unversioned:
+        return '?'
+    return '?'
+
+def do_status(pool, wc_path, verbose):
+    # Calculate the length of the input working copy path.
+    wc_path_len = len(wc_path)
+
+    # Build a client context baton.
+    ctx = svn.client.svn_client_ctx_t()
+
+    def _status_callback(path, status, root_path_len=wc_path_len):
+        """A callback function for svn_client_status."""
+
+        # Print the path, minus the bit that overlaps with the root of
+        # the status crawl
+        text_status = generate_status_code(status.text_status)
+        prop_status = generate_status_code(status.prop_status)
+        print '%s%s  %s' % (text_status, prop_status, path[wc_path_len + 1:])
+        
+    # Do the status crawl, using _status_callback() as our callback function.
+    svn.client.svn_client_status(wc_path, None, _status_callback,
+                                 1, verbose, 0, 0, ctx, pool)
+
+def usage_and_exit(errorcode):
+    """Print usage message, and exit with ERRORCODE."""
+    stream = errorcode and sys.stderr or sys.stdout
+    stream.write("""Usage: %s OPTIONS WC-PATH
+Options:
+  --help, -h    : Show this usage message
+  --verbose, -v : Show all statuses, even uninteresting ones
+""" % (os.path.basename(sys.argv[0])))
+    sys.exit(errorcode)
+    
+if __name__ == '__main__':
+    # Parse command-line options.
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hv", ["help", "verbose"])
+    except getopt.GetoptError:
+        usage_and_exit(1)
+    verbose = 0
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            usage_and_exit(0)
+        if opt in ("-v", "--verbose"):
+            verbose = 1
+    if len(args) != 1:
+        usage_and_exit(2)
+            
+    # Call the app-wrapper, which takes care of APR initialization/shutdown
+    # and the creation and cleanup of our top-level memory pool.
+    svn.core.run_app(do_status, os.path.normpath(args[0]), verbose)
+</programlisting>
+      </example>
+
+      <para>非常不幸，Subversion的语言绑定缺乏对核心Subversion模块的关注，但是，
+        However, there have been significant efforts towards creating
+        functional bindings for Python, Perl, and Ruby.  To some extent,
+        the work done preparing the SWIG interface files for the these
+        languages is reusable in efforts to generate bindings for other
+        languages supported by SWIG (which includes versions of C#,
+        Guile, Java, MzScheme, OCaml, PHP, Tcl, and others).
+        However, some extra programming is required to compensate for
+        complex APIs that SWIG needs some help interfacing with.  For
+        more information on SWIG itself, see the project's website at
+        <ulink url="http://www.swig.org/"/>.</para>
+
+    </sect2>
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.developer.insidewc">
+    <title>进入工作拷贝的管理区</title>
+    
+    <para>像我们前面提到的，每个Subversion工作拷贝包含了一个特别的子目录叫做<filename>.svn</filename>，这个目录包含了关于工作拷贝目录的管理数据，Subversion使用<filename>.svn</filename>中的信息来追踪如下的数据：
+   </para>
+
+    <itemizedlist>
+      <listitem>
+        <para>工作拷贝中展示的目录和文件在版本库中的位置。</para>
+      </listitem>
+      <listitem>
+        <para>工作拷贝中当前展示的文件和目录的修订版本。</para>
+      </listitem>
+      <listitem>
+        <para>所有附加在文件和目录上的用户定义属性。</para>
+      </listitem>
+      <listitem>
+        <para>初始（未编辑）的工作拷贝文件的拷贝。</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>然而<filename>.svn</filename>目录中还有一些其他的数据，我们会考察一些最重要的项目。
+    </para>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.developer.insidewc.entries">
+      <title>条目文件</title>
+
+      <para>或许<filename>.svn</filename>目录中最重要的单个文件就是<filename>entries</filename>了，这个条目文件是一个XML文档，包含了关于工作拷贝中的版本化的资源的大多数管理性信息，这个文件保留了版本库URL、原始修订版本、可知的最后提交信息（作者、修订版本和时间戳）和本地拷贝历史&mdash;实际上是Subversion客户端关于一个版本化（或者是将要版本化的）资源的所有感兴趣的信息！</para>
+
+      <sidebar>
+        <title>比较Subversion和CVS的管理区域</title>
+
+        <para>扫视一下典型的<filename>.svn</filename>目录会发现比CVS在<filename>CVS</filename>目录中的内容多一些，<filename>entries</filename>文件包含的XML描述了工作拷贝目录的当前状态，而且基本上合并了CVS的<filename>Entries</filename>、<filename>Root</filename>和<filename>Repository</filename>的功能。
+       </para>
+
+      </sidebar>
+
+      <para>如下是一个实际条目文件的例子：
+      </para>
+
+      <example id="svn.developer.insidewc.entries.ex-1">
+        <title>典型的<filename>.svn/entries</filename>文件内容</title>
+        <programlisting>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;wc-entries
+   xmlns="svn:"&gt;
+&lt;entry
+   committed-rev="1"
+   name=""
+   committed-date="2005-04-04T13:32:28.526873Z"
+   url="http://svn.red-bean.com/repos/greek-tree/A/D"
+   last-author="jrandom"
+   kind="dir"
+   uuid="4e820d15-a807-0410-81d5-aa59edf69161"
+   revision="1"/&gt;
+&lt;entry
+   name="lambda"
+   copied="true"
+   kind="file"
+   copyfrom-rev="1"
+   schedule="add"
+   copyfrom-url="http://svn.red-bean.com/repos/greek-tree/A/B/lambda"/&gt;
+&lt;entry
+   committed-rev="1"
+   name="gamma"
+   text-time="2005-12-11T16:32:46.000000Z"
+   committed-date="2005-04-04T13:32:28.526873Z"
+   checksum="ada10d942b1964d359e048dbacff3460"
+   last-author="jrandom"
+   kind="file"
+   prop-time="2005-12-11T16:32:45.000000Z"/&gt;
+&lt;entry
+   name="zeta"
+   kind="file"
+   schedule="add"
+   revision="0"/&gt;
+&lt;entry
+   name="G"
+   kind="dir"/&gt;
+&lt;entry
+   name="H"
+   kind="dir"
+   schedule="delete"/&gt;
+&lt;/wc-entries&gt;
+</programlisting>
+      </example>
+
+      <para>就像你能看到的，条目文件本质上是一列条目，每个<sgmltag>entry</sgmltag>标签代表了下面三者之一的事情：工作拷贝目录本身（叫做<quote>本目录</quote>条目，并且<structfield>name</structfield>属性的值为空），工作拷贝目录中的一个文件（通过<structfield>kind</structfield>属性设置为<literal>"file"</literal>来标示），或者是工作拷贝中的一个子目录（<structfield>kind</structfield>这时设置为<literal>"dir"</literal>）。所有在这个文件标记的文件和子目录都是已经纳入版本控制或者是（上面例子中的<filename>zeta</filename>）预定在下次提交加入到版本控制。每个条目都有一个唯一的名字，每个条目有一个kind节点。
+     </para>
+
+      <para>开发者必须意识到一些Subversion读写<filename>entries</filename>文件的特殊规则，每个条目都有一个修订版本和URL与之关联，注意在上面实例文件中并不是每个<sgmltag>entry</sgmltag>标签都有明确的<structfield>revision</structfield>或<structfield>url</structfield>属性，Subversion允许一些情况不明确的说明这个两个属性，如属性值与<quote>本目录</quote>的值相同（<structfield>revision</structfield>的情况）或者是可以从<quote>本目录</quote>简单计算<footnote>
+          <para>也就是，这个条目的URL就是父目录与名称合并。</para>
+        </footnote>出的来（<structfield>url</structfield>）。注意对于子目录条目，Subversion只保管最重要的信息&mdash;名称、类型、URL、修订版本和日程。为了减少重复信息，Subversion指示当要检测目录信息时会跑到这个子目录自己的<filename>.svn/entries</filename>的<quote>本目录</quote>条目。当然了，对这个子目录的引用还是会保存在父目录的<filename>entries</filename>文件，这些信息足以在子目录丢失后执行基本的版本操作。</para>
+
+    </sect2>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.developer.insidewc.base-and-props">
+      <title>原始拷贝和属性文件</title>
+
+      <para>如我们前面提到的，<filename>.svn</filename>也包含了一些原始的<quote>text-base</quote>文件版本，可以在<filename>.svn/text-base</filename>看到。这些原始文件的好处是多方面的&mdash;察看本地修改和区别不需要经过网络访问，减少传递修改时的数据&mdash;但是随之而来的代价是每个版本化的文件都在磁盘至少保存两次，现在看来这是对大多数文件可以忽略不计的一个惩罚。但是，当你版本控制的文件增多之后形势会变得很严峻，我们已经注意到了应该可以选择使用<quote>text-base</quote>，但是具有讽刺意味的是，当版本化文件增大时，<quote>text-base</quote>文件的存在会更加重要&mdash;谁会希望在提交一个小修改时在网络上传递一个大文件？
+      </para>
+
+      <para>同<quote>text-base</quote>文件的用途一样的还有属性文件和它们的<quote>prop-base</quote>拷贝，分别位于<filename>.svn/props</filename>和<filename>.svn/prop-base</filename>。因为目录也有属性，所以也有<filename>.svn/dir-props</filename>和<filename>.svn/dir-prop-base</filename>文件。所有的属性文件（<quote>working</quote>和<quote>base</quote>版本）都使用同样的<quote>hash-on-disk</quote>文件格式来排序属性名称和值。</para>
+
+    </sect2>
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.developer.webdav">
+    <title>WebDAV</title>
+
+    <para>WebDAV（<quote>Web-based Distributed Authoring
+      and Versioning</quote>的缩写）是一个标准HTTP协议的扩展，把web变成一个可读写的媒体，作为当今基本的只读媒体的替代。原理就是目录和文件时可以共享的&mdash;都是可读写的对象&mdash;通过web。RFCs2518和3253描述了WebDAV/DeltaV 对于HTTP的扩展，存放于（随之有许多其它有用的信息）<ulink url="http://www.webdav.org/"/>。</para>
+
+    <para>已经有一些操作系统文件浏览器可以使用WebDAV装配网络目录，在Win32中，Windows浏览器可以像普通共享文件夹一样浏览叫做网络文件夹（只是一个设置好WebDAV的网络位置）的目录，在Mac OS X也有这个能力，就像Nautilus和Konqueror作的（分别对应GNOME和KDE）。
+   </para>
+
+    <para>这些是如何应用到Subversion中的呢？mod_dav_svn的Apache模块使用HTTP，通过WebDAV和DeltaV扩展，作为它的网络协议之一，Subversion使用mod_dav_svn在Subversion的版本概念和RFCs 2518和3253对应部分建立影射。
+    </para>
+
+    <para>关于WebDAV的完全讨论，工作原理和Subversion如何使用，可以看<xref linkend="svn.webdav"/>。在其他事情中，附录讨论了Subversion与一般的WebDAV规范结合的程度，和这些是如何影响普通WebDAV客户端的交互性。</para>
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.developer.pools">
+    <title>使用内存池编程</title>
+
+    <para>几乎每一个使用过C语言的开发者曾经感叹令人畏缩的内存管理，分配足够的内存，并且追踪内存的分配，在不需要时释放内存&mdash;这个任务会非常复杂。当然，如果没有正确地做到这一点会导致程序毁掉自己，或者更加严重一点，把电脑搞瘫。幸运的是，Subversion所依赖的APR库为了移植性提供了<structname>apr_pool_t</structname>类型，代表了应用可以分配内存的池。
+   </para>
+
+    <para>一个内存池是程序所需要分配内存的一个抽象表示，不选择使用标准的<function>malloc()</function>从操作系统直接申请内存，而使用向APR申请的池申请创建的（使用<function>apr_pool_create()</function>方法）内存。APR会从操作系统分配合适的内存块这些内存可以立刻在程序里使用，当程序需要更多的池内存时，它会使用APR的池API方法，如<function>apr_palloc()</function>，返回池中的基本内存位置，这个程序可以继续从池中请求内存，在超过最初的池的容量后，APR会自动满足程序的要求扩大池的大小，直到系统没有足够的内存。</para>
+
+    <para>现在，如果这是池故事的结尾，我们就不应该再作过多的关注，很幸运，不是这个情况。池不可以仅仅被创建；它也可以被清空和销毁，分别使用<function>apr_pool_clear()</function>和<function>apr_pool_destroy()</function>。这给了用户灵活性来分配许多&mdash;或者是数千&mdash;东西自这个池，然后使用一个命令来清空！更进一步，池可以分级，你可以为前一步创建的池创建<quote>子池</quote>。当你清空一个池，所有的子池会被销毁；如果你销毁一个池，它和所有的子池也会被销毁。</para>
+
+    <para>在我们进一步研究之前，开发者会发现在Subversion源代码中并没有对前面提到的APR池方法有很多的调用，APR提供了许多扩展机制，像使用自定义的附加到池的<quote>用户数据</quote>的能力，注册当池销毁时的所要调用的清理方法的机制，Subversion使用一些不太琐碎的方法来利用这些扩展，所以Subversion提供了（大多数代码使用的）包裹方法<function>svn_pool_create()</function>、<function>svn_pool_clear()</function>和<function>svn_pool_destroy()</function>。</para>
+
+    <para>尽管池帮助我们基本的内存管理，池的创建确实投射出了循环和迭代场景，因为反复在循环中经常没有界限，在深度迭代中，一定区域的内存消耗变得不可预料，很幸运，使用嵌套的内存池可以简单的管理这种潜在的混乱情形，下面的例子描述了在这个情形下嵌套池的基本使用非常平常&mdash;迭代的对目录树的遍历，对树上的每一个部分做一些任务。
+   </para>
+
+    <example id="svn.developer.pools.ex-1">
+      <title>有效地池使用</title>
+      <programlisting>
+/* Recursively crawl over DIRECTORY, adding the paths of all its file
+   children to the FILES array, and doing some task to each path
+   encountered.  Use POOL for the all temporary allocations, and store
+   the hash paths in the same pool as the hash itself is allocated in.  */
+static apr_status_t 
+crawl_dir (apr_array_header_t *files,
+           const char *directory,
+           apr_pool_t *pool)
+{
+  apr_pool_t *hash_pool = files-&gt;pool;  /* array pool */
+  apr_pool_t *subpool = svn_pool_create (pool);  /* iteration pool */
+  apr_dir_t *dir;
+  apr_finfo_t finfo;
+  apr_status_t apr_err;
+  apr_int32_t flags = APR_FINFO_TYPE | APR_FINFO_NAME;
+
+  apr_err = apr_dir_open (&amp;dir, directory, pool);
+  if (apr_err)
+    return apr_err;
+
+  /* Loop over the directory entries, clearing the subpool at the top of
+     each iteration.  */
+  for (apr_err = apr_dir_read (&amp;finfo, flags, dir);
+       apr_err == APR_SUCCESS;
+       apr_err = apr_dir_read (&amp;finfo, flags, dir))
+    {
+      const char *child_path;
+
+      /* Clear the per-iteration SUBPOOL.  */
+      svn_pool_clear (subpool);
+
+      /* Skip entries for "this dir" ('.') and its parent ('..').  */
+      if (finfo.filetype == APR_DIR)
+        {
+          if (finfo.name[0] == '.'
+              &amp;&amp; (finfo.name[1] == '\0'
+                  || (finfo.name[1] == '.' &amp;&amp; finfo.name[2] == '\0')))
+            continue;
+        }
+
+      /* Build CHILD_PATH from DIRECTORY and FINFO.name.  */
+      child_path = svn_path_join (directory, finfo.name, subpool);
+
+      /* Do some task to this encountered path. */
+      do_some_task (child_path, subpool);
+
+      /* Handle subdirectories by recursing into them, passing SUBPOOL
+         as the pool for temporary allocations.  */
+      if (finfo.filetype == APR_DIR)
+        {
+          apr_err = crawl_dir (files, child_path, subpool);
+          if (apr_err)
+            return apr_err;
+        }
+
+      /* Handle files by adding their paths to the FILES array.  */
+      else if (finfo.filetype == APR_REG)
+        {
+          /* Copy the file's path into the FILES array's pool.  */
+          child_path = apr_pstrdup (hash_pool, child_path);
+
+          /* Add the path to the array.  */
+          (*((const char **) apr_array_push (files))) = child_path;
+        }
+    }
+
+  /* Destroy SUBPOOL.  */
+  svn_pool_destroy (subpool);
+
+  /* Check that the loop exited cleanly. */
+  if (apr_err)
+    return apr_err;
+
+  /* Yes, it exited cleanly, so close the dir. */
+  apr_err = apr_dir_close (dir);
+  if (apr_err)
+    return apr_err;
+
+  return APR_SUCCESS;
+}
+</programlisting>
+    </example>
+
+    <para>在前一个例子里描述了在循环和迭代情况下有效地池使用，每次迭代会从为方法传递一个新建的子池开始，池在循环区域中使用，在每次迭代清理。结果是内存使用比例和深度成比例，而不是顶级目录包含所有的子目录的总数量。当迭代的第一个调用最终结束时，实际上只有很小的传递过来的数据存放在池中，现在想想一下如果在每片数据使用时使用<function>alloc()</function>和<function>free()</function>时会面临的复杂性！</para>
+    
+    <para>池并不是对所有的应用是理想的，但是在Subversion中非常有用，作为一个Subversion开发者，你会需要学会适应池并且正确地使用它，内存使用的bug和膨胀可能会非常难于诊断和修正，但是APR提供的pool结构被证明了是非常的方便的，节约时间的功能。</para>
+
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.developer.contrib">
+    <title>为Subversion做贡献</title>
+    
+    <para>Subversion项目的官方信息源当然是项目的网站<ulink url="http://subversion.tigris.org/"/>。这里你可以发现如何得到源代码和参与到讨论列表。Subversion社区一致欢迎新成员，如果你有兴趣通过贡献源代码来参与到社区，以下是一下作为开始的提示。
+     </para>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.developer.contrib.join">
+      <title>加入社区</title>
+      
+      <para>加入社区的第一步是关注最新发生的事情，最有效的办法是订阅主要的开发邮件列表（<email>dev@subversion.tigris.org</email>）和提交邮件列表（<email>svn@subversion.tigris.org</email>）。通过轻松的跟踪这些列表，你可以参与最重要的设计讨论，并且可以看到实际发生效果的Subversion代码，并且可以见证这些修改并提出修改建议。这些基于邮件列表的讨论是我们Subversion开发最主要的交流媒体。如果你对其他Subversion相关的列表有兴趣，可以查看本网站的邮件列表部分。</para>
+
+      <para>但是你如何知道需要做什么？这是一个希望参与帮助我们开发的程序员最关心的问题，很难找到一个好的开始。毕竟，来到社区的很多人并没有已经决定好了要做什么，但是通过阅读开发者的讨论，你会看到很感兴趣的已知bug或特性需求。另外也可以在问题追踪数据库找出那些突出的没有人做的任务，这里你会发现当前列表的已知bug和特性需求，如果你希望从一些小事开始，可以查看那些标记为<quote>bite-sized</quote>的问题。</para>
+      
+    </sect2>
+    
+    <!-- =============================================================== -->
+    <sect2 id="svn.developer.contrib.get-code">
+      <title>取得源代码</title>
+      
+      <para>为了编辑源代码，你需要得到源代码，这意味着你需要从Subversion源代码版本库检出一个工作拷贝，听起来如此直接，这个任务可能有一点微妙。因为Subversion的源代码使用Subversion本身版本管理，你实际上需要使用别的方法得到工作的Subversion客户端来启动这个过程。最通常的方法是下载最新的二进制分发版本（如果有你的平台的版本存在），或者是下载最新的源程序包并且自己编译Subversion客户端，如果你从源代码编译，确定要阅读源代码顶级目录的<filename>INSTALL</filename>文件作为指导。
+     </para>
+
+      <para>在你有了工作的Subversion客户端后，你可以泰然自若的从Subversion源代码版本库<ulink
+         url="http://svn.collab.net/repos/svn/trunk/"/>检出一个工作拷贝：
+        <footnote>
+          <para>注意上面例子中检出的URL并不是以<literal>svn</literal>结尾，而是它的一个叫做<literal>trunk</literal>的子目录，可以看我们对Subversion的分支和标签模型的讨论来理解背后的原因。
+         </para>
+        </footnote></para>
+
+      <screen>
+$ svn checkout http://svn.collab.net/repos/svn/trunk subversion
+A    subversion/HACKING
+A    subversion/INSTALL
+A    subversion/README
+A    subversion/autogen.sh
+A    subversion/build.conf
+&hellip;
+</screen>
+
+      <para>上面的命令会检出一个流血的，最新的Subversion源代码版本到你的叫做<filename>subversion</filename>的当前工作目录。很明显，你可以调整最后的参数改为你需要的。不管你怎么称呼你的新的工作拷贝目录，在操作之后，你现在已经有了Subversion的源代码。当然，你还是需要得到一些帮助库（apr，apr-util等等）&mdash;见工作拷贝根目录的<filename>INSTALL</filename>来得到更多细节。
+     </para>
+
+    </sect2>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.developer.contrib.hacking">
+      <title>开始熟悉社区政策</title>
+      
+      <para>Now that you have a working copy containing the latest
+        Subversion source code, you will most certainly want to take a
+        cruise through the <quote>Hacker's Guide to Subversion</quote>,
+        which is available either as the
+        <filename>www/hacking.html</filename> file in the working copy,
+        or on the Subversion website at <ulink
+          url="http://subversion.tigris.org/hacking.html"/>.  This guide
+        contains general instructions for contributing to Subversion,
+        including how to properly format your source code for
+        consistency with the rest of the codebase, how to describe your
+        proposed changes with an effective change log message, how to
+        test your changes, and so on.  Commit privileges on the
+        Subversion source repository are earned&mdash;a government by
+        meritocracy.
+        <footnote>
+          <para>浅薄的看起来这像是某种高人一等的优越感，<quote>赢得你的提交特权</quote>这个概念关于效率&mdash;检查和应用别人的修改是否安全和有用会花费大量的时间和精力，与之相比的是取消危险的代码的潜在代价。</para>
+        </footnote>
+        <quote>Hacker's Guide</quote>文件是一个无价的资源，它可以确保你被提议作的修改能够取得承认，而不会因为技术原因被拒绝。</para>
+
+    </sect2>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.developer.contrib.code-and-test">
+      <title>作出修改并测试</title>
+      
+      <para>当理解了代码和社区政策，你已经准备好了作出修改，最好是努力作出小的但是相关的修改，即使在处理大的任务阶段，不要选择作出巨大的扫除试的修改。如果你搞乱最少的代码来完成修改，你被提议的修改就会很容易理解（而且因此应该很容易去审核）。当完成了每个提议的修改集，你的Subversion树一定要处于编译无警告的状态。</para>
+
+      <para>Subversion有一个相当彻底
+        <footnote>
+          <para>在这个情况下，你或许希望抓一些爆米花，在附近花三十分钟转一下，渡过非交互的机器时间。</para>
+        </footnote>
+        的回归测试套件，你提议的修改期望不会带来任何这种测试失败，通过在源代码根目录运行<command>make check</command>（在Unix）你可以完全测试你的修改。提交会导致测试套间失败的代码是拒绝（或者是提供一个好的日志信息）你贡献的代码的最快方法。</para>
+        
+
+      <!-- ### TODO: Describe building and testing on Windows. -->
+
+      <para>在最好的情况下，你实际上应该添加适当的测试到测试套件来验证你提议的修改工作正常，实际上，有时候一个人可以做到的最好贡献就是让添加的测试能够独立起来。你可以添加回归测试来保护当前工作的代码在将来修改时这个区域里不会触发失败。另外，你也可以写测试来描述已知的失败，为了这个目的，Subversion测试套件允许你指定一个给定的测试是期望会失败的（叫做<literal>XFAIL</literal>），而且只要Subversion按照预期失败，一个<literal>XFAIL</literal>测试会认为是一个成功。最后，测试组件越好，就会花费更少的时间来诊断潜在的晦涩的回归bug。
+     </para>
+
+    </sect2>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.developer.contrib.submit">
+      <title>贡献你的修改</title>
+      
+      <para>当完成了对源代码的修改，写一个干净的和细致的日志信息来描述那些修改和原因。然后，发送一个包含日志信息和<command>svn diff</command>（在Subversion工作拷贝顶级目录运行）输出的邮件到开发者列表。如果社区成员认为你的修改可以接受，一些有提交权限（允许在Subversion源代码版本库提交新的修订版本）的用户会添加你的新的修改到公共源代码树。回想对版本库直接的提交权限是赋予那些展现能力的人&mdash;如果你展示了对Subversion的理解，编程能力，和<quote>团队精神</quote>，你会很可能授予那个权限。</para>
+
+    </sect2>
+  </sect1>
+</chapter>
+
+<!--
+local variables: 
+sgml-parent-document: ("book.xml" "chapter")
+end:
+-->

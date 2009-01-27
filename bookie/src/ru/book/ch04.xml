@@ -1,0 +1,3748 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="svn.branchmerge">
+  <!-- @ENGLISH {{{
+  <title>Branching and Merging</title>
+  @ENGLISH }}} -->
+  <title>Ветвление и слияние</title>
+  <!-- See also svn.preface.organization -->
+
+  <simplesect>
+
+    <!-- @ENGLISH {{{
+    <para>Branching, tagging, and merging are concepts common to
+      almost all version control systems.  If you're not familiar with
+      these ideas, we provide a good introduction in this chapter.  If
+      you are familiar, then hopefully you'll find it interesting to
+      see how Subversion implements these ideas.</para>
+
+    <para>Branching is a fundamental part of version control.  If
+      you're going to allow Subversion to manage your data, then this
+      is a feature you'll eventually come to depend on.  This chapter
+      assumes that you're already familiar with Subversion's basic
+      concepts (<xref linkend="svn.basic"/>).</para>
+    @ENGLISH }}} -->
+    <para>Ветвление, назначение меток и слияние понятия свойственные
+      практически всем системам управления версиями. Если вы плохо
+      знакомы с этими понятиями, то в этой главе мы предлагаем хорошее
+      введение. Если эти понятия вам знакомы, тогда надеемся что вам будет
+      интересно узнать как эти идеи реализует Subversion.</para>
+
+    <para>Ветвление это фундаментальное понятие управления версиями.
+      Если вы доверии Subversion управлять своей информацией, то эта
+      функция от которой со временем вы будете зависеть. Эта глава
+      предполагает, что вы уже знакомы с основными понятиями
+      Subversion (<xref linkend="svn.basic"/>).</para>
+
+  </simplesect>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.branchmerge.whatis">
+    <!-- @ENGLISH {{{
+    <title>What's a Branch?</title>
+
+    <para>Suppose it's your job to maintain a document for a division
+      in your company, a handbook of some sort.  One day a different
+      division asks you for the same handbook, but with a few parts
+      <quote>tweaked</quote> for them, since they do things slightly
+      differently.</para>
+
+    <para>What do you do in this situation?  You do the obvious thing:
+      you make a second copy of your document, and begin maintaining
+      the two copies separately.  As each department asks you to make
+      small changes, you incorporate them into one copy or the
+      other.</para>
+    @ENGLISH }}} -->
+
+    <title>Что такое ветка?</title>
+
+    <para>Предположим, что ваша работа заключается в сопровождении
+      документа, например какого-то руководства, для подразделений
+      в вашей компании. Однажды различные подразделения запросят у вас
+      одно и тоже руководство, но с несколькими частями которые будут
+      немного <quote>подредактированны</quote>, так как задачи у них
+      немного различаются.</para>
+
+    <para>Как вы поступите в такой ситуации? Вы делаете очевидную вещь:
+      создаете вторую копию документа и начинаете сопровождать две
+      отдельных копии. Когда какое-то из подразделений просит вас
+      внести небольшие изменения, вы включаете их или в одну копию или
+      в другую.</para>
+
+    <!-- @ENGLISH {{{
+    <para>You often want to make the same change to both copies.  For
+      example, if you discover a typo in the first copy, it's very
+      likely that the same typo exists in the second copy.  The two
+      documents are almost the same, after all; they only differ in
+      small, specific ways.</para>
+
+    <para>This is the basic concept of a
+      <firstterm>branch</firstterm>&mdash;namely, a line of
+      development that exists independently of another line, yet still
+      shares a common history if you look far enough back in time.  A
+      branch always begins life as a copy of something, and moves on
+      from there, generating its own history (see <xref
+      linkend="svn.branchmerge.whatis.dia-1"/>).</para>
+    @ENGLISH }}} -->
+    <para>Как правило, вам будет нужно вносить изменения в обе копии.
+      Например, если вы обнаружили опечатку в одной копии, скорее
+      всего, эта же опечатка присутствует и во второй копии.
+      Два документа в общем то одинаковые; отличаются они незначительно
+      в отдельных, специфичных моментах.</para>
+
+    <para>В этом заключается основная идея
+      <firstterm>ветки</firstterm> &mdash; а именно, направления разработки,
+      которое существует независимо от другого направления, однако
+      имеющие с ним общую историю, если заглянуть немного в прошлое.
+      Ветка всегда берет начало как копия чего-либо и двигается от
+      этого момента создавая свою собственную историю (см. <xref
+      linkend="svn.branchmerge.whatis.dia-1"/>).</para>
+
+    <!-- @ENGLISH {{{
+      <figure id="svn.branchmerge.whatis.dia-1">
+        <title>Branches of development</title>
+        <graphic fileref="images/ch04dia1.png"/>
+      </figure>
+
+    <para>Subversion has commands to help you maintain parallel
+      branches of your files and directories.  It allows you to create
+      branches by copying your data, and remembers that the copies are
+      related to one another.  It also helps you duplicate changes
+      from one branch to another.  Finally, it can make portions of
+      your working copy reflect different branches, so that you can
+      <quote>mix and match</quote> different lines of development in
+      your daily work.</para>
+    @ENGLISH }}} -->
+      <figure id="svn.branchmerge.whatis.dia-1">
+        <title>Ветки разработки</title>
+        <graphic fileref="images/ch04dia1.png"/>
+      </figure>
+
+    <para>У Subversion есть команды, которые помогают сопровождать
+      параллельные ветки файлов и директорий. Эти команды позволяют создавать
+      ветки, копируя информацию и запоминая, что копии относятся
+      друг к другу. Кроме того эти команды помогают дублировать изменения
+      из одной ветки в другую. Наконец, они могут сделать отдельные части
+      рабочей копии отвечающими отдельным веткам, что позволит вам
+      <quote>смешивать и согласовывать</quote> различные направления
+      разработки в своей каждодневной работе.</para>
+
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.branchmerge.using">
+    <!-- @ENGLISH {{{
+    <title>Using Branches</title>
+
+    <para>At this point, you should understand how each commit creates
+      an entire new filesystem tree (called a <quote>revision</quote>)
+      in the repository.  If not, go back and read about revisions in
+      <xref linkend="svn.basic.in-action.revs"/>.</para>
+
+    <para>For this chapter, we'll go back to the same example from
+      Chapter 2.  Remember that you and your collaborator, Sally, are
+      sharing a repository that contains two projects,
+      <filename>paint</filename> and <filename>calc</filename>.
+      Notice that in <xref linkend="svn.branchmerge.using.dia-1"/>, however, each
+      project directory now contains subdirectories named
+      <filename>trunk</filename> and <filename>branches</filename>.
+      The reason for this will soon become clear.</para>
+    @ENGLISH }}} -->
+    <title>Использование веток</title>
+
+    <para>К этому моменту вы должны понимать как в хранилище, при каждой
+      фиксации, создается полностью новое дерево файлов (называемое
+      <quote>правка</quote>). Если нет, то вернитесь назад и прочитайте
+      раздел <xref linkend="svn.basic.in-action.revs"/>.</para>
+
+    <para>Для этой главы, мы воспользуемся тем же примером, что и
+      в Главе 2. Как вы помните, вы и ваш соразработчик Салли
+      делите хранилище, содержащее два проекта, <filename>paint</filename>
+      и <filename>calc</filename>. Как показывает <xref
+      linkend="svn.branchmerge.using.dia-1"/> каждая директория проекта
+      содержит поддиректории с названиями <filename>trunk</filename> и
+      <filename>branches</filename>. Назначение этих директорий скоро
+      станет понятно.</para>
+
+      <figure id="svn.branchmerge.using.dia-1">
+        <!-- @ENGLISH {{{
+        <title>Starting repository layout</title>
+        @ENGLISH }}} -->
+        <title>Начальная структура хранилища</title>
+        <graphic fileref="images/ch04dia2.png"/>
+      </figure>
+
+    <!-- @ENGLISH {{{
+    <para>As before, assume that Sally and you both have working
+      copies of the <quote>calc</quote> project.  Specifically, you
+      each have a working copy of <filename>/calc/trunk</filename>.
+      All the files for the project are in this subdirectory rather
+      than in <filename>/calc</filename> itself, because your team has
+      decided that <filename>/calc/trunk</filename> is where the
+      <quote>main line</quote> of development is going to take
+      place.</para>
+
+    <para>Let's say that you've been given the task of performing a
+      radical reorganization of the project.  It will take a long time
+      to write, and will affect all the files in the project.  The
+      problem here is that you don't want to interfere with Sally, who
+      is in the process of fixing small bugs here and there.  She's
+      depending on the fact that the latest version of the project (in
+      <filename>/calc/trunk</filename>) is always usable.  If you
+      start committing your changes bit-by-bit, you'll surely break
+      things for Sally.</para>
+    @ENGLISH }}} -->
+    <para>Как и раньше, будем считать что Салли и вы, оба, имеете
+      рабочие копии проекта <quote>calc</quote>. А конкретно, каждый
+      из вас имеет рабочую копию <filename>/calc/trunk</filename>.
+      Все файлы относящиеся к проекту находятся в этой поддиректории,
+      а не прямо в <filename>/calc</filename>, потому, что ваша команда
+      решила размещать главную линию разработки в
+      <filename>/calc/trunk</filename>.</para>
+
+    <para>Скажем, перед вами была поставлена задача коренной реорганизации
+      проекта. Это займет много времени и затронет все файлы проекта.
+      Проблема заключается в том, что вы не хотите мешать Салли, которая
+      прямо сейчас занимается исправлением небольших ошибок. Ее работа
+      зависит от постоянной доступности последней версии проекта (директории
+      <filename>/calc/trunk</filename>). Если вы начнете пошагово фиксировать
+      свои изменения, вы конечно же смешаете Салли все карты.</para>
+
+    <!-- @ENGLISH {{{
+    <para>One strategy is to crawl into a hole: you and Sally can stop
+      sharing information for a week or two.  That is, start gutting
+      and reorganizing all the files in your working copy, but don't
+      commit or update until you're completely finished with the task.
+      There are a number of problems with this, though.  First, it's
+      not very safe.  Most people like to save their work to the
+      repository frequently, should something bad accidentally happen
+      to their working copy.  Second, it's not very flexible.  If you
+      do your work on different computers (perhaps you have a working
+      copy of <filename>/calc/trunk</filename> on two different
+      machines), you'll need to manually copy your changes back and
+      forth, or just do all the work on a single computer.  By that
+      same token, it's difficult to share your changes-in-progress
+      with anyone else.  A common software development <quote>best
+      practice</quote> is to allow your peers to review your work as you
+      go.  If nobody sees your intermediate commits, you lose
+      potential feedback.  Finally, when you're finished with all your
+      changes, you might find it very difficult to re-merge your final
+      work with the rest of the company's main body of code.  Sally
+      (or others) may have made many other changes in the repository
+      that are difficult to incorporate into your working
+      copy&mdash;especially if you run <command>svn update</command>
+      after weeks of isolation.</para>
+    @ENGLISH }}} -->
+    <para>Одним из вариантов является ограничение свободы действий:
+      вы и Салли перестаете делиться информацией на неделю или две.
+      В это время начинайте переворачивать и реорганизовывать файлы
+      рабочей копии, но не фиксируйте и не обновляйте ее пока не
+      закончите эту задачу. Однако в этом случае появляется несколько
+      проблем. Во-первых это не очень надежно. Большинство людей
+      предпочитают часто сохранять свою работу в хранилище, на случай если
+      вдруг что-то плохое случится с рабочей копией. Во-вторых, это не
+      достаточно гибко. Если вы работаете на разных компьютерах
+      (к примеру если рабочая копия <filename>/calc/trunk</filename>
+      есть у вас на разных машинах), вам придется вручную копировать
+      изменения взад и вперед, либо делать всю работу на одном
+      компьютере. А с другой стороны, вам трудно разделять вносимые
+      изменения с кем-то еще. Общий при разработке программного обеспечения
+      <quote>лучший метод организации</quote> это возможность
+      совместного просмотра проделанной работы по мере продвижения.
+      Если никто не видит ваших промежуточных фиксаций, вы теряете
+      потенциальную возможность обратной связи. В конце концов, когда вы
+      закончите свои изменения, вы можете обнаружить, что очень трудно
+      заново слить сделанную вами работу с остальным программным кодом
+      компании. Салли или (кто-то другой) могли внести изменения в
+      хранилище, которые будет трудно внедрить в вашу рабочую копию
+      &mdash; особенно если вы выполните <command>svn update</command>
+      после нескольких недель изоляции.</para>
+
+
+    <!-- @ENGLISH {{{
+    <para>The better solution is to create your own branch, or line of
+      development, in the repository.  This allows you to save your
+      half-broken work frequently without interfering with others, yet
+      you can still selectively share information with your
+      collaborators.  You'll see exactly how this works later
+      on.</para>
+    @ENGLISH }}} -->
+    <para>Лучшим решением является создание вашей собственной ветки, или
+      направления разработки, в хранилище. Это позволит вам часто сохранять
+      наполовину поломанную работу не пересекаясь с другими, и кроме того,
+      вы можете выборочно разделять информацию с другими соразработчиками.
+      Дальше по тексту вы увидите как все это работает.</para>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.branchmerge.using.create">
+      <!-- @ENGLISH {{{
+      <title>Creating a Branch</title>
+
+      <para>Creating a branch is very simple&mdash;you make a copy of
+        the project in the repository using the <command>svn
+        copy</command> command.  Subversion is not only able to copy
+        single files, but whole directories as well.  In this case,
+        you want to make a copy of the
+        <filename>/calc/trunk</filename> directory.  Where should the
+        new copy live?  Wherever you wish&mdash;it's a matter of
+        project policy.  Let's say that your team has a policy of
+        creating branches in the <filename>/calc/branches</filename>
+        area of the repository, and you want to name your branch
+        <literal>my-calc-branch</literal>.  You'll want to create a
+        new directory,
+        <filename>/calc/branches/my-calc-branch</filename>, which
+        begins its life as a copy of
+        <filename>/calc/trunk</filename>.</para>
+
+      <para>There are two different ways to make a copy.  We'll
+        demonstrate the messy way first, just to make the concept
+        clear.  To begin, check out a working copy of the project's
+        root directory, <filename>/calc</filename>:</para>
+      @ENGLISH }}} -->
+      <title>Создание ветки</title>
+
+      <para>Создать ветку очень просто &mdash; при помощи команды
+        <command>svn copy</command> делаете в хранилище копию проекта.
+        Subversion может копировать не только отдельные файлы но и
+        директории. Итак, вам нужно сделать копию директории
+        <filename>/calc/trunk</filename>. Где эта новая копия будет
+        находится? Где угодно &mdash; этот вопрос определяется
+        правилами проекта. Допустим, что правилами вашей команды определено
+        создание веток в директории <filename>/calc/branches</filename>
+        хранилища, и свою ветку вы хотите назвать
+        <literal>my-calc-branch</literal>. Вам необходимо создать новую
+        директорию <filename>/calc/branches/my-calc-branch</filename>
+        которая будет являться копией
+        <filename>/calc/trunk</filename>.</para>
+
+      <para>Есть два способа создания копии. Сначала мы покажем
+        неудачный способ, просто для того, что бы прояснить основные моменты.
+        Для начала, создается рабочая копия корневой директории проекта
+        <filename>/calc</filename>:</para>
+
+      <screen>
+$ svn checkout http://svn.example.com/repos/calc bigwc
+A  bigwc/trunk/
+A  bigwc/trunk/Makefile
+A  bigwc/trunk/integer.c
+A  bigwc/trunk/button.c
+A  bigwc/branches/
+Checked out revision 340.
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>Making a copy is now simply a matter of passing two
+        working-copy paths to the <command>svn copy</command>
+        command:</para>
+      @ENGLISH }}} -->
+      <para>Теперь создание копии заключается в простой передаче
+        двух путей в пределах рабочей копии команде
+        <command>svn copy</command>:</para>
+
+      <screen>
+$ cd bigwc
+$ svn copy trunk branches/my-calc-branch
+$ svn status
+A  +   branches/my-calc-branch
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>In this case, the <command>svn copy</command> command
+        recursively copies the <filename>trunk</filename> working
+        directory to a new working directory,
+        <filename>branches/my-calc-branch</filename>.  As you can see
+        from the <command>svn status</command> command, the new
+        directory is now scheduled for addition to the repository.
+        But also notice the <quote>+</quote> sign next to the letter
+        A.  This indicates that the scheduled addition is a
+        <emphasis>copy</emphasis> of something, not something new.
+        When you commit your changes, Subversion will create
+        <filename>/calc/branches/my-calc-branch</filename> in the
+        repository by copying <filename>/calc/trunk</filename>, rather
+        than resending all of the working copy data over the
+        network:</para>
+      @ENGLISH }}} -->
+      <para>В этом случае, команда <command>svn copy</command>
+        рекурсивно копирует рабочую директорию <filename>trunk</filename>
+        в новую рабочую директорию
+        <filename>branches/my-calc-branch</filename>. Теперь команда
+        <command>svn status</command> покажет, что новая директория
+        запланирована для добавления в хранилище. Обратите внимание
+        на знак <quote>+</quote> после буквы А. Это означает, что
+        то что запланировано для добавления является
+        <emphasis>копией</emphasis> чего-то, а не чем-то новым.
+        При следующей фиксации, Subversion создаст в хранилище путем
+        копирования директории <filename>/calc/trunk</filename>
+        директорию <filename>/calc/branches/my-calc-branch</filename>,
+        вместо повторного отправления через сеть всей информации
+        рабочей копии:</para>
+
+      <screen>
+$ svn commit -m "Creating a private branch of /calc/trunk."
+Adding         branches/my-calc-branch
+Committed revision 341.
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>And now the easier method of creating a branch, which we
+        should have told you about in the first place: <command>svn
+        copy</command> is able to operate directly on two URLs.</para>
+      @ENGLISH }}} -->
+      <para>А теперь, простой способ создания ветки, о котором мы говорили
+        раньше: команда <command>svn copy</command> может оперировать
+        с двумя URL напрямую.</para>
+
+      <screen>
+$ svn copy http://svn.example.com/repos/calc/trunk \
+           http://svn.example.com/repos/calc/branches/my-calc-branch \
+      -m "Creating a private branch of /calc/trunk."
+
+Committed revision 341.
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>There's really no difference between these two methods.
+        Both procedures create a new directory in revision 341, and
+        the new directory is a copy of
+        <filename>/calc/trunk</filename>.  This is shown in <xref
+        linkend="svn.branchmerge.using.create.dia-1"/>.  Notice that the second method,
+        however, performs an <emphasis>immediate</emphasis> commit.
+        <footnote>
+          <para>Subversion does not support
+            cross-repository copying.  When using URLs with <command>svn
+            copy</command> or <command>svn move</command>, you can only
+            copy items within the same repository.</para>
+        </footnote>
+        It's an easier procedure, because it doesn't require you to
+        check out a large mirror of the repository.  In fact, this
+        technique doesn't even require you to have a working copy at
+        all.</para>
+      @ENGLISH }}} -->
+      <para>В сущности, между этими двумя методами нет разницы. Оба варианта
+        создают в правке 341 новую директорию и эта новая директория является
+        копией <filename>/calc/trunk</filename>. Это показывает <xref
+        linkend="svn.branchmerge.using.create.dia-1"/>. Обратите внимание на
+        то, что второй метод, кроме прочего, выполняет
+        <emphasis>немедленную</emphasis> фиксацию. <footnote><para>Subversion
+        не поддерживает возможность копирования между хранилищами. При использовании
+        в командах <command>svn copy</command> или <command>svn move</command> URL,
+        можно копировать только элементы из одного и того же хранилища.</para>
+        </footnote>Эта процедура более проста в использовании, так как нет
+        необходимости в создании рабочей копии, отражающей большое хранилище.
+        Фактически, в этом случае вам вовсе можно не иметь рабочей
+        копии.</para>
+
+      <figure id="svn.branchmerge.using.create.dia-1">
+        <!-- @ENGLISH {{{
+        <title>Repository with new copy</title>
+        @ENGLISH }}} -->
+        <title>Хранилище, содержащее новую копию</title>
+        <graphic fileref="images/ch04dia3.png"/>
+      </figure>
+
+      <!-- @ENGLISH {{{
+      <sidebar>
+        <title>Cheap Copies</title>
+
+        <para>Subversion's repository has a special design.  When you
+          copy a directory, you don't need to worry about the
+          repository growing huge&mdash;Subversion doesn't actually
+          duplicate any data.  Instead, it creates a new directory
+          entry that points to an <emphasis>existing</emphasis> tree.
+          If you're a Unix user, this is the same concept as a
+          hard-link.  From there, the copy is said to be
+          <quote>lazy</quote>.  That is, if you commit a change to one
+          file within the copied directory, then only that file
+          changes&mdash;the rest of the files continue to exist as
+          links to the original files in the original
+          directory.</para>
+
+        <para>This is why you'll often hear Subversion users talk
+          about <quote>cheap copies</quote>.  It doesn't matter how
+          large the directory is&mdash;it takes a very tiny, constant
+          amount of time to make a copy of it.  In fact, this feature
+          is the basis of how commits work in Subversion: each
+          revision is a <quote>cheap copy</quote> of the previous
+          revision, with a few items lazily changed within.  (To read
+          more about this, visit Subversion's website and read about
+          the <quote>bubble up</quote> method in Subversion's design
+          documents.)</para>
+
+        <para>Of course, these internal mechanics of copying and
+          sharing data are hidden from the user, who simply sees
+          copies of trees.  The main point here is that copies are
+          cheap, both in time and space.  Make branches as often as
+          you want.</para>
+      </sidebar>
+      @ENGLISH }}} -->
+      <sidebar>
+        <title>Легкие копии</title>
+
+        <para>Хранилище Subversion спроектировано особым образом.
+          При копировании директории, нет необходимости задумываться о
+          большом увеличении размера хранилища &mdash; на самом деле
+          Subversion никогда не дублирует информацию. Вместо этого,
+          создается новая сущность директории, которая указывает на
+          <emphasis>существующие</emphasis> дерево файлов. Если вы
+          пользователь Unix, это тот же подход, что используется
+          для жестких ссылок. То есть копия, так сказать, стала
+          <quote>ленивой</quote>. Это значит, что если вы зафиксируете
+          изменения одного файла из скопированной директории,
+          то изменится только этот файл &mdash; остальные файлы
+          будут продолжать существовать как ссылки на первоначальные файлы
+          в первоначальной директории.</para>
+
+        <para>Вот почему часто в разговоре пользователей Subversion можно
+          услышать о <quote>легких копиях</quote>. Не имеет значения,
+          насколько директория большая &mdash; для создания копии требуется
+          очень небольшой фиксированный промежуток времени. Фактически,
+          на этой функции основана работа фиксаций в Subversion: каждая
+          правка является <quote>легкой копией</quote> предыдущей правки,
+          с несколькими элементами лениво измененными в ней. (Что бы прочитать
+          больше об этом, посетите веб сайт Subversion и прочитайте в
+          документах по архитектуре Subversion о методе <quote>всплывающих
+          пузырьков</quote>.)</para>
+
+        <para>Конечно, эти внутренние механизмы копирования и деления
+          информации скрыты от пользователя, который видит просто
+          копии файлов. Основное здесь, это то, что копии легкие
+          как по времени, так и по размеру. Делайте ветки так часто, как
+          вам необходимо.</para>
+
+      </sidebar>
+
+    </sect2>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.branchmerge.using.work">
+      <!-- @ENGLISH {{{
+      <title>Working with Your Branch</title>
+
+      <para>Now that you've created a branch of the project, you can
+        check out a new working copy to start using it:</para>
+      @ENGLISH }}} -->
+      <title>Работа с веткой</title>
+
+      <para>После создания ветки проекта, можно создать новую рабочую копию
+        для начала ее использования:</para>
+
+      <screen>
+$ svn checkout http://svn.example.com/repos/calc/branches/my-calc-branch
+A  my-calc-branch/Makefile
+A  my-calc-branch/integer.c
+A  my-calc-branch/button.c
+Checked out revision 341.
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>There's nothing special about this working copy; it simply
+        mirrors a different directory in the repository.  When you
+        commit changes, however, Sally won't ever see them when she
+        updates.  Her working copy is of
+        <filename>/calc/trunk</filename>.  (Be sure to read <xref
+        linkend="svn.branchmerge.switchwc"/> later in this chapter: the
+        <command>svn switch</command> command is an alternate way of
+        creating a working copy of a branch.)</para>
+
+      <para>Let's pretend that a week goes by, and the following
+        commits happen:</para>
+      @ENGLISH }}} -->
+      <para>В этой рабочей копии нет ничего особенного; она является
+        просто отражением другой директории хранилища. Когда вы
+        фиксируете изменения, то если Салли сделает обновление, она их
+        даже не увидит. Ее рабочая копия является копией
+        <filename>/calc/trunk</filename>. (Прочтите далее в этой главе
+        раздел <xref linkend="svn.branchmerge.switchwc"/>: команда
+        <command>svn switch</command> является альтернативным способом
+        создания рабочей копии ветки.)</para>
+
+      <para>Предположим, что прошла неделя и были сделаны следующие
+        фиксации:</para>
+
+      <!-- @ENGLISH {{{
+      <itemizedlist>
+        <listitem><para>
+          You make a change to
+          <filename>/calc/branches/my-calc-branch/button.c</filename>,
+          which creates revision 342.</para>
+        </listitem>
+
+        <listitem><para>
+          You make a change to
+          <filename>/calc/branches/my-calc-branch/integer.c</filename>,
+          which creates revision 343.</para>
+        </listitem>
+
+        <listitem><para>
+          Sally makes a change to
+          <filename>/calc/trunk/integer.c</filename>, which creates
+          revision 344.</para>
+        </listitem>
+      </itemizedlist>
+      @ENGLISH }}} -->
+      <itemizedlist>
+        <listitem><para>Вы внесли изменения в
+          <filename>/calc/branches/my-calc-branch/button.c</filename>,
+          с созданием правки 342.</para>
+        </listitem>
+
+        <listitem><para>Вы внесли изменения в
+          <filename>/calc/branches/my-calc-branch/integer.c</filename>,
+          с созданием правки 343.</para>
+        </listitem>
+
+        <listitem><para>Салли внесла изменения в
+          <filename>/calc/trunk/integer.c</filename>, с созданием
+          правки 344.</para>
+        </listitem>
+      </itemizedlist>
+
+      <!-- @ENGLISH {{{
+      <para>There are now two independent lines of development, shown
+        in <xref linkend="svn.branchmerge.using.work.dia-1"/>, happening on
+        <filename>integer.c</filename>.</para>
+
+      <figure id="svn.branchmerge.using.work.dia-1">
+        <title>The branching of one file's history</title>
+        <graphic fileref="images/ch04dia4.png"/>
+      </figure>
+
+      <para>Things get interesting when you look at the history of
+        changes made to your copy of
+        <filename>integer.c</filename>:</para>
+      @ENGLISH }}} -->
+      <para>Теперь есть два независимых направления разработки файла
+        <filename>integer.c</filename>, которые показывает <xref
+        linkend="svn.branchmerge.using.work.dia-1"/>.</para>
+
+      <figure id="svn.branchmerge.using.work.dia-1">
+        <title>История ветвления для одного файла</title>
+        <graphic fileref="images/ch04dia4.png"/>
+      </figure>
+
+      <para>Если посмотреть историю сделанных изменений для вашей копии
+        <filename>integer.c</filename>, можно увидеть интересные
+        вещи:</para>
+
+      <screen>
+$ pwd
+/home/user/my-calc-branch
+
+$ svn log --verbose integer.c
+------------------------------------------------------------------------
+r343 | user | 2002-11-07 15:27:56 -0600 (Thu, 07 Nov 2002) | 2 lines
+Changed paths:
+   M /calc/branches/my-calc-branch/integer.c
+
+* integer.c:  frozzled the wazjub.
+
+------------------------------------------------------------------------
+r341 | user | 2002-11-03 15:27:56 -0600 (Thu, 07 Nov 2002) | 2 lines
+Changed paths:
+   A /calc/branches/my-calc-branch (from /calc/trunk:340)
+
+Creating a private branch of /calc/trunk.
+
+------------------------------------------------------------------------
+r303 | sally | 2002-10-29 21:14:35 -0600 (Tue, 29 Oct 2002) | 2 lines
+Changed paths:
+   M /calc/trunk/integer.c
+
+* integer.c:  changed a docstring.
+
+------------------------------------------------------------------------
+r98 | sally | 2002-02-22 15:35:29 -0600 (Fri, 22 Feb 2002) | 2 lines
+Changed paths:
+   M /calc/trunk/integer.c
+
+* integer.c:  adding this file to the project.
+
+------------------------------------------------------------------------
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>Notice that Subversion is tracing the history of your
+        branch's <filename>integer.c</filename> all the way back
+        through time, even traversing the point where it was copied.
+        It shows the creation of the branch as an event in the
+        history, because <filename>integer.c</filename> was implicitly
+        copied when all of <filename>/calc/trunk/</filename> was
+        copied.  Now look what happens when Sally runs the same
+        command on her copy of the file:</para>
+      @ENGLISH }}} -->
+      <para>Обратите внимание на то, что Subversion прослеживает
+        историю ветки <filename>integer.c</filename> во времени полностью,
+        в том числе пересекая точку создания копии. Создание ветки
+        показывается как событие в истории, потому что файл
+        <filename>integer.c</filename> был неявно скопирован, при
+        копировании всей директории <filename>/calc/trunk/</filename>.
+        Теперь давайте посмотрим, что будет когда такую же команду Салли
+        выполнит для своей копии файла:</para>
+
+      <screen>
+$ pwd
+/home/sally/calc
+
+$ svn log --verbose integer.c
+------------------------------------------------------------------------
+r344 | sally | 2002-11-07 15:27:56 -0600 (Thu, 07 Nov 2002) | 2 lines
+Changed paths:
+   M /calc/trunk/integer.c
+
+* integer.c:  fix a bunch of spelling errors.
+
+------------------------------------------------------------------------
+r303 | sally | 2002-10-29 21:14:35 -0600 (Tue, 29 Oct 2002) | 2 lines
+Changed paths:
+   M /calc/trunk/integer.c
+
+* integer.c:  changed a docstring.
+
+------------------------------------------------------------------------
+r98 | sally | 2002-02-22 15:35:29 -0600 (Fri, 22 Feb 2002) | 2 lines
+Changed paths:
+   M /calc/trunk/integer.c
+
+* integer.c:  adding this file to the project.
+
+------------------------------------------------------------------------
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>Sally sees her own revision 344 change, but not the change
+        you made in revision 343.  As far as Subversion is concerned,
+        these two commits affected different files in different
+        repository locations.  However, Subversion
+        <emphasis>does</emphasis> show that the two files share a
+        common history.  Before the branch-copy was made in revision
+        341, they used to be the same file.  That's why you and Sally
+        both see the changes made in revisions 303 and 98.</para>
+      @ENGLISH }}} -->
+      <para>Салли увидит свои собственные изменения правки 344, а ваши
+        сделанные в правке 343 нет. Subversion позаботилась о том, что
+        бы эти две фиксации затронули разные файлы, имеющие разное
+        расположение в хранилище. Тем не менее, Subversion
+        <emphasis>будет</emphasis> показывать то, что два файла имеют одну
+        историю. До создания в правке 341 ветки (или копии) это был один файл.
+        Поэтому и вы и Салли видите изменения сделанные в правке 303 и
+        98.</para>
+
+    </sect2>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.branchmerge.using.concepts">
+      <!-- @ENGLISH {{{
+      <title>The Key Concepts Behind Branches</title>
+
+      <para>There are two important lessons that you should remember
+        from this section.</para>
+
+      <orderedlist>
+        <listitem>
+          <para>Unlike many other version control systems,
+            Subversion's branches exist as <emphasis>normal filesystem
+            directories</emphasis> in the repository, not in an extra
+            dimension.  These directories just happen to carry some
+            extra historical information.</para>
+        </listitem>
+        <listitem>
+          <para>Subversion has no internal concept of a
+            branch&mdash;only copies.  When you copy a directory, the
+            resulting directory is only a <quote>branch</quote>
+            because <emphasis>you</emphasis> attach that meaning to
+            it.  You may think of the directory differently, or treat
+            it differently, but to Subversion it's just an ordinary
+            directory that happens to have been created by
+            copying.</para>
+        </listitem>
+      </orderedlist>
+      @ENGLISH }}} -->
+      <title>Ключевые идеи, стоящие за ветками</title>
+
+      <para>Два важных понятия, которые вы должны запомнить из этого
+        раздела.</para>
+
+      <orderedlist>
+        <listitem>
+          <para>В отличие от других систем управления версиями,
+          ветки в Subversion существуют в хранилище не в отдельном измерении,
+          а как обычные <emphasis>нормальные директории файловой
+          системы</emphasis>. Такие директории просто содержат дополнительную
+          информацию о своей истории.</para>
+        </listitem>
+        <listitem>
+          <para>Subversion не имеет такого понятия как ветка &mdash;
+            есть только копии. При копировании директории результирующая
+            директория становиться <quote>веткой</quote> только потому что
+            <emphasis>вы</emphasis> рассматриваете ее таким образом.
+            Вы можете по-разному думать о директории, по разному ее трактовать,
+            но для Subversion это просто обычная директория которая была
+            создана копированием.</para>
+        </listitem>
+      </orderedlist>
+
+    </sect2>
+
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.branchmerge.copychanges">
+    <!-- @ENGLISH {{{
+    <title>Copying Changes Between Branches</title>
+
+    <para>Now you and Sally are working on parallel branches of the
+      project: you're working on a private branch, and Sally is
+      working on the <firstterm>trunk</firstterm>, or main line of
+      development.</para>
+
+    <para>For projects that have a large number of contributors, it's
+      common for most people to have working copies of the trunk.
+      Whenever someone needs to make a long-running change that is
+      likely to disrupt the trunk, a standard procedure is to create a
+      private branch and commit changes there until all the work is
+      complete.</para>
+    @ENGLISH }}} -->
+    <title>Копирование изменений между ветками</title>
+
+    <para>Сейчас вы и Салли работаете над параллельными ветками проекта:
+      вы работаете над своей собственной веткой, а Салли работает над
+      главной линией разработки (<firstterm>trunk</firstterm>).</para>
+
+    <para>В проектах, имеющих большое количество участников, как правило
+      большинство участников имеют рабочую копию главной линии разработки.
+      Когда кому-то необходимо сделать долгосрочные изменения,
+      которые возможно нарушат главную линию, стандартной процедурой
+      является создать отдельную ветку и фиксировать изменения туда
+      пока работа не будет полностью завершена.</para>
+
+    <!-- @ENGLISH {{{
+    <para>So, the good news is that you and Sally aren't interfering
+      with each other.  The bad news is that it's very easy to drift
+      <emphasis>too</emphasis> far apart.  Remember that one of the
+      problems with the <quote>crawl in a hole</quote> strategy is
+      that by the time you're finished with your branch, it may be
+      near-impossible to merge your changes back into the trunk
+      without a huge number of conflicts.</para>
+
+    <para>Instead, you and Sally might continue to share changes as
+      you work.  It's up to you to decide which changes are worth
+      sharing; Subversion gives you the ability to selectively
+      <quote>copy</quote> changes between branches.  And when you're
+      completely finished with your branch, your entire set of branch
+      changes can be copied back into the trunk.</para>
+    @ENGLISH }}} -->
+    <para>Положительным моментом является то, что вы и Салли не
+      пересекаетесь друг с другом. Отрицательный момент в том, что
+      вы можете разойтись <emphasis>слишком</emphasis> далеко друг
+      относительно друга. Помните, что одной из проблем такой
+      <quote>сходящейся к тупику</quote> стратегии является то,
+      что к моменту, когда вы закончите работу со своей веткой
+      может быть практически невозможно снова объединить ваши изменения
+      с главной линией без огромного количества конфликтов.</para>
+
+    <para>Вместо этого вы и Салли можете продолжать делиться изменениями
+      по ходу работы. Вы можете решать вплоть до отдельного изменения,
+      стоит ли им делиться; Subversion предоставляет возможность
+      выборочного <quote>копирования</quote> изменений между ветками.
+      А тогда, когда ваша ветка будет полностью закончена, полный набор
+      изменений ветки может быть скопирован обратно в основную
+      ветку.</para>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.branchmerge.copychanges.specific">
+      <!-- @ENGLISH {{{
+      <title>Copying Specific Changes</title>
+
+
+      <para>In the previous section, we mentioned that both you and
+        Sally made changes to <filename>integer.c</filename> on
+        different branches.  If you look at Sally's log message for
+        revision 344, you can see that she fixed some spelling errors.
+        No doubt, your copy of the same file still has the same spelling
+        errors.  It's likely that your future changes to this file will
+        be affecting the same areas that have the spelling errors, so
+        you're in for some potential conflicts when you merge your
+        branch someday.  It's better, then, to receive Sally's change
+        now, <emphasis>before</emphasis> you start working too heavily
+        in the same places.</para>
+
+      <para>It's time to use the <command>svn merge</command> command.
+        This command, it turns out, is a very close cousin to the
+        <command>svn diff</command> command (which you read about in
+        Chapter 3).  Both commands are able to compare any two objects
+        in the repository and describe the differences.  For example,
+        you can ask <command>svn diff</command> to show you the exact
+        change made by Sally in revision 344:</para>
+      @ENGLISH }}} -->
+      <title>Копирование отдельных изменений</title>
+
+      <para>В предыдущем пункте мы указали, что и вы и Салли, в месте,
+        в разных ветках вносите изменения в <filename>integer.c</filename>.
+        Если посмотреть на лог сообщение Салли для правки 344, вы увидите,
+        что она исправила несколько орфографических ошибок. Конечно же,
+        в вашей копии этого файла эти ошибки остались. Возможно, что
+        ваши будущие изменения для этого файла коснутся областей которые
+        содержат орфографические ошибки и таким образом вы получите несколько
+        потенциальных конфликтов при последующем объединении вашей ветки.
+        Поэтому, лучше получить изменения Салли сейчас,
+        <emphasis>до</emphasis> того, как вы начнете вплотную работать в
+        этих областях файла.</para>
+
+      <para>Настал момент воспользоваться командой <command>svn
+        merge</command>. Эта команда, оказывается, является очень близким
+        родственником команды <command>svn diff</command> (о которой вы
+        читали Главе 3). Обе эти команды способны сравнивать любые два
+        объекта в хранилище и показывать изменения. Например, вы можете
+        попросить <command>svn diff</command> показать все изменения
+        сделанные Салли в правке 344:</para>
+
+      <screen>
+$ svn diff -r 343:344 http://svn.example.com/repos/calc/trunk
+
+Index: integer.c
+===================================================================
+--- integer.c (revision 343)
++++ integer.c (revision 344)
+@@ -147,7 +147,7 @@
+     case 6:  sprintf(info-&gt;operating_system, "HPFS (OS/2 or NT)"); break;
+     case 7:  sprintf(info-&gt;operating_system, "Macintosh"); break;
+     case 8:  sprintf(info-&gt;operating_system, "Z-System"); break;
+-    case 9:  sprintf(info-&gt;operating_system, "CPM"); break;
++    case 9:  sprintf(info-&gt;operating_system, "CP/M"); break;
+     case 10:  sprintf(info-&gt;operating_system, "TOPS-20"); break;
+     case 11:  sprintf(info-&gt;operating_system, "NTFS (Windows NT)"); break;
+     case 12:  sprintf(info-&gt;operating_system, "QDOS"); break;
+@@ -164,7 +164,7 @@
+     low = (unsigned short) read_byte(gzfile);  /* read LSB */
+     high = (unsigned short) read_byte(gzfile); /* read MSB */
+     high = high &lt;&lt; 8;  /* interpret MSB correctly */
+-    total = low + high; /* add them togethe for correct total */
++    total = low + high; /* add them together for correct total */
+
+     info-&gt;extra_header = (unsigned char *) my_malloc(total);
+     fread(info-&gt;extra_header, total, 1, gzfile);
+@@ -241,7 +241,7 @@
+      Store the offset with ftell() ! */
+
+   if ((info-&gt;data_offset = ftell(gzfile))== -1) {
+-    printf("error: ftell() retturned -1.\n");
++    printf("error: ftell() returned -1.\n");
+     exit(1);
+   }
+
+@@ -249,7 +249,7 @@
+   printf("I believe start of compressed data is %u\n", info-&gt;data_offset);
+   #endif
+
+-  /* Set postion eight bytes from the end of the file. */
++  /* Set position eight bytes from the end of the file. */
+
+   if (fseek(gzfile, -8, SEEK_END)) {
+     printf("error: fseek() returned non-zero\n");
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>The <command>svn merge</command> command is almost exactly
+        the same.  Instead of printing the differences to your
+        terminal, however, it applies them directly to your working
+        copy as <emphasis>local modifications</emphasis>:</para>
+      @ENGLISH }}} -->
+      <para>Команда <command>svn merge</command> ведет себя практически
+        полностью идентично. Но вместо вывода различий на терминал,
+        применяет их к рабочей копии в виде <emphasis>локальных
+        изменений</emphasis>:</para>
+
+      <screen>
+$ svn merge -r 343:344 http://svn.example.com/repos/calc/trunk
+U  integer.c
+
+$ svn status
+M  integer.c
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>The output of <command>svn merge</command> shows that your
+        copy of <filename>integer.c</filename> was patched.  It now
+        contains Sally's change&mdash;the change has been
+        <quote>copied</quote> from the trunk to your working copy of
+        your private branch, and now exists as a local modification.
+        At this point, it's up to you to review the local modification
+        and make sure it works correctly.</para>
+
+      <para>In another scenario, it's possible that things may not have
+        gone so well, and that <filename>integer.c</filename> may have
+        entered a conflicted state.  You might need to resolve the
+        conflict using standard procedures (see Chapter 3), or if you
+        decide that the merge was a bad idea altogether, simply give up
+        and <command>svn revert</command> the local change.</para>
+      @ENGLISH }}} -->
+      <para>Вывод команды <command>svn merge</command> показывает, что
+        к вашей копии <filename>integer.c</filename> был применен патч.
+        Теперь она содержит изменения Салли &mdash; изменения Салли были
+        <quote>скопированы</quote> из главной линии разработки в вашу
+        рабочую копию, вашей личной ветки и теперь существуют в виде
+        локальных изменений. С этого момента вы можете просмотреть локальные
+        изменения и убедиться в том, что они корректно работают.</para>
+
+      <para>По другому сценарию, возможно, что не все будет так хорошо
+        и <filename>integer.c</filename> может оказаться в состоянии
+        конфликта. Вам необходимо будет при помощи стандартной процедуры
+        (см. Главу 3) решить конфликт, либо если вы прейдете к мнению, что
+        объединение было плохой идеей, просто отказаться от него, отменив
+        локальные изменения командой <command>svn revert</command>.</para>
+
+      <!-- @ENGLISH {{{
+      <para>But assuming that you've reviewed the merged change, you can
+        <command>svn commit</command> the change as usual.  At that
+        point, the change has been merged into your repository branch.
+        In version control terminology, this act of copying changes
+        between branches is commonly called
+
+
+      <para>When you commit the local modification, make sure your log
+        message mentions that you're porting a specific change from
+        one branch to another.  For example:</para>
+      @ENGLISH }}} -->
+      <para>После просмотра результата объединения изменений, можно
+        их как обычно зафиксировать (<command>svn commit</command>).
+        После этого изменения будут внесены в вашу ветку хранилища.
+        В терминах контроля версий такую процедуру копирования
+        изменений между ветками обычно называют
+        <firstterm>портированием</firstterm> изменений.</para>
+
+      <para>При фиксации локальных изменений, убедитесь, что в лог
+        сообщении упоминается о портировании отдельных изменений
+        из одной ветки в другую. Например:</para>
+
+      <screen>
+$ svn commit -m "integer.c: ported r344 (spelling fixes) from trunk."
+Sending        integer.c
+Transmitting file data .
+Committed revision 360.
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>As you'll see in the next sections, this is a very
+        important <quote>best practice</quote> to follow.</para>
+
+      <sidebar>
+        <title>Why Not Use Patches Instead?</title>
+
+        <para>A question may be on your mind, especially if you're a
+          Unix user: why bother to use <command>svn merge</command> at
+          all?  Why not simply use the operating system's
+          <command>patch</command> command to accomplish the same job?
+          For example:</para>
+      @ENGLISH }}} -->
+      <para>Как вы увидите в последующих разделах, очень важно следовать
+        подобному <quote>хорошему стилю</quote> организации работы.</para>
+
+      <sidebar>
+        <title>Почему бы не использовать вместо этого патчи?</title>
+
+        <para>Вопрос, который может крутиться у вас в голове, особенно
+          если вы пользователь Unix: зачем вообще связываться с
+          <command>svn merge</command>? Почему просто не использовать
+          команду операционной системы <command>patch</command> для
+          выполнения этой работы? Например:</para>
+
+        <screen>
+$ svn diff -r 343:344 http://svn.example.com/repos/calc/trunk &gt; patchfile
+$ patch -p0  &lt; patchfile
+Patching file integer.c using Plan A...
+Hunk #1 succeeded at 147.
+Hunk #2 succeeded at 164.
+Hunk #3 succeeded at 241.
+Hunk #4 succeeded at 249.
+done
+</screen>
+
+        <!-- @ENGLISH {{{
+        <para>In this particular case, yes, there really is no
+          difference.  But <command>svn merge</command> has special
+          abilities that surpass the <command>patch</command> program.
+          The file format used by <command>patch</command> is quite
+          limited; it's only able to tweak file contents.  There's no
+          way to represent changes to <emphasis>trees</emphasis>, such
+          as the addition, removal, or renaming of files and
+          directories.  If Sally's change had, say, added a new
+          directory, the output of <command>svn diff</command>
+          wouldn't have mentioned it at all.  <command>svn
+          diff</command> only outputs the limited patch-format, so
+          there are some ideas it simply can't express.
+          <footnote>
+            <para>In the future, the Subversion project plans to use
+              (or invent) an expanded patch format that describes
+              changes in tree structure and properties.</para>
+          </footnote>
+          The <command>svn merge</command> command, however, can express
+          changes in tree structure and properties by directly applying
+          them to your working copy.</para>
+        @ENGLISH }}} -->
+        <para>Для этого конкретного случая, да, действительно разницы
+          нет. Однако, <command>svn merge</command> имеет специфические
+          функции благодаря которым превосходит программу
+          <command>patch</command>.
+          Формат файлов, используемый программой <command>patch</command>
+          довольно таки ограниченный; он способен передавать только изменения
+          содержимого файлов. Он не имеет способа для представления изменений
+          <emphasis>дерева</emphasis> файлов, таких, как добавление, удаление
+          или переименование файлов и директорий. Если скажем, в результате
+          изменений Салли, добавилась новая директория то в выводе
+          <command>svn diff</command> упоминания об этом не будет.
+          Вывод <command>svn diff</command> представляет собой только
+          ограниченный патч-формат, по этому некоторые понятия он просто не
+          может передать. <footnote><para>В будущем, проект Subversion
+          планирует использоваться (или изобрести) расширенным формат
+          представления различий, который будет передавать изменения в
+          структуре дерева файлов и свойств.</para></footnote> Команда
+          <command>svn merge</command>, напротив, может передавать
+          изменения в структуре файлов и свойств, непосредственно применяя
+	  их к рабочей копии.</para>
+
+      </sidebar>
+
+      <!-- @ENGLISH {{{
+      <para>A word of warning: while <command>svn diff</command> and
+        <command>svn merge</command> are very similar in concept, they
+        do have different syntax in many cases.  Be sure to read about
+        them in Chapter 9 for details, or ask <command>svn
+        help</command>.  For example, <command>svn merge</command>
+        requires a working-copy path as a target, i.e. a place where
+        it should apply the tree-changes.  If the target isn't
+        specified, it assumes you are trying to perform one of the
+        following common operations:</para>
+
+      <orderedlist>
+        <listitem>
+          <para>You want to merge directory changes into your current
+            working directory.</para>
+        </listitem>
+        <listitem>
+          <para>You want to merge the changes in a specific file into
+            a file by the same name which exists in your current working
+            directory.</para>
+        </listitem>
+      </orderedlist>
+      @ENGLISH }}} -->
+      <para>Небольшое предупреждение: несмотря на то, что <command>svn
+        diff</command> и <command>svn merge</command> очень похожи в
+        основе, в большинстве случаев они имеют разные правила записи.
+        Обязательно прочтите об этом в Главе 9, или спросите у
+        <command>svn help</command>. Например, <command>svn
+        merge</command> требует в качестве целевого объекта путь в
+        рабочей копии, т. е. место, где ей нужно применить изменения
+        структуры файлов. Если целевой объект не указан, предполагается,
+        что делается попытка выполнить одну из следующих операций:</para>
+
+      <orderedlist>
+        <listitem>
+          <para>Вы хотите объединить изменения директории с вашей текущей
+            рабочей директорией.</para>
+        </listitem>
+        <listitem>
+          <para>Вы хотите объединить изменения в конкретном файле с
+            файлом имеющим тоже имя в текущей рабочей директории.</para>
+        </listitem>
+      </orderedlist>
+
+      <!-- @ENGLISH {{{
+      <para>If you are merging a directory and haven't specified a
+        target path, <command>svn merge</command> assumes the first case
+        above and tries to apply the changes into your current
+        directory.  If you are merging a file, and that file (or a file
+        by the same name) exists in your current working directory,
+        <command>svn merge</command> assumes the second case and tries
+        to apply the changes to a local file with the same name.</para>
+
+      <para>If you want changes applied somewhere else, you'll
+        need to say so.  For example, if you're sitting in the parent
+        directory of your working copy, you'll have to specify the
+        target directory to receive the changes:</para>
+      @ENGLISH }}} -->
+      <para>Если вы объединяете директорию и не указываете целевой путь
+        <command>svn merge</command> предполагает первый из приведенных выше
+        вариантов и попытается применить изменения к текущей директории.
+        Если вы объединяете файл и такой файл (то есть файл с таким именем)
+        существует в текущей рабочей директории, <command>svn merge</command>
+        подразумевает второй случай и пытается применить изменения
+        к локальному файлу с таким же именем.</para>
+
+      <para>Если вы хотите применить изменения к чему-то другому, вам
+        нужно это указать. Например, если вы находитесь в родительской
+        директории рабочей копии то вам нужно указать целевую директорию,
+        получающую изменения:</para>
+
+      <screen>
+$ svn merge -r 343:344 http://svn.example.com/repos/calc/trunk my-calc-branch
+U   my-calc-branch/integer.c
+</screen>
+
+    </sect2>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.branchmerge.copychanges.keyconcept">
+      <!-- @ENGLISH {{{
+      <title>The Key Concept Behind Merging</title>
+
+      <para>You've now seen an example of the <command>svn
+          merge</command> command, and you're about to see several
+          more.  If you're feeling confused about exactly how merging
+          works, you're not alone.  Many users (especially those new
+          to version control) are initially perplexed about the proper
+          syntax of the command, and about how and when the feature
+          should be used.  But fear not, this command is actually much
+          simpler than you think!  There's a very easy technique for
+          understanding exactly how <command>svn merge</command>
+          behaves.</para>
+
+      <para>The main source of confusion is the
+        <emphasis>name</emphasis> of the command.  The term
+        <quote>merge</quote> somehow denotes that branches are
+        combined together, or that there's some sort of mysterious
+        blending of data going on.  That's not the case.  A better
+        name for the command might have been <command>svn
+        diff-and-apply</command>, because that's all that happens:
+        two repository trees are compared, and the differences are
+        applied to a working copy.</para>
+      @ENGLISH }}} -->
+      <title>Ключевые понятия, стоящие за слиянием</title>
+
+      <para>Вы увидели примеры использования <command>svn
+        merge</command>, продолжим рассмотрение. Если вы чувствуете
+        не уверенность  в том как собственно работает слияние, то в этом
+        вы не одиноки. Многие пользователи (особенно те, для которых
+        управление версиями в новинку) поначалу путаются в правильности
+        записи этой команды и в том, как и когда эту функцию следует
+        использовать. Отбросьте страх, на самом деле эта команда намного
+        проще чем вы думаете! Очень просто понять механизм
+        того, как именно ведет себя <command>svn merge</command>.</para>
+
+      <para>В замешательство приводит, главным образом
+        <emphasis>название</emphasis> команды. Термин <quote>слияние</quote>
+        как бы указывает на то, что ветки соединяются вместе, или
+        происходит какое-то волшебное смешивание данных. На самом деле это
+        не так. Лучшим названием для этой команды могло быть <command>svn
+        diff-and-apply</command> потому что это все, что происходит:
+        сравниваются два файловых дерева хранилища, а различия переносятся
+        в рабочую копию.</para>
+
+      <!-- @ENGLISH {{{
+      <para>The command takes three arguments:</para>
+
+      <orderedlist>
+
+        <listitem><para>An initial repository tree (often called the
+        <firstterm>left side</firstterm> of the
+        comparison),</para></listitem>
+
+        <listitem><para>A final repository tree (often called the
+        <firstterm>right side</firstterm> of the
+        comparison),</para></listitem>
+
+        <listitem><para>A working copy to accept the differences as
+        local changes (often called the <firstterm>target</firstterm>
+        of the merge).</para></listitem>
+
+      </orderedlist>
+      @ENGLISH }}} -->
+      <para>Команда принимает три аргумента:</para>
+
+      <orderedlist>
+
+        <listitem><para>Начальное дерево хранилища (как правило,
+          называемое <firstterm>левой частью</firstterm>
+          при сравнении),</para></listitem>
+
+        <listitem><para>Конечное дерево хранилища (как правило
+          называемое <firstterm>правой частью</firstterm> при
+          сравнении),</para></listitem>
+
+        <listitem><para>Рабочую копию для применения отличий,
+          в виде локальных изменений (как правило, называемую
+          <firstterm>целью</firstterm> слияния).</para></listitem>
+
+      </orderedlist>
+
+      <!-- @ENGLISH {{{
+      <para>Once these three arguments are specified, the two trees
+        are compared, and the resulting differences are applied to the
+        target working copy as local modifications.  When the command
+        is done, the results are no different than if you had
+        hand-edited the files, or run various <command>svn
+        add</command> or <command>svn delete</command> commands
+        yourself.  If you like the results, you can commit them.  If
+        you don't like the results, you can simply <command>svn
+        revert</command> all of the changes.</para>
+
+      <para>The syntax of <command>svn merge</command> allows you to
+        specify the three necessary arguments rather flexibly.  Here
+        are some examples:</para>
+      @ENGLISH }}} -->
+      <para>Когда эти три аргумента указаны, сравниваются два дерева
+        и результирующие различия применяются к целевой рабочей копии
+        в виде локальных изменений. После того, как команда выполнена,
+        результат не будет отличаться он того как если бы вы вручную
+        редактировали файлы или многократно выполняли команды
+        <command>svn add</command> или <command>svn delete</command>
+        самостоятельно. Если результат вас устраивает, его можно
+        зафиксировать. Если результат вас не устраивает, просто
+        отмените (<command>svn revert</command>) все сделанные
+        изменения.</para>
+
+      <para>Правила записи <command>svn merge</command> позволяют
+        указывать три необходимых аргумента довольно гибко. Вот
+        несколько примеров:</para>
+
+      <screen>      
+$ svn merge http://svn.example.com/repos/branch1@150 \
+            http://svn.example.com/repos/branch2@212 \
+            my-working-copy
+
+$ svn merge -r 100:200 http://svn.example.com/repos/trunk my-working-copy
+
+$ svn merge -r 100:200 http://svn.example.com/repos/trunk
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>The first syntax lays out all three arguments explicitly,
+        naming each tree in the form <emphasis>URL@REV</emphasis> and
+        naming the working copy target.  The second syntax can be used
+        as a shorthand for situations when you're comparing two
+        different revisions of the same URL.  The last syntax shows
+        how the working-copy argument is optional; if omitted, it
+        defaults to the current directory.</para>
+      @ENGLISH }}} -->
+      <para>В первом примере записи все три аргумента явно указаны,
+        указываются деревья, в форме <emphasis>URL@REV</emphasis> и
+        указывается целевая рабочая копия. Второй пример записи может
+        использоваться для краткости записи, в ситуациях, когда
+        сравниваются две разных правки по одному и тому же URL.
+        Последний пример демонстрирует возможность не указывать целевую
+        рабочую копию, при этом по умолчанию используется текущая
+        директория.</para>
+
+    </sect2>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.branchmerge.copychanges.bestprac">
+      <!-- @ENGLISH {{{
+      <title>Best Practices for Merging</title>
+
+      <sect3 id="svn.branchmerge.copychanges.bestprac.track">
+        <title>Tracking Merges Manually</title>
+
+        <para>Merging changes sounds simple enough, but in practice it
+          can become a headache.  The problem is that if you
+          repeatedly merge changes from one branch to another, you
+          might accidentally merge the same change
+          <emphasis>twice</emphasis>.  When this happens, sometimes
+          things will work fine.  When patching a file, Subversion
+          typically notices if the file already has the change, and
+          does nothing.  But if the already-existing change has been
+          modified in any way, you'll get a conflict.</para>
+        @ENGLISH }}} -->
+      <title>Как правильнее всего использовать слияние</title>
+
+      <sect3 id="svn.branchmerge.copychanges.bestprac.track">
+        <title>Ручной контроль слияния</title>
+
+        <para>На первый взгляд объединить изменения просто, однако
+          на практике могут возникнуть трудности. Проблема заключается
+          в том, что при многократном объединении изменений одной
+          ветки с другой можно непреднамеренно сделать объединение одних
+          и тех же изменений <emphasis>дважды</emphasis>. Иногда,
+          когда это случается, проблем это не вызывает. При внесении
+          изменений в файл, как правило Subversion предупреждает
+          о том что файл уже содержит изменения и в этом случае не
+          выполняет никаких действий. Однако если уже присутствующие
+          изменения были модифицированы, то возникнет конфликт.</para>
+
+        <!-- @ENGLISH {{{
+        <para>Ideally, your version control system should prevent the
+          double-application of changes to a branch.  It should
+          automatically remember which changes a branch has already
+          received, and be able to list them for you.  It should use
+          this information to help automate merges as much as
+          possible.</para>
+
+        <para>Unfortunately, Subversion is not such a system.  Like
+          CVS, Subversion does not yet record any information about
+          merge operations.  When you commit local modifications, the
+          repository has no idea whether those changes came from
+          running <command>svn merge</command>, or from just
+          hand-editing the files.</para>
+        @ENGLISH }}} -->
+        <para>В идеале, система управления версиями должна предотвращать
+          повторное применение изменений к ветке. Она должна автоматически
+          фиксировать, какие изменения уже были получены и иметь возможность
+          перечислить их вам. Должна использовать эту информацию для того,
+          что бы, на сколько возможно, помочь автоматизировать
+          слияние.</para>
+
+        <para>К сожалению, Subversion не такая система. Как и
+          CVS, Subversion пока не сохраняет ни какой информации об
+          операциях объединения. При фиксации локальных изменений хранилище
+          понятия не имеет, являются ли эти изменения результатом
+          выполнения команды <command>svn merge</command> или результатом
+          обычного ручного редактирования файлов.</para>
+
+        <!-- @ENGLISH {{{
+        <para>What does this mean to you, the user?  It means that
+          until the day Subversion grows this feature, you'll have to
+          track merge information yourself.  The best place to do this
+          is in the commit log-message.  As demonstrated in the
+          earlier example, it's recommended that your log-message
+          mention a specific revision number (or range of revisions)
+          that are being merged into your branch.  Later on, you can
+          run <command>svn log</command> to review which changes your
+          branch already contains.  This will allow you to carefully
+          construct a subsequent <command>svn merge</command> command
+          that won't be redundant with previously ported
+          changes.</para>
+
+        <para>In the next section, we'll show some examples of this
+          technique in action.</para>
+        @ENGLISH }}} -->
+        <para>Что это означает для вас, как пользователя? Это означает,
+          что до того момента, пока у Subversion не появится этой функции,
+          вам придется контролировать слияние информации самостоятельно.
+          Лучшим местом для этого является лог-сообщение. Как было
+          показано в предыдущих примерах, рекомендуется, что бы в
+          лог-сообщении был указан конкретный номер правки (или диапазон
+          правок) которые были слиты в вашу ветку. После этого, для того,
+          что бы просмотреть какие изменения ваша ветка уже содержит,
+          вы можете запустить команду <command>svn log</command>. Это
+          позволит быть аккуратнее при выполнении команды <command>svn
+          merge</command>, что бы не пересечься с уже портированными
+          изменениями.</para>
+
+        <para>В следующем разделе мы на примерах рассмотрим эту технику
+          в действии.</para>
+
+      </sect3>
+
+      <sect3 id="svn.branchmerge.copychanges.bestprac.preview">
+        <!-- @ENGLISH {{{
+        <title>Previewing Merges</title>
+
+        <para>Because merging only results in local modifications,
+          it's not usually a high-risk operation.  If you get the
+          merge wrong the first time, simply <command>svn
+          revert</command> the changes and try again.</para>
+
+        <para>It's possible, however, that your working copy might
+          already have local modifications.  The changes applied by a
+          merge will be mixed with your pre-existing ones, and running
+          <command>svn revert</command> is no longer an option.  The
+          two sets of changes may be impossible to separate.</para>
+        @ENGLISH }}} -->
+        <title>Предварительные просмотр при объединении</title>
+
+        <para>Учитывая, что результатом слияния являются локальные
+          модификации, такая операция не является опасной. Если
+          в начале, при выполнении объединения вы ошиблись, просто
+          отмените изменения (<command>svn revert</command>) и
+          попробуйте еще раз.</para>
+
+        <para>Однако, возможна ситуация, когда рабочая копия уже
+          содержит локальные изменения. Изменения, примененные при
+          слиянии будут смешаны с уже существующими и
+          <command>svn revert</command> запустить будет нельзя.
+          Если нельзя будет разделить два набора изменений.</para>
+
+        <!-- @ENGLISH {{{
+        <para>In cases like this, people take comfort in being able to
+          predict or examine merges before they happen.  One simple
+          way to do that is to run <command>svn diff</command> with
+          the same arguments you plan to pass to <command>svn
+          merge</command>, as we already showed in our first example
+          of merging.  Another method of previewing is to pass the
+          <option>-&#64738;-dry-run</option> option to the merge
+          command:</para>
+        @ENGLISH }}} -->
+        <para>В такой ситуации лучше будет попробовать спрогнозировать
+          или проверить объединения до того, как они произойдут.
+          Самым простым вариантом является запуск <command>svn diff</command>
+          с теми же аргументами, что и для <command>svn merge</command>,
+          это мы уже показывали в первом примере объединения. Другим
+          вариантом предпросмотра является передача команде объединения
+          опции <option>--dry-run</option>:</para>
+
+        <screen>
+$ svn merge --dry-run -r 343:344 http://svn.example.com/repos/calc/trunk
+U  integer.c
+
+$ svn status
+#  nothing printed, working copy is still unchanged.
+</screen>
+
+        <!-- @ENGLISH {{{
+             <para>The <option>-&#64738;-dry-run</option> option doesn't actually
+          apply any local changes to the working copy.  It only shows
+          status codes that <emphasis>would</emphasis> be printed in a
+          real merge.  It's useful for getting a <quote>high
+          level</quote> preview of the potential merge, for those
+          times when running <command>svn diff</command> gives too
+          much detail.</para>
+        @ENGLISH }}} -->
+        <para>Опция <option>--dry-run</option> не вносит локальные
+          изменения в рабочую копию. Показываются только коды
+          статуса которые <emphasis>будут</emphasis> выведены
+          при настоящем объединении. Это полезно для получения
+          <quote>обобщенной</quote> информации об объединении
+          для тех случаев, когда запуск <command>svn diff</command>
+          выдает слишком детальную информацию.</para>
+
+      </sect3>
+
+      <sidebar>
+        <!-- @ENGLISH {{{
+        <title>Subversion and Changesets</title>
+
+        <para>Everyone seems to have a slightly different definition
+          of <quote>changeset</quote>, or at least a different
+          expectation of what it means for a version control system to
+          have <quote>changeset features</quote>.  For our purpose,
+          let's say that a changeset is just a collection of changes
+          with a unique name.  The changes might include textual edits
+          to file contents, modifications to tree structure, or tweaks
+          to metadata.  In more common speak, a changeset is just a
+          patch with a name you can refer to.</para>
+        @ENGLISH }}} -->
+        <title>Subversion и наборы изменений</title>
+
+        <para>У каждого найдется свое, немного отличающееся
+          определение <quote>набора изменений</quote>, или во всяком
+          случая того, что это должно означать применительно к системе
+          управления версиями <quote>поддерживающей наборы
+          изменений</quote>. Для нашего случая будем считать, что
+          набор изменений это просто модификации объединенные под
+          уникальным именем. Изменения могут заключаться в редактировании
+          текста файлов, модификации структуры файлов или корректировке
+          метаданных. Проще говоря, набор изменений это просто патч
+          с заданным для него именем.</para>
+
+        <!-- @ENGLISH {{{
+        <para>In Subversion, a global revision number N names a tree
+          in the repository: it's the way the repository looked after
+          the Nth commit.  It's also the name of an implicit
+          changeset: if you compare tree N with tree N-1, you can
+          derive the exact patch that was committed.  For this reason,
+          it's easy to think of <quote>revision N</quote> as not just
+          a tree, but a changeset as well.  If you use an issue
+          tracker to manage bugs, you can use the revision numbers to
+          refer to particular patches that fix bugs&mdash;for example,
+          <quote>this issue was fixed by revision 9238.</quote>.
+          Somebody can then run <command>svn log -r9238</command> to
+          read about the exact changeset which fixed the bug, and run
+          <command>svn diff -r9237:9238</command> to see the patch
+          itself.  And Subversion's <literal>merge</literal> command
+          also uses revision numbers.  You can merge specific changesets
+          from one branch to another by naming them in the merge
+          arguments: <command>svn merge -r9237:9238</command> would
+          merge changeset #9238 into your working copy.</para>
+        @ENGLISH }}} -->
+        <para>В Subversion глобальный номер правки N относится к
+          дереву в хранилище: так выглядит хранилище после
+          фиксации N. Кроме того, это имя для неявного набора
+          изменений: если сравнить дерево N с деревом N-1 вы получите
+          полный патч того, что было зафиксировано. В этом смысле,
+          о <quote>правке N</quote> можно думать не как о дереве
+          файлов, а как о наборе изменений. Если вы пользуетесь
+          системой отслеживания релизов для управления ошибками,
+          вы можете использовать номера правок для того, что бы
+          ссылаться на конкретные патчи, которые исправляют
+          ошибку &mdash; например, <quote>этот релиз был исправлен
+          правкой 9238.</quote>. После этого, для того, что бы прочитать
+          о том наборе изменений, который исправляет ошибку можно выполнить
+          <command>svn log -r9238</command>, а для того, что бы увидеть
+          сам патч, выполнить <command>svn diff -r9237:9238</command>.
+          В Subversion команда <literal>merge</literal> тоже использует
+          номера правок. Можно объединить набор изменений из одной ветки
+          в другую указав его в качестве аргумента:
+          команда <command>svn merge -r9237:9238</command> внедрит
+          набор изменений #9238 в вашу рабочую копию.</para>
+
+      </sidebar>
+
+      <sect3 id="svn.branchmerge.copychanges.bestprac.merge">
+        <!-- @ENGLISH {{{
+        <title>Merge Conflicts</title>
+
+        <para>Just like the <command>svn update</command> command,
+          <command>svn merge</command> applies changes to your working
+          copy.  And therefore it's also capable of creating
+          conflicts.  The conflicts produced by <command>svn
+          merge</command>, however, are sometimes different, and this
+          section explains those differences.</para>
+
+        <para>To begin with, assume that your working copy has no
+          local edits.  When you <command>svn update</command> to a
+          particular revision, the changes sent by the server will
+          always apply <quote>cleanly</quote> to your working copy.
+          The server produces the delta by comparing two trees: a
+          virtual snapshot of your working copy, and the revision tree
+          you're interested in.  Because the left-hand side of the
+          comparison is exactly equal to what you already have, the
+          delta is guaranteed to correctly convert your working copy
+          into the right-hand tree.</para>
+        @ENGLISH }}} -->
+        <title>Конфликты при объединении</title>
+
+        <para>Так же как и команда <command>svn update</command>,
+          <command>svn merge</command> внедряет изменения в
+          рабочую копию. А следовательно тоже может создавать
+          конфликты. Однако конфликты, создаваемые <command>svn
+          merge</command> иногда отличаются и эти отличия
+          рассмотрены в этом разделе.</para>
+
+        <para>В начале будем считать, что рабочая копия не имеет
+          локальных изменений. При обновлении (<command>svn
+          update</command>) до конкретной правки, изменения, отправляемые
+          сервером, будут всегда <quote>без проблем</quote> внедрятся
+          в рабочую копию. Сервер создает дельту сравнивая два дерева:
+          виртуальный снимок рабочей копии и дерево файлов, которое
+          вас интересует. Учитывая то, что левая часть сравнения
+          полностью эквивалентна тому, что вы уже имеете, дельта
+          гарантированно правильно конвертирует рабочую копию в правую
+          часть сравнения.</para>
+
+        <!-- @ENGLISH {{{
+        <para>But <command>svn merge</command> has no such guarantees
+          and can be much more chaotic: the user can ask the server to
+          compare <emphasis>any</emphasis> two trees at all, even ones
+          that are unrelated to the working copy!  This means there's
+          large potential for human error.  Users will sometimes
+          compare the wrong two trees, creating a delta that doesn't
+          apply cleanly.  <command>svn merge</command> will do its
+          best to apply as much of the delta as possible, but some
+          parts may be impossible.  Just like the Unix
+          <command>patch</command> command sometimes complains about
+          <quote>failed hunks</quote>, <command>svn merge</command>
+          will complain about <quote>skipped targets</quote>:</para>
+        @ENGLISH }}} -->
+        <para>Однако <command>svn merge</command> не может этого
+          гарантировать и может вести себя более хаотично:
+          пользователь может запросить сервер сравнить
+          <emphasis>любые</emphasis> два дерева файлов, даже такие,
+          которые не имеют отношения к рабочей копии! Из этого
+          следует большое количество потенциальных человеческих
+          ошибок. Пользователи иногда будут сравнивать два
+          ошибочных дерева создавая дельту которая не
+          сможет правильно внедриться. <command>svn
+          merge</command> будет пытаться внедрить по возможности
+          больше различий, но иногда это будет не возможно.
+          Так же как команда <command>patch</command> в Unix
+          иногда жалуется на <quote>неудачные попытки</quote>
+          объединения, <command>svn merge</command> будет
+          жаловаться на <quote>пропущенные цели</quote>:</para>
+
+        <screen>
+$ svn merge -r 1288:1351 http://svn.example.com/repos/branch
+U  foo.c
+U  bar.c
+Skipped missing target: 'baz.c'
+U  glub.c
+C  glorb.h
+
+$
+</screen>
+
+        <!-- @ENGLISH {{{
+        <para>In the previous example it might be the case that
+          <filename>baz.c</filename> exists in both snapshots of the
+          branch being compared, and the resulting delta wants to
+          change the file's contents, but the file doesn't exist in
+          the working copy.  Whatever the case, the
+          <quote>skipped</quote> message means that the user is most
+          likely comparing the wrong two trees; they're the classic
+          sign of driver error.  When this happens, it's easy to
+          recursively revert all the changes created by the merge
+          (<command>svn revert -&#64738;-recursive</command>), delete any
+          unversioned files or directories left behind after the
+          revert, and re-run <command>svn merge</command> with
+          different arguments.</para>
+
+        <para>Also notice that the previous example shows a conflict
+          happening on <filename>glorb.h</filename>.  We already
+          stated that the working copy has no local edits: how can a
+          conflict possibly happen?  Again, because the user can use
+          <command>svn merge</command> to define and apply any old
+          delta to the working copy, that delta may contain textual
+          changes that don't cleanly apply to a working file, even if
+          the file has no local modifications.</para>
+        @ENGLISH }}} -->
+        <para>Возможно, что в предыдущем примере файл
+          <filename>baz.c</filename> существует в обоих сравниваемых
+          снимках ветки и Subversion пытается применить результирующую
+          дельту для того, чтобы изменить содержимое файла, однако в
+          рабочей копии файл отсутствует. В любом случае сообщение
+          <quote>skipped</quote> означает, что скорее всего пользователь
+          ошибся при указании деревьев для сравнения; классическая ошибка
+          оператора. Если это произошло, то проще всего рекурсивно
+          отменить все изменения, сделанные при слиянии (<command>svn
+          revert --recursive</command>), сразу же после этого удалить
+          все не версионированные файлы и директории и повторно
+          запустить <command>svn merge</command> с другими
+          параметрами.</para>
+
+        <para>Обратите внимание на то, что в предыдущем примере
+          в файле <filename>glorb.h</filename> возник конфликт.
+          Ранее мы договорились, что рабочая копия не имеет
+          локальных изменений: откуда же взялся конфликт?
+          Опять же, так как пользователь мог запустить <command>svn
+          merge</command> для выделения и применения к рабочей копии
+          какой то старой дельты, в результате, такая дельта может
+          содержать изменения, которые не смогут внедриться в рабочий
+          файл без появления проблем, даже если он не имеет локальных
+          изменений.</para>
+
+        <!-- @ENGLISH {{{
+        <para>Another small difference between <command>svn
+          update</command> and <command>svn merge</command> are the
+          names of the full-text files created when a conflict
+          happens.  In <xref linkend="svn.tour.cycle.resolve"/>, we saw
+          that an update produces files named
+          <filename>filename.mine</filename>,
+          <filename>filename.rOLDREV</filename>, and
+          <filename>filename.rNEWREV</filename>.  When <command>svn
+          merge</command> produces a conflict, though, it creates
+          three files named <filename>filename.working</filename>,
+          <filename>filename.left</filename>, and
+          <filename>filename.right</filename>.  In this case, the
+          terms <quote>left</quote> and <quote>right</quote> are
+          describing which side of the double-tree comparison the file
+          came from.  In any case, these differing names will help you
+          distinguish between conflicts that happened as a result of an
+          update versus ones that happened as a result of a
+          merge.</para>
+        @ENGLISH }}} -->
+        <para>Еще одно небольшое отличием между <command>svn
+          update</command> и <command>svn merge</command> заключается
+          в названиях файлов, создаваемых при возникновении конфликта.
+          В разделе <xref linkend="svn.tour.cycle.resolve"/> мы
+          говорили о том, что при обновлении создаются файлы с
+          названиями <filename>filename.mine</filename>,
+          <filename>filename.rOLDREV</filename>, и
+          <filename>filename.rNEWREV</filename>. А <command>svn
+          merge</command> в конфликтной ситуации создает три файла
+          с названиями <filename>filename.working</filename>,
+          <filename>filename.left</filename> и
+          <filename>filename.right</filename>. Здесь, термины
+          <quote>left</quote> и <quote>right</quote> указывают
+          на две стороны сравнения, то есть на используемые при
+          сравнении деревья. Это разделение используемых названий
+          поможет вам отличать конфликты возникшие в результате
+          обновления от конфликтов, возникших в результате
+          объединения.</para>
+
+      </sect3>
+
+      <sect3 id="svn.branchmerge.copychanges.bestprac.ancestry">
+        <!-- @ENGLISH {{{
+        <title>Noticing or Ignoring Ancestry</title>
+
+        <para>When conversing with a Subversion developer, you might
+          very likely hear reference to the term
+          <firstterm>ancestry</firstterm>.  This word is used to
+          describe the relationship between two objects in a
+          repository: if they're related to each other, then one
+          object is said to be an ancestor of the other.</para>
+
+        <para>For example, suppose you commit revision 100, which
+          includes a change to a file <filename>foo.c</filename>.
+          Then <filename>foo.c@99</filename> is an
+          <quote>ancestor</quote> of <filename>foo.c@100</filename>.
+          On the other hand, suppose you commit the deletion of
+          <filename>foo.c</filename> in revision 101, and then add a
+          new file by the same name in revision 102.  In this case,
+          <filename>foo.c@99</filename> and
+          <filename>foo.c@102</filename> may appear to be related
+          (they have the same path), but in fact are completely
+          different objects in the repository.  They share no history
+          or <quote>ancestry</quote>.</para>
+        @ENGLISH }}} -->
+        <title>Учитывать или игнорировать происхождение</title>
+
+        <para>При общении разработчиков, использующих Subversion
+          очень часто можно услышать упоминание термина
+          <firstterm>происхождение</firstterm>. Это слово используется
+          для описания отношений между двумя объектами хранилища:
+          если между ними есть связь, тогда говорят, что один объект
+          является предком другого.</para>
+
+        <para>Например, предположим, что фиксируется правка 100,
+          в которой содержатся изменения файла <filename>foo.c</filename>.
+          В этом случае файл <filename>foo.c@99</filename> является предком
+          файла <filename>foo.c@100</filename>. С другой стороны, можно
+          допустить, что в правке 101 вы фиксируете удаление
+          <filename>foo.c</filename>, а затем в правке 102 добавляете
+          новый файл с таким же именем. В таком случае файлы
+          <filename>foo.c@99</filename> и <filename>foo.c@102</filename>
+          могут выглядеть так, как будто они имеют друг к другу отношение
+          (у них одинаковый путь), однако на самом деле являются
+          полностью независимыми объектами хранилища. Они не имеют
+          ни общей истории, ни общих <quote>предков</quote>.</para>
+
+        <!-- @ENGLISH {{{
+        <para>The reason for bringing this up is to point out an
+          important difference between <command>svn diff</command> and
+          <command>svn merge</command>.  The former command ignores
+          ancestry, while the latter command is quite sensitive to it.
+          For example, if you asked <command>svn diff</command> to
+          compare revisions 99 and 102 of <filename>foo.c</filename>,
+          you would see line-based diffs; the <literal>diff</literal>
+          command is blindly comparing two paths.  But if you asked
+          <command>svn merge</command> to compare the same two objects,
+          it would notice that they're unrelated and first attempt to
+          delete the old file, then add the new file;  the output would
+          indicate a deletion followed by an add:</para>
+        @ENGLISH }}} -->
+        <para>Мы обращаем на это ваше внимание, для того, чтобы
+          указать на важные отличия между <command>svn diff</command>
+          и <command>svn merge</command>. Первая команда игнорирует
+          происхождение, в то время, как вторая его учитывает.
+          Например, если попросить <command>svn diff</command> сравнить
+          правки 99 и 102 файла <filename>foo.c</filename> вы увидите
+          построчное сравнение; команда <literal>diff</literal> слепо сравнивает
+          два пути. А вот если вы попросите <command>svn merge</command>
+          сравнить те же объекты, то Subversion предупредит вас о том, что
+          они не связаны друг с другом и сначала попытается удалить
+          старый файл, а затем добавить новый; вывод команды покажет
+	  удаление с последующим добавлением:</para>
+
+        <screen>
+D  foo.c
+A  foo.c
+</screen>
+
+        <!-- @ENGLISH {{{
+        <para>Most merges involve comparing trees that are ancestrally
+          related to one another, and therefore <command>svn
+          merge</command> defaults to this behavior.  Occasionally,
+          however, you may want the <literal>merge</literal> command to
+          compare two unrelated trees.  For example, you may have
+          imported two source-code trees representing different vendor
+          releases of a software project (see <xref
+          linkend="svn.advanced.vendorbr"/>).
+          If you asked <command>svn merge</command> to compare the two
+          trees, you'd see the entire first tree being deleted,
+          followed by an add of the entire second tree!</para>
+
+        <para>In these situations, you'll want <command>svn
+          merge</command> to do a path-based comparison only, ignoring
+          any relations between files and directories.  Add the
+          <option>-&#64738;-ignore-ancestry</option> option to your merge
+          command, and it will behave just like <command>svn
+          diff</command>.  (And conversely, the
+          <option>-&#64738;-notice-ancestry</option> option will cause
+          <command>svn diff</command> to behave like the
+          <literal>merge</literal> command.)</para>
+        @ENGLISH }}} -->
+        <para>В большинстве случаев при объединении сравниваются
+          деревья, имеющие родственную связь и по умолчанию
+          <command>svn merge</command> рассчитывает на это. Однако
+          иногда, вам будет нужно, что бы команда <literal>merge</literal>
+	  сравнила два не связанных дерева файлов. Например, у вас может быть
+          два импортированных дерева содержащих исходный код
+          релизов программных проектов от сторонних поставщиков
+          (см. <xref linkend="svn.advanced.vendorbr"/>). Если попросить
+          <command>svn merge</command> сравнить два эти дерева,
+          вы увидите, что первое дерево будет полностью удалено,
+          а затем будет полностью добавлено второе!</para>
+
+        <para>В подобных ситуациях вам нужно, чтобы команда
+          <command>svn merge</command> выполняла сравнение основанное
+          только на пути, без учета любых отношений между файлами
+          и директориями. Добавьте опцию <option>--ignore-ancestry</option>
+          при записи команды объединения, после чего эта команда будет
+          вести себя также как <command>svn diff</command>. (И наоборот,
+          опция <option>--notice-ancestry</option> будет заставлять
+          <command>svn diff</command> вести себя как команда
+          <literal>merge</literal>.)</para>
+
+      </sect3>
+
+    </sect2>
+
+
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.branchmerge.commonuses">
+    <!-- @ENGLISH {{{
+    <title>Common Use-Cases</title>
+
+    <para>There are many different uses for branching and <command>svn
+      merge</command>, and this section describes the most common ones
+      you're likely to run into.</para>
+    @ENGLISH }}} -->
+    <title>Типовые примеры использования</title>
+
+    <para>Для ветвления и команды <command>svn merge</command>
+      существует множество применений, в этом раздели описаны наиболее
+      типичные из тех с которыми вы можете столкнуться.</para>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.branchmerge.commonuses.wholebr">
+      <!-- @ENGLISH {{{
+      <title>Merging a Whole Branch to Another</title>
+
+      <para>To complete our running example, we'll move forward in
+        time.  Suppose several days have passed, and many changes have
+        happened on both the trunk and your private branch.  Suppose
+        that you've finished working on your private branch; the
+        feature or bug fix is finally complete, and now you want to
+        merge all of your branch changes back into the trunk for
+        others to enjoy.</para>
+
+      <para>So how do we use <command>svn merge</command> in this
+        scenario?  Remember that this command compares two trees, and
+        applies the differences to a working copy.  So to receive the
+        changes, you need to have a working copy of the trunk.  We'll
+        assume that either you still have your original one lying
+        around (fully updated), or that you recently checked out a
+        fresh working copy of <filename>/calc/trunk</filename>.</para>
+      @ENGLISH }}} -->
+      <title>Полное объединение двух веток</title>
+
+      <para>Что бы завершить наш текущий пример, заглянем немного
+        в перед. Предположим, прошло несколько дней и как в главную
+        линию разработки так и вашу личную ветку было внесено множество
+        изменений. Допустим, что работу над своей веткой вы завершили;
+        добавление функциональности или исправление ошибок наконец
+        закончено и теперь вы хотите объединить все изменения из своей
+        ветки с главной линией разработки.</para>
+
+      <para>Как же в этом случае нужно использовать <command>svn
+        merge</command>? Помните о том, что эта команда сравнивает
+        два дерева и применяет различия к рабочей копии. Поэтому,
+        для того, что бы было к чему применять изменения, необходимо
+        иметь рабочую копию главной линии разработки. Будем считать,
+        что-либо у вас под рукой имеется такая (полностью обновленная)
+        копия, либо вы только что создали новую рабочую копию
+        <filename>/calc/trunk</filename>.</para>
+
+      <!-- @ENGLISH {{{
+      <para>But which two trees should be compared?  At first glance,
+        the answer may seem obvious: just compare the latest trunk
+        tree with your latest branch tree.  But beware&mdash;this
+        assumption is <emphasis>wrong</emphasis>, and has burned many
+        a new user!  Since <command>svn merge</command> operates like
+        <command>svn diff</command>, comparing the latest trunk and
+        branch trees will <emphasis>not</emphasis> merely describe
+        the set of changes you made to your branch.  Such a comparison
+        shows too many changes: it would not only show the addition of
+        your branch changes, but also the <emphasis>removal</emphasis>
+        of trunk changes that never happened on your branch.</para>
+
+      <para>To express only the changes that happened on your branch,
+        you need to compare the initial state of your branch to its
+        final state.  Using <command>svn log</command> on your branch,
+        you can see that your branch was created in revision 341.  And
+        the final state of your branch is simply a matter of using the
+        <literal>HEAD</literal> revision.  That means you want to
+        compare revisions 341 and <literal>HEAD</literal> of your
+        branch directory, and apply those differences to a working
+        copy of the trunk.</para>
+      @ENGLISH }}} -->
+      <para>А какие именно два дерева должны сравниваться? На первый
+        взгляд ответ очевиден: сравнивать последнее дерево главной
+        линии разработки с последним деревом вашей ветки. Однако
+        будьте осторожны &mdash; такое предположение является
+        <emphasis>ошибочным</emphasis>, многие новые пользователи
+        ошибаются подобным образом! Учитывая то, что <command>svn
+        merge</command> работает так же как <command>svn diff</command>,
+        сравнение последние версии главной линии разработки и вашей ветки
+        покажет изменения сделанные <emphasis>не</emphasis> только в вашей
+        ветке. Такое сравнение покажет слишком много изменений: будут
+        показано не только то, что добавлялось в вашей ветке,
+        но и то, что <emphasis>удалялось</emphasis> в главной линии
+        разработки и не удалялось в вашей ветке.</para>
+
+      <para>Для выделения только тех изменений, которые были сделаны
+        в вашей ветке, нужно сравнивать начальное и конечное состояния
+        ветки. Воспользовавшись <command>svn log</command> для ветки,
+        можно узнать, что она была создана в правке 341. А для определения
+        конечного состояния ветки можно просто использовать правку
+        <literal>HEAD</literal>. Это значит, что вам нужно сравнить
+        правки 341 и <literal>HEAD</literal> директории с веткой и применить
+        различия к рабочей копии главной линии разработки.</para>
+
+      <!-- @ENGLISH {{{
+      <tip>
+        <para>A nice way of finding the revision in which a branch was
+          created (the <quote>base</quote> of the branch) is to use the
+          <option>-&#64738;-stop-on-copy</option> option to <command>svn
+          log</command>.  The log subcommand will normally show every
+          change ever made to the branch, including tracing back
+          through the copy which created the branch.  So normally,
+          you'll see history from the trunk as well.  The
+          <option>-&#64738;-stop-on-copy</option> will halt log output as soon
+          as <command>svn log</command> detects that its target was
+          copied or renamed.</para>
+
+        <para>So in our continuing example,</para>
+      @ENGLISH }}} -->
+      <tip>
+        <para>Удобно для определения правки, в которой ветка была создана
+          (<quote>базовой</quote> правки ветки) использовать параметр
+          <option>--stop-on-copy</option> при запуске <command>svn
+          log</command>. При обычном запуске, эта команда показывает
+          все изменения сделанные в ветке, включая те, которые были
+          сделаны до создания ветки. Поэтому, при таком запуске
+          вы увидите и историю главной линии разработки. Параметр
+          <option>--stop-on-copy</option> остановит вывод лог сообщений
+          как только <command>svn log</command> определит, что
+          целевой объект был скопирован или переименован.</para>
+
+        <screen>
+$ svn log --verbose --stop-on-copy \
+          http://svn.example.com/repos/calc/branches/my-calc-branch
+&hellip;
+------------------------------------------------------------------------
+r341 | user | 2002-11-03 15:27:56 -0600 (Thu, 07 Nov 2002) | 2 lines
+Changed paths:
+   A /calc/branches/my-calc-branch (from /calc/trunk:340)
+
+$
+</screen>
+
+      <!-- @ENGLISH {{{
+        <para>As expected, the final revision printed by this command
+          is the revision in which <filename>my-calc-branch</filename>
+          was created by copying.</para>
+      </tip>
+      @ENGLISH }}} -->
+        <para>Как и ожидалось, последняя правка выведенная этой командой
+          будет правка, в которой директория
+          <filename>my-calc-branch</filename> была создана
+          путем копированием.</para>
+      </tip>
+
+      <!-- @ENGLISH {{{
+      <para>Here's the final merging procedure, then:</para>
+      @ENGLISH }}} -->
+      <para>Вот так выглядит завершение объединения:</para>
+
+      <screen>
+$ cd calc/trunk
+$ svn update
+At revision 405.
+
+$ svn merge -r 341:405 http://svn.example.com/repos/calc/branches/my-calc-branch
+U   integer.c
+U   button.c
+U   Makefile
+
+$ svn status
+M   integer.c
+M   button.c
+M   Makefile
+
+# ...examine the diffs, compile, test, etc...
+
+$ svn commit -m "Merged my-calc-branch changes r341:405 into the trunk."
+Sending        integer.c
+Sending        button.c
+Sending        Makefile
+Transmitting file data ...
+Committed revision 406.
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>Again, notice that the commit log message very
+        specifically mentions the range of changes that was merged
+        into the trunk.  Always remember to do this, because it's
+        critical information you'll need later on.</para>
+
+      <para>For example, suppose you decide to keep working on your
+        branch for another week, in order to complete an enhancement
+        to your original feature or bug fix.  The repository's
+        <literal>HEAD</literal> revision is now 480, and you're ready
+        to do another merge from your private branch to the trunk.
+        But as discussed in <xref linkend="svn.branchmerge.copychanges.bestprac"/>, you
+        don't want to merge the changes you've already merged before;
+        you only want to merge everything <quote>new</quote> on your
+        branch since the last time you merged.  The trick is to figure
+        out what's new.</para>
+
+      <para>The first step is to run <command>svn log</command> on the
+        trunk, and look for a log message about the last time you
+        merged from the branch:</para>
+      @ENGLISH }}} -->
+      <para>Еще раз обратите внимание, на то, что в лог сообщении
+        фиксации очень точно указан диапазон правок, которые были
+        объединены с главной линией разработки. Никогда не забывайте
+        этого делать, потому что это очень важная информация, которая
+        понадобиться вам позже.</para>
+
+      <para>Например, предположим, что на следующей неделе вы решите
+        продолжить работу над веткой, для завершения расширения
+        функциональности или исправления ошибки. После этого, правка
+        <literal>HEAD</literal> хранилища будет имеет номер 480 и вы готовы
+        выполнить еще одно объединение своей личной копии с главной линией
+        разработки. Однако, как уже было сказано в разделе
+        <xref linkend= "svn.branchmerge.copychanges.bestprac"/>, нет
+        необходимости объединять изменения которые уже были объединены
+        раньше; нужно объединить только <quote>новые</quote> изменения,
+        появившиеся с момента последнего объединения. Сложность в том,
+        что бы выделить эти новые изменения.</para>
+
+      <para>Первым шагом является запуск <command>svn log</command>
+        для главной линии разработки, для того, что бы увидеть
+        сообщение о времени последнего объединения с веткой:</para>
+
+      <screen>
+$ cd calc/trunk
+$ svn log
+&hellip;
+------------------------------------------------------------------------
+r406 | user | 2004-02-08 11:17:26 -0600 (Sun, 08 Feb 2004) | 1 line
+
+Merged my-calc-branch changes r341:405 into the trunk.
+------------------------------------------------------------------------
+&hellip;
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>Aha!  Since all branch-changes that happened between
+        revisions 341 and 405 were previously merged to the trunk as
+        revision 406, you now know that you want to merge only the
+        branch changes after that&mdash;by comparing revisions 406 and
+        <literal>HEAD</literal>.</para>
+      @ENGLISH }}} -->
+      <para>Ага! Так как все изменения в ветке, которые делались между
+        правками 341 и 405 уже были объединены с главной линией разработки
+        в правке 406, то теперь вы знаете, что необходимо брать только те
+        изменения ветки, которые были выполнены после этого &mdash;
+        сравнивая правки 406 и <literal>HEAD</literal>.</para>
+
+      <screen>
+$ cd calc/trunk
+$ svn update
+At revision 480.
+
+# We notice that HEAD is currently 480, so we use it to do the merge:
+
+$ svn merge -r 406:480 http://svn.example.com/repos/calc/branches/my-calc-branch
+U   integer.c
+U   button.c
+U   Makefile
+
+$ svn commit -m "Merged my-calc-branch changes r406:480 into the trunk."
+Sending        integer.c
+Sending        button.c
+Sending        Makefile
+Transmitting file data ...
+Committed revision 481.
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>Now the trunk contains the complete second wave of changes
+        made to the branch.  At this point, you can either delete your
+        branch (we'll discuss this later on), or continue working on
+        your branch and repeat this procedure for subsequent
+        merges.</para>
+      @ENGLISH }}} -->
+      <para>Теперь главная линия разработки полностью содержит вторую
+        волну изменений, сделанных в ветке. С этого момента можно
+        либо удалить ветку (об этом мы поговорим позже), либо
+        продолжать работать над веткой, с последующим объединением
+        изменений.</para>
+
+    </sect2>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.branchmerge.commonuses.undo">
+      <!-- @ENGLISH {{{
+      <title>Undoing Changes</title>
+
+      <para>Another common use for <command>svn merge</command> is to
+        roll back a change that has already been committed.  Suppose
+        you're working away happily on a working copy of
+        <filename>/calc/trunk</filename>, and you discover that the
+        change made way back in revision 303, which changed
+        <filename>integer.c</filename>, is completely wrong.  It never
+        should have been committed.  You can use <command>svn
+        merge</command> to <quote>undo</quote> the change in your
+        working copy, and then commit the local modification to the
+        repository.  All you need to do is to specify a
+        <emphasis>reverse</emphasis> difference:</para>
+      @ENGLISH }}} -->
+      <title>Отмена изменений</title>
+
+      <para>Еще одним типичным применением для <command>svn
+        merge</command> является откат изменений, которые уже были
+        зафиксированы. Предположим вы спокойно работаете в рабочей
+        копии <filename>/calc/trunk</filename> и выясняете, что
+        изменения сделанные в правке 303, которые изменили
+        <filename>integer.c</filename>, полностью ошибочны. Вы можете
+        воспользоваться командой <command>svn merge</command> для
+        <quote>отмены</quote> изменений в своей рабочей копии,
+        после чего зафиксировать локальные изменения в хранилище.
+        Все, что нужно сделать, это указать
+        <emphasis>обратные</emphasis> отличия:</para>
+
+      <screen>
+$ svn merge -r 303:302 http://svn.example.com/repos/calc/trunk
+U  integer.c
+
+$ svn status
+M  integer.c
+
+$ svn diff
+&hellip;
+# verify that the change is removed
+&hellip;
+
+$ svn commit -m "Undoing change committed in r303."
+Sending        integer.c
+Transmitting file data .
+Committed revision 350.
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>One way to think about a repository revision is as a
+        specific group of changes (some version control systems call
+        these <firstterm>changesets</firstterm>).  By using the
+        <option>-r</option> switch, you can ask <command>svn
+        merge</command> to apply a changeset, or whole range of
+        changesets, to your working copy.  In our case of undoing a
+        change, we're asking <command>svn merge</command> to apply
+        changeset #303 to our working copy
+        <emphasis>backwards</emphasis>.</para>
+
+      <para>Keep in mind that rolling back a change like this is just
+        like any other <command>svn merge</command> operation, so you
+        should use <command>svn status</command> and <command>svn
+        diff</command> to confirm that your work is in the state you
+        want it to be in, and then use <command>svn commit</command>
+        to send the final version to the repository.  After
+        committing, this particular changeset is no longer reflected
+        in the <literal>HEAD</literal> revision.</para>
+      @ENGLISH }}} -->
+      <para>Одним из взглядов на правку хранилища является представление
+        ее в виде сгруппированных изменений (некоторые системы управления
+        версиями называют это <firstterm>набором изменений</firstterm>).
+        Используя параметр <option>-r</option> можно попросить
+        <command>svn merge</command> применить к рабочей копии набор
+        изменений или целый диапазон наборов изменений. В нашем случае
+        с отменой изменений, мы просим <command>svn merge</command>
+        применить к рабочей копии набор изменений #303
+        <emphasis>в обратном направлении</emphasis>.</para>
+
+      <para>Обратите внимание, что откат изменений подобным образом
+        ничем не отличается от любых других операций, выполненных с
+        помощью <command>svn merge</command>, поэтому необходимо
+        использовать <command>svn status</command> и <command>svn
+         diff</command> для того, что бы убедится, что ваша
+         работа находится в том состоянии в котором вам нужно, а затем
+         используя <command>svn commit</command> отправить финальную
+         версию в хранилище. После фиксации, этот конкретный набор
+         изменений больше не будет отражен в правке
+         <literal>HEAD</literal>.</para>
+
+      <!-- @ENGLISH {{{
+      <para>Again, you may be thinking: well, that really didn't undo
+        the commit, did it?  The change still exists in revision 303.
+        If somebody checks out a version of the
+        <filename>calc</filename> project between revisions 303 and
+        349, they'll still see the bad change, right?</para>
+
+      <para>Yes, that's true.  When we talk about
+        <quote>removing</quote> a change, we're really talking about
+        removing it from <literal>HEAD</literal>.  The original change
+        still exists in the repository's history.  For most
+        situations, this is good enough.  Most people are only
+        interested in tracking the <literal>HEAD</literal> of a
+        project anyway.  There are special cases, however, where you
+        really might want to destroy all evidence of the commit.
+        (Perhaps somebody accidentally committed a confidential
+        document.)  This isn't so easy, it turns out, because
+        Subversion was deliberately designed to never lose
+        information.  Revisions are immutable trees which build upon
+        one another.  Removing a revision from history would cause a
+        domino effect, creating chaos in all subsequent revisions and
+        possibly invalidating all working copies.
+        <footnote>
+          <para>The Subversion project has plans, however, to someday
+            implement an <command>svnadmin obliterate</command>
+            command that would accomplish the task of permanently
+            deleting information.  In the meantime, see <xref
+            linkend="svn.reposadmin.maint.tk.svndumpfilter"/> for a possible
+            workaround.</para>
+        </footnote>
+      </para>
+      @ENGLISH }}} -->
+      <para>Но наряду с этим, вы можете подумать: однако же на самом деле
+        фиксация не отменяется, не так ли? Изменения продолжают существовать
+        в правке 303. И если кто-то создаст рабочую копию версии проекта
+        <filename>calc</filename> между правками 303 и 349, он все равно
+        получит ошибочные изменения, верно?</para>
+
+      <para>Да, это так. Когда мы говорим об <quote>удалении</quote>
+        изменений, имеется в виду их удаление из <literal>HEAD</literal>.
+        Первоначальные изменения продолжают существовать в истории
+        хранилища. Для большинства ситуаций это является положительным
+        моментом. В любом случае, большинство пользователей интересует
+        только <literal>HEAD</literal> проекта. Однако, возможны
+        ситуации, когда действительно необходимо удалить последствия
+        фиксации. (Возможно, кто-то случайно зафиксировал
+        конфиденциальный документ.) Сделать это будет не так просто, так как
+        Subversion спроектирована специально таким образом, что бы исключить
+        возможность потери информации. Правки представляют собой не меняющиеся
+        деревья файлов, основывающиеся одно на другом. Удаление правки из
+        хранилища может вызвать эффект домино, создавая беспорядок во всех
+        последующих правках и возможно разрушая все рабочие копии.
+        <footnote><para>Однако, проект Subversion планирует со временем
+        реализовать команду <command>svnadmin obliterate</command>
+        с помощью которой можно будет выборочно удалять информацию.
+        А пока за возможным решением проблемы обратитесь к разделу <xref
+        linkend="svn.reposadmin.maint.tk.svndumpfilter"/>.</para>
+        </footnote></para>
+
+    </sect2>
+
+    <!-- =============================================================== -->
+    <!-- @ENGLISH {{{
+    <sect2 id="svn.branchmerge.commonuses.resurrect">
+      <title>Resurrecting Deleted Items</title>
+
+      <para>The great thing about version control systems is that
+        information is never lost.  Even when you delete a file or
+        directory, it may be gone from the <literal>HEAD</literal>
+        revision, but the object still exists in earlier revisions.
+        One of the most common questions new users ask is, <quote>How
+        do I get my old file or directory back?</quote>.</para>
+
+      <para>The first step is to define exactly <emphasis
+        role="bold">which</emphasis> item you're trying to resurrect.
+        Here's a useful metaphor: you can think of every object in the
+        repository as existing in a sort of two-dimensional coordinate
+        system.  The first coordinate is a particular revision tree,
+        and the second coordinate is a path within that tree.  So
+        every version of your file or directory can be defined by a
+        specific coordinate pair.</para>
+    @ENGLISH }}} -->
+    <sect2 id="svn.branchmerge.commonuses.resurrect">
+      <title>Восстановление удаленных элементов</title>
+
+      <para>Отличным свойством системы контроля версия является то,
+        что информация никогда не теряется. При удалении файла
+        или директории, элемент исчезает из правки <literal>HEAD</literal>
+        но продолжает существовать в более ранних правках. Одним
+        из наиболее частых вопросов, задаваемых новыми пользователями,
+        является такой: <quote>Как мне вернуть назад свой файл или
+        директорию?</quote></para>
+
+      <para>Первым шагом является определение того, <emphasis
+        role="bold">какой именно</emphasis> элемент вы пытаетесь
+        восстановить. Неплохой метафорой является представление
+        каждого объекта в хранилище существующим в двухмерной системе
+        координат. Первой координатой является отдельное дерево правок,
+        второй координатой является путь в этом дереве. Таким образом
+        каждая версия файла или директории может быть представлена
+        конкретной парой координат.</para>
+
+      <!-- @ENGLISH {{{
+      <para>Subversion has no <filename>Attic</filename> directory
+        like CVS does,
+        <footnote>
+          <para>Because CVS doesn't version trees, it creates an
+            <filename>Attic</filename> area within each repository
+            directory as a way of remembering deleted files.</para>
+        </footnote>
+        so you need to use <command>svn
+        log</command> to discover the exact coordinate pair you wish
+        to resurrect.  A good strategy is to run <command>svn log
+        -&#64738;-verbose</command> in a directory which used to contain your
+        deleted item.  The <option>-&#64738;-verbose</option> option shows a
+        list of all changed items in each revision; all you need to do
+        is find the revision in which you deleted the file or
+        directory.  You can do this visually, or by using another tool
+        to examine the log output (via <command>grep</command>, or
+        perhaps via an incremental search in an editor).</para>
+      @ENGLISH }}} -->
+      <para>Subversion, в отличие от CVS, не имеет директории
+        <filename>Attic</filename><footnote><para>Из-за того, что
+        CVS не версионирует деревья, она создает область
+        <filename>Attic</filename> для каждой директории хранилища
+        как способ запоминания удаленных файлов.</para></footnote>
+        поэтому для определения необходимой при восстановлении пары
+        координат нужно воспользоваться командой <command>svn
+        log</command>. Лучше всего запустить <command>svn log
+        --verbose</command> в директории, которая содержала
+        удаленный элемент. Параметр <option>--verbose</option>
+        покажет для каждой правки список измененных элементов;
+        все, что вам остается сделать, это найти правку, в которой
+        файл или директория были удалены. Сделать это можно
+        визуально или воспользоваться для обработки вывода каким-то
+        инструментом (<command>grep</command> или может быть
+        последовательным поиском в редакторе).</para>
+
+      <screen>
+$ cd parent-dir
+$ svn log --verbose
+&hellip;
+------------------------------------------------------------------------
+r808 | joe | 2003-12-26 14:29:40 -0600 (Fri, 26 Dec 2003) | 3 lines
+Changed paths:
+   D /calc/trunk/real.c
+   M /calc/trunk/integer.c
+
+Added fast fourier transform functions to integer.c.
+Removed real.c because code now in double.c.
+&hellip;
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>In the example, we're assuming that you're looking for a
+        deleted file <filename>real.c</filename>.  By looking through
+        the logs of a parent directory, you've spotted that this file
+        was deleted in revision 808.  Therefore, the last version of
+        the file to exist was in the revision right before that.
+        Conclusion: you want to resurrect the path
+        <filename>/calc/trunk/real.c</filename> from revision
+        807.</para>
+
+      <para>That was the hard part&mdash;the research.  Now that you
+        know what you want to restore, you have two different
+        choices.</para>
+
+      <para>One option is to use <command>svn merge</command> to apply
+        revision 808 <quote>in reverse</quote>.  (We've already
+        discussed how to undo changes, see <xref
+        linkend="svn.branchmerge.commonuses.undo"/>.)  This would have the effect of
+        re-adding <filename>real.c</filename> as a local modification.
+        The file would be scheduled for addition, and after a commit,
+        the file would again exist in <literal>HEAD</literal>.</para>
+      @ENGLISH }}} -->
+      <para>В примере предполагается, что вы ищите удаленный файл
+        <filename>real.c</filename>. Просмотрев логи родительской
+        директории вы определите, что этот файл был удален в правке
+        808. Следовательно, последняя существовавшая версия файла
+        была в правке, предшествующей этой. Вывод: необходимо из
+        правки 807 восстановить путь
+        <filename>/calc/trunk/real.c</filename>.</para>
+
+      <para>Поиск был сложной задачей. Теперь, когда известно, что
+        нужно восстановить, есть две возможности.</para>
+
+      <para>Одним из вариантов является использование <command>svn
+        merge</command> для применения правки 808 <quote>в обратном
+        направлении</quote>. (Как отменять изменения мы уже рассматривали,
+        см. <xref linkend="svn.branchmerge.commonuses.undo"/>.) Это
+        приведет к эффекту повторного добавления фала
+        <filename>real.c</filename> в виде локальных изменений.
+        Файл будет запланирован для добавления и после фиксации
+        будет опять присутствовать в <literal>HEAD</literal>.</para>
+
+      <!-- @ENGLISH {{{
+      <para>In this particular example, however, this is probably not
+        the best strategy.  Reverse-applying revision 808 would not
+        only schedule <filename>real.c</filename> for addition, but
+        the log message indicates that it would also undo certain
+        changes to <filename>integer.c</filename>, which you don't
+        want.  Certainly, you could reverse-merge revision 808 and
+        then <command>svn revert</command> the local modifications to
+        <filename>integer.c</filename>, but this technique doesn't
+        scale well.  What if there were 90 files changed in revision
+        808?</para>
+
+      <para>A second, more targeted strategy is not to use
+        <command>svn merge</command> at all, but rather the
+        <command>svn copy</command> command.  Simply copy the exact
+        revision and path <quote>coordinate pair</quote> from the
+        repository to your working copy:</para>
+      @ENGLISH }}} -->
+      <para>Однако в этом, отдельно взятом примере, это не самое лучшее
+        решение. Повторное применение правки 808 не только добавит
+        файл <filename>real.c</filename>; лог сообщение показывает, что
+        будут отменены некоторые изменения в <filename>integer.c</filename>,
+        чего вы не хотите. Конечно, можно выполнить обратное объединение
+        с правкой 808, а затем отменить (<command>svn revert</command>)
+        локальные изменения <filename>integer.c</filename>, однако такой
+        подход плохо масштабируется. Что если в правке 808 было изменено
+        90 файлов?</para>
+
+      <para>При втором, более целевом методе, <command>svn merge</command>
+        вообще не используется, а вместо этого применяется команда
+        <command>svn copy</command>. Просто скопируете определенные
+        <quote>парой координат</quote> правку и путь из хранилища в
+        рабочую копию:</para>
+
+      <screen>
+$ svn copy --revision 807 \
+           http://svn.example.com/repos/calc/trunk/real.c ./real.c
+
+$ svn status
+A  +   real.c
+
+$ svn commit -m "Resurrected real.c from revision 807, /calc/trunk/real.c."
+Adding         real.c
+Transmitting file data .
+Committed revision 1390.
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>The plus sign in the status output indicates that the item
+        isn't merely scheduled for addition, but scheduled for
+        addition <quote>with history</quote>.  Subversion remembers
+        where it was copied from.  In the future, running <command>svn
+        log</command> on this file will traverse back through the
+        file's resurrection and through all the history it had prior
+        to revision 807.  In other words, this new
+        <filename>real.c</filename> isn't really new; it's a direct
+        descendant of the original, deleted file.</para>
+
+      <para>Although our example shows us resurrecting a file, note
+        that these same techniques work just as well for resurrecting
+        deleted directories.</para>
+      @ENGLISH }}} -->
+      <para>Знак плюс в статусе показывает, что элемент не просто
+        запланирован для добавления, а запланирован для добавления
+        <quote>с историей</quote>. Subversion запоминает откуда он был
+        скопирован. В будущем, запуск <command>svn log</command> для
+        этого файла будет пересекать восстановление файла и всю историю,
+        предшествующую правке 807. Другими словами, новый файл
+        <filename>real.c</filename> на самом деле не является новым;
+        он является прямым наследником оригинального, удаленного
+        файла.</para>
+
+      <para>Хотя наш пример показывает как восстанавливать файл, обратите
+        внимание, на то что этот подход работает также и для
+        восстановления удаленных директорий.</para>
+
+    </sect2>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.branchmerge.commonuses.patterns">
+      <!-- @ENGLISH {{{
+      <title>Common Branching Patterns</title>
+
+      <para>Version control is most often used for software
+        development, so here's a quick peek at two of the most common
+        branching/merging patterns used by teams of programmers.  If
+        you're not using Subversion for software development, feel
+        free to skip this section.  If you're a software developer
+        using version control for the first time, pay close attention,
+        as these patterns are often considered best practices by
+        experienced folk.  These processes aren't specific to
+        Subversion; they're applicable to any version control system.
+        Still, it may help to see them described in Subversion
+        terms.</para>
+      @ENGLISH }}} -->
+      <title>Типовые приемы при использовании веток</title>
+
+      <para>Управление версиями чаще всего используется при
+        разработке программного обеспечения, поэтому здесь мы
+        вкратце рассмотрим два, наиболее часто используемые командами
+        программистов, приема ветвления/слияния. Если вы не используете
+        Subversion для разработки программного обеспечения, можете
+        пропустить этот раздел. Если вы разработчик программного
+        обеспечения использующий контроль версий впервые, внимательно
+        присмотритесь, поскольку опытные разработчики считают использование
+        этих приемов хорошим стилем работы. Такие приемы не являются
+        специфичными для Subversion; они применимы к любой системе
+        управления версиями. Тем более, что это поможет увидеть
+        их описание в терминах Subversion.</para>
+
+      <sect3 id="svn.branchmerge.commonuses.patterns.release">
+        <!-- @ENGLISH {{{
+        <title>Release Branches</title>
+
+        <para>Most software has a typical lifecycle: code, test,
+          release, repeat.  There are two problems with this process.
+          First, developers need to keep writing new features while
+          quality-assurance teams take time to test supposedly-stable
+          versions of the software.  New work cannot halt while the
+          software is tested.  Second, the team almost always needs to
+          support older, released versions of software; if a bug is
+          discovered in the latest code, it most likely exists in
+          released versions as well, and customers will want to get
+          that bugfix without having to wait for a major new
+          release.</para>
+
+        <para>Here's where version control can help.  The typical
+          procedure looks like this:</para>
+        @ENGLISH }}} -->
+        <title>Ветки релизов</title>
+
+        <para>Большинство программного обеспечения имеет типовой
+          жизненный цикл: написание кода, тестирование, выпуск,
+          повторный цикл. При таком подходе возникают две проблемы.
+          Во-первых, разработчикам необходимо продолжать расширять
+          функциональность в то время, как группа проверки качества
+          будет заниматься тестированием предположительно стабильных
+          версий программы. Во время тестирования не должна останавливаться
+          разработка. Во-вторых, как правило, требуется поддерживать старые,
+          уже выпущенные версии программы; если найдена ошибка в
+          последней версии кода, то скорее всего она присутствует и в уже
+          выпущенных версиях, поэтому пользователи захотят, чтобы
+          эта ошибка была исправлена не дожидаясь выхода новой версии
+          программы.</para>
+
+        <para>Здесь-то и может помочь контроль версий. Типичная процедура
+          выглядит примерно так:</para>
+
+      <itemizedlist>
+
+        <!-- @ENGLISH {{{
+        <listitem>
+          <para><emphasis>Developers commit all new work to the
+                trunk.</emphasis>
+
+              Day-to-day changes are committed to
+              <filename>/trunk</filename>: new features, bugfixes, and
+              so on.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis>The trunk is copied to a
+                <quote>release</quote> branch.</emphasis>
+
+              When the team thinks the software is ready for release
+              (say, a 1.0 release), then <filename>/trunk</filename>
+              might be copied to
+              <filename>/branches/1.0</filename>.</para>
+        </listitem>
+        @ENGLISH }}} -->
+        <listitem>
+          <para><emphasis>Разработчики фиксируют все новое в главную
+                линию разработки.</emphasis>
+
+              Каждодневные изменения фиксируются в
+              <filename>/trunk</filename>: новая функциональность,
+              исправление ошибок и тому подобное.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis>Главная линия разработки копируется в ветку
+                <quote>релиза</quote>.</emphasis>
+
+              Когда команда разработчиков решает, что программа готова
+              к выпуску (скажем, к релизу 1.0), тогда
+              <filename>/trunk</filename> копируется, например, в
+              <filename>/branches/1.0</filename>.</para>
+        </listitem>
+
+        <!-- @ENGLISH {{{
+        <listitem>
+          <para><emphasis>Teams continue to work in parallel.</emphasis>
+
+              One team begins rigorous testing of the release branch,
+              while another team continues new work (say, for version
+              2.0) on <filename>/trunk</filename>.  If bugs are
+              discovered in either location, fixes are ported back and
+              forth as necessary.  At some point, however, even that
+              process stops.  The branch is <quote>frozen</quote> for
+              final testing right before a release.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis>The branch is tagged and released.</emphasis>
+
+              When testing is complete,
+              <filename>/branches/1.0</filename> is copied to
+              <filename>/tags/1.0.0</filename> as a reference
+              snapshot.  The tag is packaged and released to
+              customers.</para>
+        </listitem>
+        @ENGLISH }}} -->
+        <listitem>
+          <para><emphasis>Группы продолжают работать параллельно.</emphasis>
+
+              Одна группа начинает всестороннее тестирование ветки релиза,
+              в то время как вторая группа продолжает работу (скажем, над
+              версией 2.0) в <filename>/trunk</filename>. Если находятся
+              ошибки в какой-либо из версий, исправления портируются по
+              необходимости в одну или другую сторону. В какой-то момент этот
+              процесс останавливается. Ветка <quote>замораживается</quote>
+              для окончательной проверки перед релизом.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis>На основе ветки создается метка и выпускается
+            релиз.</emphasis>
+
+              Когда тестирование завершено,
+              <filename>/branches/1.0</filename> копируется в
+              <filename>/tags/1.0.0</filename> как справочный снимок.
+              Метка запаковывается и отправляется пользователям.</para>
+        </listitem>
+
+        <!-- @ENGLISH {{{
+        <listitem>
+          <para><emphasis>The branch is maintained over time.</emphasis>
+
+              While work continues on <filename>/trunk</filename> for
+              version 2.0, bugfixes continue to be ported from
+              <filename>/trunk</filename> to
+              <filename>/branches/1.0</filename>.  When enough
+              bugfixes have accumulated, management may decide to do a
+              1.0.1 release: <filename>/branches/1.0</filename> is
+              copied to <filename>/tags/1.0.1</filename>, and the tag
+              is packaged and released.</para>
+        </listitem>
+        @ENGLISH }}} -->
+        <listitem>
+          <para><emphasis>Ветка продолжает поддерживаться</emphasis>
+
+              По мере продвижения работы над <filename>/trunk</filename>
+              для версии 2.0, исправления ошибок продолжают портироваться
+              из <filename>/trunk</filename> в
+              <filename>/branches/1.0</filename>. Когда будет накоплено
+              определенной количество исправлений, руководство может решить
+              сделать релиз 1.0.1: <filename>/branches/1.0</filename>
+              копируется  в <filename>/tags/1.0.1</filename>, метка
+              пакуется и выпускается.</para>
+        </listitem>
+
+        </itemizedlist>
+
+        <!-- @ENGLISH {{{
+        <para>This entire process repeats as the software matures:
+          when the 2.0 work is complete, a new 2.0 release branch is
+          created, tested, tagged, and eventually released.  After
+          some years, the repository ends up with a number of release
+          branches in <quote>maintenance</quote> mode, and a number
+          of tags representing final shipped versions.</para>
+        @ENGLISH }}} -->
+        <para>По мере развития программы эти этапы повторяются:
+          когда работа над 2.0 будет завершена, создается новая ветка
+          релиза 2.0, тестируется, создается метка и в последствии
+          выпускается релиз. После нескольких лет в хранилище будет
+          находиться определенное количество веток релизов, находящихся
+          в режиме <quote>сопровождения</quote> и определенное количество
+          меток, отражающих последние выпущенные ветки.</para>
+
+      </sect3>
+
+      <sect3 id="svn.branchmerge.commonuses.patterns.feature">
+        <!-- @ENGLISH {{{
+        <title>Feature Branches</title>
+
+        <para>A <firstterm>feature branch</firstterm> is the sort of
+          branch that's been the dominant example in this chapter, the
+          one you've been working on while Sally continues to work on
+          <filename>/trunk</filename>.  It's a temporary branch
+          created to work on a complex change without interfering with
+          the stability of <filename>/trunk</filename>.  Unlike
+          release branches (which may need to be supported forever),
+          feature branches are born, used for a while, merged back to
+          the trunk, then ultimately deleted.  They have a finite span
+          of usefulness.</para>
+
+        <para>Again, project policies vary widely concerning exactly
+          when it's appropriate to create a feature branch.  Some
+          projects never use feature branches at all: commits to
+          <filename>/trunk</filename> are a free-for-all.  The
+          advantage to this system is that it's simple&mdash;nobody
+          needs to learn about branching or merging.  The disadvantage
+          is that the trunk code is often unstable or unusable.  Other
+          projects use branches to an extreme: no change is
+          <emphasis>ever</emphasis> committed to the trunk directly.
+          Even the most trivial changes are created on a short-lived
+          branch, carefully reviewed and merged to the trunk.  Then
+          the branch is deleted.  This system guarantees an
+          exceptionally stable and usable trunk at all times, but at
+          the cost of tremendous process overhead.</para>
+        @ENGLISH }}} -->
+        <title>Функциональные ветки</title>
+
+        <para><firstterm>Функциональная ветка</firstterm> является
+          доминирующим примером в этой главе, над такой веткой вы работаете
+          пока Салли работает над <filename>/trunk</filename>. Это временная
+          ветка, которая создается для работы над комплексным изменением
+          без пересечения со стабильной линией разработки
+          <filename>/trunk</filename>. В отличие от веток релизов
+          (которые могут поддерживаться вечно), функциональные ветки
+          создаются, используются, внедряются обратно в главную линию
+          разработки, после чего полностью удаляются. Они имеют ограниченный
+          срок использования.</para>
+
+        <para>Опять же, правила проекта относительно определения момента,
+          когда требуется создание функциональной ветки могут быть разными.
+          Некоторые проекты вообще никогда не используют функциональные ветки:
+          все фиксируется в <filename>/trunk</filename>. Преимущества такой
+          системы в ее простоте &mdash; никому не нужно учиться делать
+          ветки или объединения. Недостатком является то, что главная линия
+          разработки часто не стабильна или не пригодна к использованию.
+          В других проектах ветки используют по-другому:
+          <emphasis>ни одного</emphasis> изменения не фиксируют в главной
+          линии разработки напрямую. Даже для самых простых изменений
+          создается краткосрочная ветка, внимательно анализируется и
+          объединяется с главной линией. После чего ветка удаляется. Ценой
+          огромных накладных расходов, такая система гарантирует
+          исключительную стабильность и пригодность к использованию главной
+          линии разработки в любой момент времени.</para>
+
+        <!-- @ENGLISH {{{
+        <para>Most projects take a middle-of-the-road approach.  They
+          commonly insist that <filename>/trunk</filename> compile and
+          pass regression tests at all times.  A feature branch is
+          only required when a change requires a large number of
+          destabilizing commits.  A good rule of thumb is to ask this
+          question: if the developer worked for days in isolation and
+          then committed the large change all at once (so that
+          <filename>/trunk</filename> were never destabilized), would
+          it be too large a change to review?  If the answer to that
+          question is <quote>yes</quote>, then the change should be
+          developed on a feature branch.  As the developer commits
+          incremental changes to the branch, they can be easily
+          reviewed by peers.</para>
+
+        <para>Finally, there's the issue of how to best keep a feature
+          branch in <quote>sync</quote> with the trunk as work
+          progresses.  As we mentioned earlier, there's a great risk
+          to working on a branch for weeks or months; trunk changes
+          may continue to pour in, to the point where the two lines of
+          development differ so greatly that it may become a nightmare
+          trying to merge the branch back to the trunk.</para>
+        @ENGLISH }}} -->
+        <para>Большинство проектов использует что-то среднее. Как правило,
+          все время контролируя, что <filename>/trunk</filename>
+          компилируется и проходит регрессивные тесты. Функциональная ветка
+          требуется только тогда, когда изменение требует большого количества
+          дестабилизирующих фиксаций. Хорошим способом проверки является
+          постановка такого вопроса: если разработчик работал несколько
+          дней изолировано, а затем за один раз зафиксировал большое
+          изменение (притом, что <filename>/trunk</filename> не будет
+          дестабилизирован) будет ли сложно отследить это изменение? Если
+          ответ на этот вопрос <quote>да</quote>, то тогда изменение должно
+          разрабатываться в функциональной ветке. По мере того, как
+          разработчик последовательно фиксирует изменения в ветку, они могут
+          легко отслеживаться другими участниками.</para>
+
+        <para>Напоследок, рекомендация, как по ходу работы лучше всего
+          сохранять функциональную ветку <quote>синхронизированной</quote> с
+          главной линией разработки. Как мы уже говорили, рискованно работать
+          над веткой в течение недель или месяцев; изменения в главной линии
+          будут продолжаться, и настанет момента, когда две линии разработки
+          станут отличаться так сильно, что  попытка объединить ветку обратно
+          с главной линией разработки может стать ночным кошмаром.</para>
+
+        <!-- @ENGLISH {{{
+        <para>This situation is best avoided by regularly merging
+          trunk changes to the branch.  Make up a policy: once a week,
+          merge the last week's worth of trunk changes to the branch.
+          Take care when doing this; the merging needs to be
+          hand-tracked to avoid the problem of repeated merges (as
+          described in <xref linkend="svn.branchmerge.copychanges.bestprac.track"/>).  You'll
+          need to write careful log messages detailing exactly which
+          revision ranges have been merged already (as
+          demonstrated in <xref linkend="svn.branchmerge.commonuses.wholebr"/>).  It
+          may sound intimidating, but it's actually pretty easy to
+          do.</para>
+
+        <para>At some point, you'll be ready to merge the
+          <quote>synchronized</quote> feature branch back to the
+          trunk.  To do this, begin by doing a final merge of the
+          latest trunk changes to the branch.  When that's done, the
+          latest versions of branch and trunk will be absolutely
+          identical except for your branch changes.  So in this
+          special case, you would merge by comparing the branch with
+          the trunk:</para>
+        @ENGLISH }}} -->
+        <para>Этой ситуации не возникнет, если регулярно объединять ветку с
+          изменениями в главной линии. Возьмите за правило один раз в неделю
+          объединять с веткой значимые изменения в главной линии разработки за
+          прошедшую неделю. Делайте это аккуратно; за объединением необходим
+          ручной контроль для того, что бы исключить проблему повторных
+          объединений (как это описано в разделе <xref
+          linkend="svn.branchmerge.copychanges.bestprac.track"/>). Необходимо
+          внимательно записывать лог сообщение, указывая какой именно
+          диапазон правок был объединен (как показано в разделе <xref
+          linkend="svn.branchmerge.commonuses.wholebr"/>). Возможно это
+          звучит устрашающе, но на самом деле это сделать очень
+          легко.</para>
+
+        <para>Начиная с какого-то момента вы будете готовы объединить
+          <quote>синхронизированную</quote> функциональную ветку с главной
+          линией разработки. Для этого начните с завершающего объединения
+          последних изменений из главной линии разработки с веткой. После
+          чего, последняя версия ветки и главной линии будут абсолютно
+          идентичны, за исключением ваших изменений в ветке. Теперь
+          объединение заключается в сравнении ветки с главной линией
+          разработки:</para>
+
+        <screen>
+$ cd trunk-working-copy
+
+$ svn update
+At revision 1910.
+
+$ svn merge http://svn.example.com/repos/calc/trunk@1910 \
+            http://svn.example.com/repos/calc/branches/mybranch@1910
+U  real.c
+U  integer.c
+A  newdirectory
+A  newdirectory/newfile
+&hellip;
+</screen>
+
+        <!-- @ENGLISH {{{
+        <para>By comparing the <literal>HEAD</literal> revision of the
+          trunk with the <literal>HEAD</literal> revision of the
+          branch, you're defining a delta that describes only the
+          changes you made to the branch; both lines of development
+          already have all of the trunk changes.</para>
+
+        <para>Another way of thinking about this pattern is that your
+          weekly sync of trunk to branch is analogous to running
+          <command>svn update</command> in a working copy, while the
+          final merge step is analogous to running <command>svn
+          commit</command> from a working copy.  After all, what else
+          <emphasis>is</emphasis> a working copy but a very shallow
+          private branch?  It's a branch that's only capable of
+          storing one change at a time.</para>
+        @ENGLISH }}} -->
+        <para>Сравнивая правку <literal>HEAD</literal> главной линии
+          разработки и правку <literal>HEAD</literal> ветки, определяется
+          дельта, которая представляет собой только изменения сделанные в
+          ветке; обе линии разработки уже содержат все изменения из
+          главной линии.</para>
+
+        <para>Другим способом представления этого приема является то, что
+          еженедельная синхронизация ветки аналогична запуску <command>svn
+          update</command> в рабочей копии, в то время как окончательное
+          объединение аналогично запуску из рабочей копии <command>svn
+          commit</command>. В конце концов, <emphasis>что же
+          такое</emphasis> рабочая копия если не миниатюрная личная ветка?
+          Эта такая ветка которая способна хранить одно изменение
+          в каждый момент времени.</para>
+
+      </sect3>
+
+    </sect2>
+
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.branchmerge.switchwc">
+    <!-- @ENGLISH {{{
+    <title>Switching a Working Copy</title>
+
+    <para>The <command>svn switch</command> command transforms an
+      existing working copy into a different branch.  While this
+      command isn't strictly necessary for working with branches, it
+      provides a nice shortcut to users.  In our earlier example,
+      after creating your private branch, you checked out a fresh
+      working copy of the new repository directory.  Instead, you can
+      simply ask Subversion to change your working copy of
+      <filename>/calc/trunk</filename> to mirror the new branch
+      location:</para>
+    @ENGLISH }}} -->
+    <title>Переключение рабочей копии</title>
+
+    <para>Команда <command>svn switch</command> трансформирует
+      существующую рабочую копию в другую ветку. Несмотря на то, что
+      при работе с ветками эта команда не является крайне необходимой,
+      она значительно облегчает жизнь пользователям. В ранее приведенном
+      примере, после создания личной ветки вы создавали новую рабочую
+      копию созданной директории хранилища. Вместо этого, можно
+      попросить Subversion изменить рабочую копию
+      <filename>/calc/trunk</filename> так, что бы она отражала
+      созданную ветку:</para>
+
+    <screen>
+$ cd calc
+
+$ svn info | grep URL
+URL: http://svn.example.com/repos/calc/trunk
+
+$ svn switch http://svn.example.com/repos/calc/branches/my-calc-branch
+U   integer.c
+U   button.c
+U   Makefile
+Updated to revision 341.
+
+$ svn info | grep URL
+URL: http://svn.example.com/repos/calc/branches/my-calc-branch
+</screen>
+
+    <!-- @ENGLISH {{{
+    <para>After <quote>switching</quote> to the branch, your working
+      copy is no different than what you would get from doing a fresh
+      checkout of the directory.  And it's usually more efficient to
+      use this command, because often branches only differ by a small
+      degree.  The server sends only the minimal set of changes
+      necessary to make your working copy reflect the branch
+      directory.</para>
+
+    <para>The <command>svn switch</command> command also takes a
+      <option>-&#64738;-revision</option> (<option>-r</option>) option, so you
+      need not always move your working copy to the <quote>tip</quote>
+      of the branch.</para>
+
+    <para>Of course, most projects are more complicated than our
+      <filename>calc</filename> example, containing multiple
+      subdirectories.  Subversion users often follow a specific
+      algorithm when using branches:</para>
+    @ENGLISH }}} -->
+    <para>После <quote>переключения</quote> на ветку, рабочая копия
+      не будет отличаться от той которая получилась бы при создании
+      новой рабочей копии директории хранилища. Как правило, более
+      эффективно использовать эту команду, так как обычно у ветки
+      немного отличий. Сервер отправляет минимально необходимый для
+      того, что бы рабочая копия отражала директорию ветки, набор
+      изменений.</para>
+
+    <para>Команда <command>svn switch</command> принимает параметр
+      <option>--revision</option> (<option>-r</option>), по-этому
+      необязательно помещать рабочую копию на самую
+      <quote>верхушку</quote> ветки.</para>
+
+    <para>Конечно, большинство проектов, по сравнению с нашим примером
+      <filename>calc</filename> более сложны, содержат множество
+      поддиректорий. Обычно пользователи Subversion используют
+      специальный алгоритм для работы с ветками:</para>
+
+      <!-- @ENGLISH {{{
+      <orderedlist>
+        <listitem>
+          <para>Copy the project's entire <quote>trunk</quote> to a
+            new branch directory.</para>
+        </listitem>
+        <listitem>
+          <para>Switch only <emphasis>part</emphasis> of the trunk
+            working copy to mirror the branch.</para>
+        </listitem>
+      </orderedlist>
+      @ENGLISH }}} -->
+      <orderedlist>
+        <listitem>
+          <para>Скопировать всю директорию <quote>trunk</quote> в
+            директорию новой ветки.</para>
+        </listitem>
+        <listitem>
+          <para>Переключить <emphasis>часть</emphasis> главной линии
+            разработки на ветку.</para>
+        </listitem>
+      </orderedlist>
+
+    <!-- @ENGLISH {{{
+    <para>In other words, if a user knows that the branch-work only
+      needs to happen on a specific subdirectory, they use
+      <command>svn switch</command> to move only that subdirectory to
+      the branch.  (Or sometimes users will switch just a single
+      working file to the branch!)  That way, they can continue to
+      receive normal <quote>trunk</quote> updates to most of their
+      working copy, but the switched portions will remain immune
+      (unless someone commits a change to their branch).  This feature
+      adds a whole new dimension to the concept of a <quote>mixed
+      working copy</quote>&mdash;not only can working copies contain a
+      mixture of working revisions, but a mixture of repository
+      locations as well.</para>
+
+    <para>If your working copy contains a number of switched subtrees
+      from different repository locations, it continues to function as
+      normal.  When you update, you'll receive patches to each subtree
+      as appropriate.  When you commit, your local changes will still
+      be applied as a single, atomic change to the repository.</para>
+    @ENGLISH }}} -->
+    <para>Другими словами, если пользователь знает, что работа над веткой
+      будет проходить в конкретной директории, он может, с помощью,
+      <command>svn switch</command> переключить на ветку только эту
+      поддиректорию. (А иногда на ветку переключается только один
+      рабочий файл!) В этом случае пользователи могут продолжать
+      обычным образом получать обновления <quote>trunk</quote> для
+      большей части рабочей копии, а переключенные части будут оставаться
+      нетронутыми (до тех пор, пока кто-то не изменить этой ветки).
+      Эта возможность добавляет совершенно новое измерение в понятие
+      <quote>смешанная рабочая копия</quote> &mdash; рабочая копия может
+      содержать не только смесь рабочих правок но и смесь местоположений
+      в хранилище.</para>
+
+    <para>Если рабочая копия содержит какое-то количество переключенных
+      на разные местоположения в хранилище поддиректорий, она будет
+      продолжать нормально функционировать. При обновлении, патчи
+      соответственно будут приниматься для каждой поддиректории.
+      При фиксации, локальные модификации будут приниматься в хранилище
+      в виде единого, атомарного изменения.</para>
+
+    <!-- @ENGLISH {{{
+    <para>Note that while it's okay for your working copy to reflect a
+      mixture of repository locations, these locations must all be
+      within the <emphasis>same</emphasis> repository.  Subversion
+      repositories aren't yet able to communicate with one another;
+      that's a feature planned beyond Subversion
+      1.0.<footnote><para>You <emphasis>can</emphasis>, however, use
+      <command>svn switch</command> with the
+      <option>-&#64738;-relocate</option> switch if the URL of your server
+      changes and you don't want to abandon an existing working copy.
+      See the <command>svn switch</command> section in <xref
+      linkend="svn.ref"/> for more information and an example.</para>
+      </footnote></para>
+    @ENGLISH }}} -->
+    <para>Обратите внимание, на то, что хотя и иметь в рабочей копии
+      смесь местоположений в хранилище является нормальным, все эти
+      местоположения должны быть из <emphasis>одного</emphasis>
+      хранилища. Хранилища Subversion пока не могут сообщаться друг с
+      другом; реализация этой возможности запланирована после Subversion
+      1.0.<footnote><para>Однако, <emphasis>можно</emphasis>
+      воспользоваться <command>svn switch</command> с параметром
+      <option>--relocate</option> если URL сервера изменился
+      и вы не хотите бросать существующую рабочую копию. За более
+      подробной информацией и примерами смотрите раздел, посвященный
+      <command>svn switch</command> в <xref linkend="svn.ref"/></para>
+      </footnote></para>
+
+    <sidebar>
+      <!-- @ENGLISH {{{
+      <title>Switches and Updates</title>
+
+      <para>Have you noticed that the output of <command>svn
+        switch</command> and <command>svn update</command> look the
+        same?  The <literal>switch</literal> command is actually a
+        superset of the update command.</para>
+
+      <para>When you run <command>svn update</command>, you're asking
+        the repository to compare two trees.  The repository does so,
+        and then sends a description of the differences back to the
+        client.  The only difference between <command>svn
+        switch</command> and <command>svn update</command> is that the
+        <literal>update</literal> command always compares two identical
+        paths.</para>
+
+      <para>That is, if your working copy is a mirror of
+        <filename>/calc/trunk</filename>, then <command>svn
+        update</command> will automatically compare your working copy
+        of <filename>/calc/trunk</filename> to
+        <filename>/calc/trunk</filename> in the
+        <literal>HEAD</literal> revision.  If you're switching your
+        working copy to a branch, then <command>svn switch</command>
+        will compare your working copy of
+        <filename>/calc/trunk</filename> to some
+        <emphasis>other</emphasis> branch-directory in the
+        <literal>HEAD</literal> revision.</para>
+
+      <para>In other words, an update moves your working copy through
+        time.  A switch moves your working copy through time
+        <emphasis>and</emphasis> space.</para>
+      @ENGLISH }}} -->
+      <title>Переключения и обновления</title>
+
+      <para>Вы не обратили внимания на то, что вывод <command>svn
+        switch</command> и <command>svn update</command> выглядит
+        одинаково? На самом деле команда <literal>switch</literal>
+	является расширенным вариантом команды обновления.</para>
+
+      <para>При запуске <command>svn update</command> вы просите
+        хранилище сравнить два дерева. Хранилище выполняет это
+        и отправляет описания изменений обратно клиенту. Отличие
+        между <command>svn switch</command> и <command>svn
+        update</command> только в том, что команда <literal>update</literal>
+        всегда сравнивает два одинаковых пути.</para>
+
+      <para>То есть, рабочая копия отражает <filename>/calc/trunk</filename>,
+        то <command>svn update</command> будет автоматически сравнивать
+        рабочую копию <filename>/calc/trunk</filename> с правкой
+         <literal>HEAD</literal> <filename>/calc/trunk</filename>.
+         Если вы переключаете рабочую копию на ветку, то <command>svn
+         switch</command> будет сравнивать рабочую копию
+         <filename>/calc/trunk</filename> с какой-то
+         <emphasis>другой</emphasis> директорией в правке
+         <literal>HEAD</literal>.</para>
+
+       <para>Другими словами, обновление переносит рабочую копию сквозь
+        время. А переключение переносит рабочую копию сквозь время
+        <emphasis>и</emphasis> пространство.</para>
+    </sidebar>
+
+    <!-- @ENGLISH {{{
+    <para>Because <command>svn switch</command> is essentially a
+      variant of <command>svn update</command>, it shares the same
+      behaviors; any local modifications in your working copy are
+      preserved when new data arrives from the repository.  This
+      allows you to perform all sorts of clever tricks.</para>
+
+    <para>For example, suppose you have a working copy of
+      <filename>/calc/trunk</filename> and make a number of changes to
+      it.  Then you suddenly realize that you meant to make the
+      changes to a branch instead.  No problem!  When you <command>svn
+      switch</command> your working copy to the branch, the local
+      changes will remain.  You can then test and commit them to the
+      branch.</para>
+    @ENGLISH }}} -->
+    <para>Учитывая то, что <command>svn switch</command> в сущности
+      является разновидностью <command>svn update</command> их поведение
+      схоже; при получении новой информации из хранилища, все локальные
+      изменения сохраняются. Это позволяет использовать разнообразные
+      трюки.</para>
+
+    <para>Предположим вы внесли некоторые изменения в имеющуюся у вас
+      рабочую копию <filename>/calc/trunk</filename>. После чего неожиданно
+      обнаружили, что вместо этого вам необходимо внести изменения в ветку
+      Нет проблем! Когда вы переключите (<command>svn switch</command>)
+      рабочую копию на ветку, локальные изменения сохраняться. После чего
+      их можно проверить и зафиксировать в ветке.</para>
+
+  </sect1>
+
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.branchmerge.tags">
+    <!-- @ENGLISH {{{
+    <title>Tags</title>
+
+    <para>Another common version control concept is a
+      <firstterm>tag</firstterm>.  A tag is just a
+      <quote>snapshot</quote> of a project in time.  In Subversion,
+      this idea already seems to be everywhere.  Each repository
+      revision is exactly that&mdash;a snapshot of the filesystem
+      after each commit.</para>
+
+    <para>However, people often want to give more human-friendly names
+      to tags, like <literal>release-1.0</literal>.  And they want to
+      make snapshots of smaller subdirectories of the filesystem.
+      After all, it's not so easy to remember that release-1.0 of a
+      piece of software is a particular subdirectory of revision
+      4822.</para>
+    @ENGLISH }}} -->
+    <title>Метки</title>
+
+    <para>Еще одним понятием, свойственным управлению версиями является
+      <firstterm>метка</firstterm>. Метка является просто
+      <quote>снимком</quote> проекта в определенный момент времени.
+      В Subversion эта идея уже, кажется, повсюду. Каждая правка хранилища
+      является именно этим &mdash; снимком файловой системы после каждой
+      фиксации.</para>
+
+    <para>Как правило, люди предпочитают давать меткам удобочитаемые имена,
+      наподобие <literal>release-1.0</literal>. И делать снимки небольших
+      поддиректорий файловой системы. Проще говоря, не просто запомнить, что
+      версия 1.0 программы соответствует поддиректории в правке 4822.</para>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.branchmerge.tags.mksimple">
+      <!-- @ENGLISH {{{
+      <title>Creating a Simple Tag</title>
+
+      <para>Once again, <command>svn copy</command> comes to the
+        rescue.  If you want to create a snapshot of
+        <filename>/calc/trunk</filename> exactly as it looks in the
+        <literal>HEAD</literal> revision, then make a copy of it:</para>
+      @ENGLISH }}} -->
+      <title>Создание простой метки</title>
+
+      <para>И снова приходит на помощь <command>svn copy</command>.
+        Если вам нужно сделать снимок <filename>/calc/trunk</filename>
+        в точно таком виде как в правке <literal>HEAD</literal>,
+        сделайте копию этой директории:</para>
+
+      <screen>
+$ svn copy http://svn.example.com/repos/calc/trunk \
+           http://svn.example.com/repos/calc/tags/release-1.0 \
+      -m "Tagging the 1.0 release of the 'calc' project."
+
+Committed revision 351.
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>This example assumes that a
+        <filename>/calc/tags</filename> directory already exists.  (If it
+        doesn't, see <xref linkend="svn.ref.svn.c.mkdir"/>).
+        After the copy completes, the new
+        <filename>release-1.0</filename> directory is forever a
+        snapshot of how the project looked in the
+        <literal>HEAD</literal> revision at the time you made the
+        copy.  Of course you might want to be more precise about
+        exactly which revision you copy, in case somebody else may
+        have committed changes to the project when you weren't
+        looking.  So if you know that revision 350 of
+        <filename>/calc/trunk</filename> is exactly the snapshot you
+        want, you can specify it by passing <option>-r 350</option> to
+        the <command>svn copy</command> command.</para>
+
+      <para>But wait a moment: isn't this tag-creation procedure the
+        same procedure we used to create a branch?  Yes, in fact, it
+        is.  In Subversion, there's no difference between a tag and a
+        branch.  Both are just ordinary directories that are created
+        by copying.  Just as with branches, the only reason a copied
+        directory is a <quote>tag</quote> is because
+        <emphasis>humans</emphasis> have decided to treat it that way:
+        as long as nobody ever commits to the directory, it forever
+        remains a snapshot.  If people start committing to it, it
+        becomes a branch.</para>
+      @ENGLISH }}} -->
+      <para>В этом примере предполагается, что директория
+        <filename>/calc/tags</filename> существует. (Если нет,
+        обратитесь к <xref linkend="svn.ref.svn.c.mkdir"/>).
+        После того как сделана копия, новая директория
+        <filename>release-1.0</filename> навсегда сохранит состояние
+        проекта в таком виде в каком он существовал в правке
+        <literal>HEAD</literal> на момент создания копии. Конечно,
+        можно более точно указать какую именно правку копировать,
+        возможна ситуация, когда кто-то другой зафиксировал изменения в
+        проекте с которыми вы еще не успели познакомиться. Поэтому,
+        если вы знаете, что правка 350 <filename>/calc/trunk</filename>
+        это именно тот снимок который вам нужен, можете указать ее
+        передав <option>-r 350</option> команде <command>svn
+        copy</command>.</para>
+
+      <para>Постойте: ведь процедура создания метки такая же как процедура
+        использованная нами при создании ветки? Да, фактически, это так.
+        Subversion не разделяет ветки и метки. И то и другое является
+        обычными директориями, созданными копированием. Как и в случае с
+        ветками, скопированная директория становиться <quote>меткой</quote>
+        только потому, что <emphasis>человек</emphasis> считает
+        ее таковой: если никто не делает фиксаций в эту директорию она
+        будет оставаться снимком. Если в эту директорию начнут делать
+        фиксации она превратится в ветку.</para>
+
+      <!-- @ENGLISH {{{
+      <para>If you are administering a repository, there are two
+        approaches you can take to managing tags.  The first approach
+        is <quote>hands off</quote>: as a matter of project policy,
+        decide where your tags will live, and make sure all users know
+        how to treat the directories they copy in there.  (That is,
+        make sure they know not to commit to them.)  The second
+        approach is more paranoid: you can use one of the
+        access-control scripts provided with Subversion to prevent
+        anyone from doing anything but creating new copies in the
+        tags-area (See <xref linkend="svn.serverconfig"/>.)  The paranoid
+        approach, however, isn't usually necessary.  If a user
+        accidentally commits a change to a tag-directory, you can
+        simply undo the change as discussed in the previous section.
+        This is version control, after all.</para>
+      @ENGLISH }}} -->
+      <para>Если вы администрируете хранилище, есть два возможных подхода
+        управления метками. Первый подход <quote>ручной</quote>: в
+        соответствии с правилами проекта решите, где будут находиться
+        метки и убедитесь в том, что все пользователи знают как рассматривать
+        директории скопированные сюда. (То есть убедитесь, что они знают о
+        том что в них нельзя выполнять фиксации.) Второй подход более
+        параноидальный: вы можете воспользоваться одним из скриптов для
+        контроля доступа, поставляемым с Subversion для того, что бы никто
+        ничего другого кроме создания копий в области для создания меток
+        сделать не мог. (См. <xref linkend="svn.serverconfig"/>.) Однако
+        обычно в параноидальном подходе необходимости нет. Если пользователь
+        непреднамеренно зафиксирует изменения в директорию с меткой,
+        вы можете просто отменить изменения, как это было рассмотрено в
+        предыдущем разделе. Как ни как, это управление версиями.</para>
+
+
+    </sect2>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.branchmerge.tags.mkcomplex">
+      <!-- @ENGLISH {{{
+      <title>Creating a Complex Tag</title>
+
+      <para>Sometimes you may want your <quote>snapshot</quote> to be
+        more complicated than a single directory at a single
+        revision.</para>
+
+      <para>For example, pretend your project is much larger than our
+        <filename>calc</filename> example: suppose it contains a
+        number of subdirectories and many more files.  In the course
+        of your work, you may decide that you need to create a working
+        copy that is designed to have specific features and bug fixes.
+        You can accomplish this by selectively backdating files or
+        directories to particular revisions (using <command>svn update
+        -r</command> liberally), or by switching files and directories
+        to particular branches (making use of <command>svn
+        switch</command>).  When you're done, your working copy is a
+        hodgepodge of repository locations from different revisions.
+        But after testing, you know it's the precise combination of
+        data you need.</para>
+
+      <para>Time to make a snapshot.  Copying one URL to another won't
+        work here.  In this case, you want to make a snapshot of your
+        exact working copy arrangement and store it in the repository.
+        Luckily, <command>svn copy</command> actually has four
+        different uses (which you can read about in Chapter 9),
+        including the ability to copy a working-copy tree to the
+        repository:</para>
+      @ENGLISH }}} -->
+      <title>Создание комплексной метки</title>
+
+      <para>Иногда вам будет необходим более сложный <quote>снимок</quote>,
+        чем одна единственная директория в одной правке.</para>
+
+      <para>Например, представим, что ваш проект гораздо больше, чем
+        наш пример <filename>calc</filename>: допустим он содержит
+        несколько поддиректорий и на много больше файлов. В процессе
+        работе вам может понадобиться создать рабочую копию, содержащую
+        конкретную функциональность и исправленные ошибки. Добиться этого
+        вы можете выборочно возвращая файлы или директории к конкретной
+        правке (используя <command>svn update -r</command> по мере
+        необходимости) или переключая файлы или директории на отдельные
+        ветки (применяя <command>svn switch</command>). По завершении
+        рабочаяя копия будет представлять собой мешанину различных
+        директорий и правок хранилища. После проверки вы поймете, что
+        вам нужна именно такая комбинация.</para>
+
+      <para>Время создавать снимок. Копирование одного URL в другой
+        здесь не пройдет. Здесь нужно сделать и сохранить в хранилище снимок
+        именно такой структуры которую имеет рабочая копия. К счастью,
+        <command>svn copy</command> имеет четыре способа использования
+        (о которых вы можете прочитать в Главе 9), включая возможность
+        копировать в хранилище дерево рабочей копии:</para>
+
+      <screen>
+$ ls
+my-working-copy/
+
+$ svn copy my-working-copy http://svn.example.com/repos/calc/tags/mytag
+
+Committed revision 352.
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>Now there is a new directory in the repository,
+        <filename>/calc/tags/mytag</filename>, which is an exact
+        snapshot of your working copy&mdash;mixed revisions, URLs,
+        and all.</para>
+
+      <para>Other users have found interesting uses for this feature.
+        Sometimes there are situations where you have a bunch of local
+        changes made to your working copy, and you'd like a
+        collaborator to see them.  Instead of running <command>svn
+        diff</command> and sending a patch file (which won't capture
+        tree changes, symlink changes or changes in properties), you can
+        instead use <command>svn copy</command> to <quote>upload</quote>
+        your working copy to a private area of the repository.  Your
+        collaborator can then either checkout a verbatim copy of your
+        working copy, or use <command>svn merge</command> to receive
+        your exact changes.</para>
+      @ENGLISH }}} -->
+      <para>Теперь в хранилище есть новая директория
+      <filename>/calc/tags/mytag</filename> которая является полным отражением
+        рабочей копии &mdash; смешанные правки, URL, и тому подобное.</para>
+
+      <para>Некоторые пользователи находят интересное применение этой
+        возможности. Иногда возникают ситуации, когда в вашей рабочей копии
+        содержаться изменения, которые вы не хотите показывать соразработчику.
+        Вместо запуска <command>svn diff</command> и передачи патч-файла
+        (который не сможет отразить изменения в структуре файлов, измененные
+	символьные ссылки или свойства), вы можете
+        воспользоваться <command>svn copy</command> для
+        <quote>загрузки</quote> рабочей копии в отдельную область хранилища.
+        Ваш соразработчик может сделать либо чистую копию вашей рабочей копии,
+        либо воспользоваться <command>svn merge</command> для получения именно
+        ваших изменений.</para>
+
+    </sect2>
+
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.branchmerge.maint">
+    <!-- @ENGLISH {{{
+    <title>Branch Maintenance</title>
+
+    <para>You may have noticed by now that Subversion is extremely
+      flexible.  Because it implements branches and tags with the same
+      underlying mechanism (directory copies), and because branches
+      and tags appear in normal filesystem space, many people find
+      Subversion intimidating.  It's almost <emphasis>too</emphasis>
+      flexible.  In this section, we'll offer some suggestions for
+      arranging and managing your data over time.</para>
+    @ENGLISH }}} -->
+    <title>Поддержка веток</title>
+
+    <para>Сейчас вы уже понимаете, что Subversion очень гибкая система.
+      Учитывая то, что ветки и метки имеют одну и ту же основу (копии
+      директорий), а также то, что ветки и метки являются обычными элементами
+      файловой системы, Subversion многих пугает. Она
+      <emphasis>слишком</emphasis> гибкая. В этом разделе мы предложим
+      несколько советов по компоновке и поддержке информации с течением
+      времени.</para>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.branchmerge.maint.layout">
+      <!-- @ENGLISH {{{
+      <title>Repository Layout</title>
+
+      <para>There are some standard, recommended ways to organize a
+        repository.  Most people create a <filename>trunk</filename>
+        directory to hold the <quote>main line</quote> of development,
+        a <filename>branches</filename> directory to contain branch
+        copies, and a <filename>tags</filename> directory to contain
+        tag copies.  If a repository holds only one project, then
+        often people create these top-level directories:</para>
+      @ENGLISH }}} -->
+      <title>Структура хранилища</title>
+
+      <para>Существует несколько стандартных, рекомендуемых способов
+        организации хранилища. Как правило, создается директория
+        <filename>trunk</filename>, в которой находится
+        <quote>главная линия</quote> разработки, директория
+        <filename>branches</filename> для хранения веток и директория
+        <filename>tags</filename> для хранения меток. Если хранилище
+        содержит только один проект, обычно создают три директории
+        верхнего уровня:</para>
+
+      <screen>
+/trunk
+/branches
+/tags
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>If a repository contains multiple projects, admins
+        typically index their layout by project (see <xref
+        linkend="svn.reposadmin.projects.chooselayout"/> to read more about
+        <quote>project roots</quote>):</para>
+      @ENGLISH }}} -->
+      <para>Если хранилище содержит несколько проектов, администратор,
+        обычно создает такую структуру для каждого проекта отдельно
+        (за более подробной информацией о <quote>корне проекта</quote>
+        обратитесь в раздел <xref
+        linkend="svn.reposadmin.projects.chooselayout"/>):</para>
+
+      <screen>
+/paint/trunk
+/paint/branches
+/paint/tags
+/calc/trunk
+/calc/branches
+/calc/tags
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>Of course, you're free to ignore these common layouts.
+        You can create any sort of variation, whatever works best for
+        you or your team.  Remember that whatever you choose, it's not
+        a permanent commitment.  You can reorganize your repository at
+        any time.  Because branches and tags are ordinary directories,
+        the <command>svn move</command> command can move or rename
+        them however you wish.  Switching from one layout to another
+        is just a matter of issuing a series of server-side moves; if
+        you don't like the way things are organized in the repository,
+        just juggle the directories around.</para>
+
+      <para>Remember, though, that while moving directories may be
+        easy to do, you need to be considerate of your users as well.
+        Your juggling can be disorienting to users with existing
+        working copies.  If a user has a working copy of a particular
+        repository directory, your <command>svn move</command>
+        operation might remove the path from the latest revision.
+        When the user next runs <command>svn update</command>, she will
+        be told that her working copy represents a path that no
+        longer exists, and the user will be forced to <command>svn
+        switch</command> to the new location.
+        </para>
+      @ENGLISH }}} -->
+      <para>Конечно, вы можете не использовать такие типовые структуры.
+        Вы можете сделать любую разновидность, которая будет удобна для вас
+        или вашей команды. Помните о том, какой бы вы выбор не сделали,
+        он может быть не окончательным. Хранилище можно реорганизовать в
+        любое время. Учитывая то, что ветки и метки являются обычными
+        директориями, команда <command>svn move</command> может переместить
+        или переименовать их по вашему усмотрению. Переход от одной структуры
+        к другой означает просто несколько последовательных передвижек
+        на сервере; если организация хранилища вам не нравится, просто
+        поменяйте местами директории.</para>
+
+      <para>Однако не забывайте о том, что несмотря на легкость перемещения
+        директорий, нужно помнить и о других пользователях. Ваши перестановки
+        могут дезориентировать пользователей с существующими рабочими копиями.
+        Если у пользователя есть рабочая копия отдельной директории хранилища,
+        то ваше использование <command>svn move</command> может удалить этот
+        путь из последней правки. Когда в очередной раз пользователь запустит
+        <command>svn update</command>, он будет проинформирован о том, что
+        его рабочая копия отражает путь, который больше не существует,
+        и пользователь будет вынужден переключиться (<command>svn
+        switch</command>) на новое местоположение.</para>
+
+    </sect2>
+
+    <!-- =============================================================== -->
+    <sect2 id="svn.branchmerge.maint.lifetime">
+      <!-- @ENGLISH {{{
+      <title>Data Lifetimes</title>
+
+      <para>Another nice feature of Subversion's model is that
+        branches and tags can have finite lifetimes, just like any
+        other versioned item.  For example, suppose you eventually
+        finish all your work on your personal branch of the
+        <filename>calc</filename> project.  After merging all of your
+        changes back into <filename>/calc/trunk</filename>, there's
+        no need for your private branch directory to stick around
+        anymore:</para>
+      @ENGLISH }}} -->
+      <title>Продолжительность жизни информации</title>
+
+      <para>Еще одним замечательным свойством модели Subversion
+        является то, что ветки и метки могут иметь конечную
+        продолжительность жизни, так же как и все другие версионированные
+        элементы. Например, предположим вы наконец закончили все работы
+        в ваше личной ветке проекта <filename>calc</filename>. После
+        объединения изменений с  <filename>/calc/trunk</filename>,
+        нет причин продолжать хранить эту ветку:</para>
+
+      <screen>
+$ svn delete http://svn.example.com/repos/calc/branches/my-calc-branch \
+             -m "Removing obsolete branch of calc project."
+
+Committed revision 375.
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>And now your branch is gone.  Of course it's not really
+        gone: the directory is simply missing from the
+        <literal>HEAD</literal> revision, no longer distracting
+        anyone.  If you use <command>svn checkout</command>,
+        <command>svn switch</command>, or <command>svn list</command>
+        to examine an earlier revision, you'll still be able to see
+        your old branch.</para>
+
+      <para>If browsing your deleted directory isn't enough, you can
+        always bring it back.  Resurrecting data is very easy in
+        Subversion.  If there's a deleted directory (or file) that
+        you'd like to bring back into <literal>HEAD</literal>, simply
+        use <command>svn copy -r</command> to copy it from the old
+        revision:</para>
+      @ENGLISH }}} -->
+      <para>Больше вашей ветки не существует. Конечно, на самом деле она
+        не исчезла: просто ее больше нет в правке <literal>HEAD</literal>,
+        она больше никого не отвлекает. Если воспользоваться командами
+        <command>svn checkout</command>, <command>svn switch</command>
+        или <command>svn list</command> для обращения к ранним правкам,
+        свою старую ветку вы увидите.</para>
+
+      <para>Если просмотра удаленной директории не достаточно, вы всегда
+        можете восстановить эту директорию. Восстановление информации в
+        Subversion выполнить очень просто. Если есть директория или файл,
+        который вы хотите вернуть обратно в <literal>HEAD</literal>,
+        просто воспользуйтесь <command>svn copy -r</command> для того,
+        что бы скопировать его из старой правки:</para>
+
+      <screen>
+$ svn copy -r 374 http://svn.example.com/repos/calc/branches/my-calc-branch \
+                  http://svn.example.com/repos/calc/branches/my-calc-branch
+
+Committed revision 376.
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>In our example, your personal branch had a relatively
+        short lifetime: you may have created it to fix a bug or
+        implement a new feature.  When your task is done, so is the
+        branch.  In software development, though, it's also common to
+        have two <quote>main</quote> branches running side-by-side for
+        very long periods.  For example, suppose it's time to release
+        a stable version of the <filename>calc</filename> project to the
+        public, and you know it's going to take a couple of months to
+        shake bugs out of the software.  You don't want people to add
+        new features to the project, but you don't want to tell all
+        developers to stop programming either.  So instead, you create
+        a <quote>stable</quote> branch of the software that won't
+        change much:</para>
+      @ENGLISH }}} -->
+      <para>В нашем примере ваша личная ветка имеет относительно
+        короткую продолжительность жизни: возможно она создавалась
+        для того, что бы исправить ошибку или реализовать новую функцию.
+        После того, как работа завершена, завершена и ветка. При разработке
+        программного обеспечения, тем не менее, часто имеют две
+        <quote>главных</quote> ветки, существующих рядом довольно долгое
+        время. Допустим, пришло время выпустить релиз стабильной версии
+        проекта <filename>calc</filename>, а вы знаете, что нужна будет пара
+        месяцев для того, что бы вытрясти из программы последние ошибки.
+        Разработчики не должны добавлять в проект новых функции, но при этом
+        и работа не должна останавливаться. В подобной ситуации создается
+        <quote>стабильная</quote> ветка программы, которая существенно
+        изменяться уже не будет:</para>
+
+      <screen>
+$ svn copy http://svn.example.com/repos/calc/trunk \
+         http://svn.example.com/repos/calc/branches/stable-1.0 \
+         -m "Creating stable branch of calc project."
+
+Committed revision 377.
+</screen>
+
+      <!-- @ENGLISH {{{
+      <para>And now developers are free to continue adding
+        cutting-edge (or experimental) features to
+        <filename>/calc/trunk</filename>, and you can declare a
+        project policy that only bug fixes are to be committed to
+        <filename>/calc/branches/stable-1.0</filename>.  That is, as
+        people continue to work on the trunk, a human selectively
+        ports bug fixes over to the stable branch.  Even after the
+        stable branch has shipped, you'll probably continue to
+        maintain the branch for a long time&mdash;that is, as long
+        as you continue to support that release for customers.</para>
+      @ENGLISH }}} -->
+      <para>После этого, разработчикам ничего не мешает продолжать добавлять
+        в <filename>/calc/trunk</filename> новые передовые (или экспериментальные)
+        функции, а в правилах проекта можно указать, что в
+        <filename>/calc/branches/stable-1.0</filename> должны фиксироваться
+        только исправления ошибок. По мере того, как будет продвигаться
+        работа над главной линией разработки, исправленные ошибки будут
+        выборочно портироваться в стабильную ветку. Даже после выхода релиза
+        стабильной ветки, она может продолжать поддерживаться долгое время
+        &mdash; столько, сколько этот релиз будет продолжать поддерживаться
+        для пользователей.</para>
+
+    </sect2>
+
+  </sect1>
+
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.branchmerge.summary">
+    <!-- @ENGLISH {{{
+    <title>Summary</title>
+
+    <para>We've covered a lot of ground in this chapter.  We've
+      discussed the concepts of tags and branches, and demonstrated
+      how Subversion implements these concepts by copying directories
+      with the <command>svn copy</command> command.  We've shown how
+      to use <command>svn merge</command> to copy changes from one
+      branch to another, or roll back bad changes.  We've gone over
+      the use of <command>svn switch</command> to create
+      mixed-location working copies.  And we've talked about how one
+      might manage the organization and lifetimes of branches in a
+      repository.</para>
+
+    <para>Remember the Subversion mantra: branches and tags are cheap.
+      So use them liberally!</para>
+    @ENGLISH }}} -->
+    <title>Подводя итоги</title>
+
+    <para>В этой главе было рассмотрено очень многое. Мы обсудили
+      концепцию меток и веток, показали как Subversion реализует эти понятия
+      используя команду <command>svn copy</command>. Показали, как
+      <command>svn merge</command> копирует изменения из одной ветки в другую,
+      как с помощью этой команды отменить ошибочные изменения. Мы рассмотрели
+      использование <command>svn switch</command> для создания рабочих копий,
+      собранных из разных директорий хранилища. Обсудили, как управлять
+      организацией и временем жизни веток в хранилище.</para>
+
+    <para>Не забывайте о мантре Subversion: ветки и метки легковесны. Поэтому
+      пользуйтесь ими свободно!</para>
+
+  </sect1>
+
+</chapter>
+
+<!--
+local variables:
+sgml-parent-document: ("book.xml" "chapter")
+end:
+vim: tw=78:ft=svnbook
+-->
+
+
+

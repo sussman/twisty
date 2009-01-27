@@ -1,0 +1,356 @@
+﻿<appendix id="svn.forcvs">
+  <title>Subversion对于CVS用户</title>
+
+  <simplesect>
+
+    <para>这个附录可以作为CVS用户开始使用Subversion的指南，实质上就是鸟瞰这两个系统之间的区别列表，在每一小节，我们会尽可能提供相关章节的引用。
+    </para>
+
+    <para>尽管Subversion的目标是接管当前和未来的CVS用户基础，需要一些新的特性设计来修正一些CVS<quote>不好的</quote>行为习惯，这意味着，作为一个CVS用户，你或许需要打破习惯&mdash;忘记一些奇怪的习惯来作为开始。
+    </para>
+
+  </simplesect>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.forcvs.revnums">
+    <title>修订版本号现在不同了</title>
+
+    <para>在CVS中，修订版本号是每文件的，这是因为CVS使用RCS文件保存数据，每个文件都在版本库有一个对应的RCS文件，版本库几乎就是根据项目树的结构创建。
+    </para>
+
+    <para>在Subversion，版本库看起来像是一个单独的文件系统，每次提交导致一个新的文件系统；本质上，版本库是一堆树，每棵树都有一个单独的修订版本号。当有人谈论<quote>修订版本54</quote>时，他们是在讨论一个特定的树（并且间接来说，文件系统在提交54次之后的样子）。
+    </para>
+
+    <para>技术上讲，谈论<quote>文件<filename>foo.c</filename>的修订版本5</quote>是不正确的，相反，一个人会说<quote><filename>foo.c</filename>在修订版本5出现</quote>。同样，我们在假定文件的进展时也要小心，在CVS，文件<filename>foo.c</filename>的修订版本5和6一定是不同的，在Subversion，<filename>foo.c</filename>可能在修订版本5和6之间<emphasis>没有</emphasis>改变。
+    </para>
+
+    <para>更多细节见<xref
+      linkend="svn.basic.in-action.revs" />.</para>
+
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.forcvs.directories">
+    <title>目录的版本</title>
+    
+    <para>Subversion会记录目录树的结构，不仅仅是文件的内容。这是编写Subversion替代CVS最重要的一个原因。
+    </para>
+
+    <para>以下是对你这意味着什么的说明，作为一个前CVS用户：</para>
+
+    <itemizedlist>
+      <listitem>
+        <para><command>svn add</command>和<command>svn
+          delete</command>现在也工作在目录上了，就像在文件上一样，还有<command>svn 
+          copy</command>和<command>svn 
+          move</command>也一样。然而，这些命令<emphasis>不</emphasis>会导致版本库即时的变化，相反，工作的项目只是<quote>预定要</quote>添加和删除，在运行<command>svn
+          commit</command>之前没有版本库的修改。</para>
+      </listitem>
+      <listitem>
+        <para>目录不再是哑容器了；它们也有文件一样的修订版本号。（更准确一点，谈论<quote>修订版本5的目录
+<filename>foo/</filename></quote>是正确的。）
+        </para>
+      </listitem>
+    </itemizedlist>
+
+    <para>让我们再讨论一下最后一点，目录版本化是一个困难的问题；因为我们希望允许混合修订版本的工作拷贝，有一些防止我们滥用这个模型的限制。
+    </para>
+
+    <para>从理论观点，我们定义<quote>目录<filename>foo</filename>的修订版本5</quote>意味着一组目录条目和属性。现在假定我们从<filename>foo</filename>开始添加和删除文件，然后提交。如果说我们还有<filename>foo</filename>的修订版本5就是一个谎言。然而，如果说我们在提交之后增加了一位<filename>foo</filename>的修订版本号码，这也是一个谎言；<filename>foo</filename>还有一些修改我们没有得到，因为我们还没有更新。
+    </para>
+    
+    <para>Subversion通过在<filename>.svn</filename>区域偷偷的纪录添加和删除来处理这些问题，当你最后运行<command>svn update</command>，所有的账目会到版本库结算，并且目录的新修订版本号会正确设置。<emphasis>因此，只有在更新之后才可以真正安全地说我们有了一个<quote>完美的</quote>修订版本目录。</emphasis>在大多数时候，你的工作拷贝会保存<quote>不完美的</quote>目录修订版本。
+    </para>
+    
+    <para>同样的，如果你尝试提交目录的属性修改会有一个问题，通常情况下，提交应该会提高工作目录的本地修订版本号，但是再一次，这还是一个谎言，因为这个目录还没有添加和删除发生，因为还没有更新发生。<emphasis>因此，在你的目录不是最新的时候不允许你提交属性修改。</emphasis>
+    </para>
+
+    <para>关于目录版本的更多讨论见<xref linkend="svn.basic.in-action.mixedrevs"/>。
+    </para>
+
+  </sect1>
+
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.forcvs.disconnected">
+    <title>更多离线操作</title>
+
+    <para>近些年来，磁盘空间变得异常便宜和丰富，但是网络带宽还没有，因此Subversion工作拷贝为紧缺资源进行了优化。
+    </para>
+
+    <para><filename>.svn</filename>管理目录维护者与<filename>CVS</filename>同样的功能，除了它还保存了只读的文件<quote>原始</quote>拷贝，这允许你做许多离线操作：
+    </para>
+    
+    <variablelist>
+      
+      <varlistentry>
+        <term><command>svn status</command></term>
+        <listitem>
+          <para>显示你所做的本地修改（见<xref
+            linkend="svn.tour.cycle.examine.status"/>）</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>svn diff</command></term>
+        <listitem>
+          <para>显示修改的详细信息（见see <xref
+            linkend="svn.tour.cycle.examine.diff"/>）</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>svn revert</command></term>
+        <listitem>
+          <para>删除你的本地修改（见<xref
+            linkend="svn.tour.cycle.examine.revert"/>）</para>
+        </listitem>
+      </varlistentry>
+
+    </variablelist>
+
+    <para>另外，原始文件的缓存允许Subversion客户端在提交时只提交区别，这是CVS做不到的。
+    </para>
+
+    <para>列表中最后一个子命令是新的；它不仅仅删除本地修改，也会取消如增加和删除的预定操作，这是恢复文件推荐的方式；运行<command>rm file; svn update</command>还可以工作，但是这样侮辱了更新操作的作用，而且，我们在这个主题&hellip;
+    </para>
+
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.forcvs.status-vs-update">
+    <title>区分状态和更新</title>
+
+    <para>在Subversion，我们已经设法抹去<command>cvs status</command>和<command>cvs update</command>之间的混乱。
+    </para>
+
+    <para><command>cvs status</command>命令有两个目的：第一，显示用户在工作拷贝的所有本地修改，第二，显示给用户哪些文件是最新的。很不幸，因为CVS难以阅读的状态输出，许多CVS用户并没有充分利用这个命令的好处。相反，他们慢慢习惯运行<command>cvs update</command>或<command>cvs -n update</command>来快速查看区别，如果用户忘记使用<option>-n</option>选项，副作用就是将还没有准备好处理的版本库修改合并到工作拷贝。
+    </para>
+
+    <para>对于Subversion，我们通过修改<command>svn status</command>的输出使之同时满足阅读和解析的需要来努力消除这种混乱，同样，<command>svn update</command>只会打印将要更新的文件信息，而<emphasis>不是</emphasis>本地修改。
+    </para>
+
+    <para><command>svn status</command>打印所有本地修改的文件，缺省情况下，不会联系版本库，然而这个命令接受一些选项，如下是一些最常用的：
+    </para>
+
+    <variablelist>
+      <varlistentry>
+        <term><option>-u</option></term>
+        <listitem>
+          <para>联系版本库来确定，然后显示，过时的信息。
+          </para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term><option>-v</option></term>
+        <listitem>
+          <para>显示<emphasis>所有</emphasis>版本控制之下的条目。</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-N</option></term>
+        <listitem>
+          <para>非递归运行（不传递到子目录）。</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+    <para><command>status</command>命令有两种输出格式，缺省是<quote>简短</quote>格式，本地修改看起来是这样：
+    </para>
+
+    <screen>
+$ svn status
+M      foo.c
+M      bar/baz.c
+</screen>
+
+    <para>如果你指定<option>--show-updates</option>（<option>-u</option>），输出会使用比较长的格式：
+    </para>
+
+    <screen>
+$ svn status -u
+M            1047   foo.c
+       *     1045   faces.html
+       *            bloo.png
+M            1050   bar/baz.c
+Status against revision:   1066
+</screen>
+
+    <para>在这个例子里，有两个新列，如果文件或目录已经过期了，第二列会显示星号。第三列显示工作拷贝项目的修订版本号，在上面的例子里，星号表示<filename>faces.html</filename>会在更新时更新，而<filename>bloo.png</filename>是在版本库新加的文件。（<filename>bloo.png</filename>前面的空格表示它不曾存在于工作拷贝。）
+    </para>
+
+    <!-- ###TODO describe -v here as well as -uv. -u and -v use
+         different <quote>long</quote> formats and need to be
+         documented separately. Moreover, as you can combine -u and
+         -v, it needs to be explained what each of them does. As -u is
+         much more important than -v, and the example following that
+         paragraph *is* about -u, not -v, my patch concentrated on
+         that. -->
+
+    <para>最后，你会想看一个常见状态码的快速总结：</para>
+
+    <screen>
+A    资源预定要添加
+D    资源预定要删除
+M    资源有本地修改
+C    资源发生冲突（修改不能完全在版本库和
+     工作拷贝之间合并）
+X    资源在工作拷贝之外（来自其他版本库，
+     见<xref linkend="svn.advanced.props.special.externals" />）
+?    资源不在版本控制之下
+!    资源丢失或者不完整（被Subversion以外的工具删除）
+</screen>
+
+    <!-- ###TODO:  This paragraph should be moved elsewhere.  We are
+                   talking about status codes here, and not update.
+                   Although CVS uses update as a form of status... -->
+    <para>Subversion合并了CVS的<literal>P</literal>和<literal>U</literal>代码为<literal>U</literal>，当一个合并或冲突发生，Subversion只会简单得打印<literal>G</literal>或<literal>C</literal>，而不是一段完整的描述语句。
+    </para>
+
+    <para>关于<command>svn
+      status</command>的详细讨论见<xref linkend="svn.tour.cycle.examine.status" />。
+    </para>
+
+
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.forcvs.branches-and-tags">
+    <title>分支和标签</title>
+
+    <para>Subversion不区分文件系统空间和<quote>分支</quote>空间；分支和标签都是普通的文件系统目录，这恐怕是CVS用户需要逾越的最大心理障碍，所有信息在<xref linkend="svn.branchmerge"/>。
+    </para>
+
+
+    <warning>
+      <para>因为Subversion把分支和标签看作普通目录看待，一直要记住检出项目的<literal>trunk</literal>（<literal>http://svn.example.com/repos/calc/trunk/</literal>），而不是项目本身的（<literal>http://svn.example.com/repos/calc/</literal>）。如果你错误的检出了项目本身，你会紧张的发现你的项目拷贝包含了所有的分支和标签。<footnote><para>如果在检出完成之前没有消耗完磁盘空间的话。</para></footnote></para>
+    </warning>
+
+  </sect1>
+
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.forcvs.properties">
+    <title>元数据属性</title>
+
+    <para>Subversion的一个新特性就是你可以对文件和目录任意附加元数据（或者是<quote>属性</quote>），属性是关联在工作拷贝文件或目录的任意名称/值对。
+    </para>
+    
+    <para>为了设置或得到一个属性名称，使用<command>svn
+      propset</command>和<command>svn propget</command>子命令，列出对象所有的属性，使用<command>svn proplist</command>。</para>
+
+    <para>更多信息见<xref linkend="svn.advanced.props"/>。</para>
+
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.forcvs.conflicts">
+    <title>冲突解决</title>
+
+    <para>CVS使用内联<quote>冲突标志</quote>来标记冲突，并且在更新时打印<literal>C</literal>。历史上讲，这导致了许多问题，因为CVS做得还不够。许多用户在它们快速闪过终端时忘记（或没有看到）<literal>C</literal>，即使出现了冲突标记，他们也经常忘记，然后提交了带有冲突标记的文件。
+    </para>
+
+    <para>Subversion通过让冲突更明显来解决这个问题，它记住一个文件是处于冲突状态，在你运行<command>svn resolved</command>之前不会允许你提交修改，详情见<xref
+      linkend="svn.tour.cycle.resolve"/>。
+    </para>
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.forcvs.binary-and-trans">
+    <title>二进制文件和转化</title>
+
+    <para>在大多数情况下，Subversion比CVS更好的处理二进制文件，因为CVS使用RCS，它只可以存储二进制文件的完整拷贝，但是，Subversion使用二进制区别算法来表示文件的区别，而不管文件是文本文件还是二进制文件。这意味着所有的文件是以微分的（压缩的）形式存放在版本库。
+    </para>
+    
+    <para>CVS用户需要使用<option>-kb</option>选项来标记二进制文件，防止数据的混淆（因为关键字解释和行结束转化），他们有时候会忘记这样做。
+    </para>
+
+    <para>Subversion使用更加异想天开的方法&mdash;第一，如果你不明确的告诉它（详情见<xref
+      linkend="svn.advanced.props.special.keywords"/>和<xref
+      linkend="svn.advanced.props.special.eol-style"/>）这样做，它不会做任何关键字或行结束转化的操作，缺省情况下Subversion会把所有的数据看作字节串，所有的储存在版本库的文件都处于未转化的状态。
+    </para>
+
+    <para>第二，Subversion维护了一个内部的概念来区别一个文件是<quote>文本</quote>还是<quote>二进制</quote>文件，但这个概念<emphasis>只</emphasis>在工作拷贝非常重要，在<command>svn update</command>，Subversion会对本地修改的文本文件执行上下文的合并，但是对二进制文件不会。
+    </para>
+
+    <para>为了检测一个上下文的合并是可能的，Subversion检测<literal>svn:mime-type</literal>属性，如果没有<literal>svn:mime-type</literal>属性，或者这个属性是文本的（例如<literal>text/*</literal>），Subversion会假定它是文本的，否则Subversion认为它是二进制文件。Subversion也会在<command>svn import</command>和<command>svn add</command>命令时通过运行一个二进制检测算法来帮助用户。这些命令会做出很好的猜测，然后（如果可能）设置添加文件的<literal>svn:mime-type</literal>属性。（如果Subversion猜测错误，用户可以删除或手工编辑这个属性。）
+    </para>
+
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.forcvs.modules">
+
+    <title>版本化的模块</title>
+
+    <para>不像CVS，Subversion工作拷贝会意识到它检出了一个模块，这意味着如果有人修改了模块的定义（例如添加和删除组件），然后一个对<command>svn update</command>的调用会适当的更新工作拷贝，添加或删除组件。
+    </para>
+
+    <para>Subversion定义了模块作为一个目录属性的目录列表：见<xref linkend="svn.advanced.externals"/>。
+    </para>
+
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.forcvs.auth">
+
+    <title>认证</title>
+
+    <para>通过CVS的pserver，你需要在读写操作之前<quote>登陆</quote>到服务器&mdash;即使是匿名操作。Subversion版本库使用Apache的<command>httpd</command>或<command>svnserve</command>作为服务器，你不需要开始时提供认证凭证&mdash;如果一个操作需要认证，服务器会要求你的凭证（不管这凭证是用户名与密码，客户证书还是两个都有）。所以如果你的工作拷贝是全局可读的，在所有的读操作中不需要任何认证。
+    </para>
+
+    <para>相对于CVS，Subversion会一直在磁盘（在你的<filename>~/.subversion/auth/</filename>目录）缓存凭证，除非你通过<option>--no-auth-cache</option>选项告诉它不这样做。
+    </para>
+
+    <para>这个行为也有例外，当使用SSH管道的<command>svnserve</command>服务器时，使用<literal>svn+ssh://</literal>的URL模式这种情况下，<command>ssh</command>会在通道刚开始时无条件的要求认证。
+    </para>
+
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.forcvs.convert">
+
+    <title>转化CVS版本库到Subversion</title>
+
+    <para>或许让CVS用户熟悉Subversion最好的办法就是让他们的项目继续在新系统下工作，这可以简单得通过平淡的把CVS版本库的导出数据导入到Subversion完成，或者是更加完全的方案，不仅仅包括最新数据快照，还包括所有的历史，从一个系统到另一个系统。这是一个非常困难的问题，包括推导保持原子性的修改集，转化两个系统完全不同的分支政策。但是我们还是有许多工具声称至少部分具备了的转化已存在的CVS版本库为Subversion版本库的能力。
+    </para>
+
+    <para>其中一个工具是cvs2svn（<ulink url="http://cvs2svn.tigris.org/"/>），是一个Python脚本，最初是Subversion自己的开发社区的成员编写的。其他的如Chia-liang Kao的Subversion的VCP工具（<ulink url="http://svn.clkao.org/revml/branches/svn-perl/"/>）转化器插件，还有Lev Serebryakov的RefineCVS（<ulink url="http://lev.serebryakov.spb.ru/refinecvs/"/>）。这些工具具备不同程度的完成性，也许会具备完全不同的处理CVS历史的方法。无论你决定使用哪个工具，确定要执行尽可能多的验证来确定你可以接受转化结果&mdash;毕竟，你曾经努力创建这些历史！
+      </para>
+
+    <para>关于最新的转化工具链接列表，可以访问Subversion的网站（<ulink url="http://subversion.tigris.org/project_links.html"/>）。
+    </para>
+
+  </sect1>
+
+</appendix>
+
+<!--
+local variables: 
+sgml-parent-document: ("book.xml" "appendix")
+end:
+-->

@@ -1,0 +1,347 @@
+﻿<chapter id="svn.intro">
+
+  <title>介绍</title>
+
+  <simplesect>
+    <para>版本控制是管理信息变化的艺术，它很早就成为了程序员重要的工具，程序员经常会花时间做一点小修改然后第二天又把它改回来。但是版本控制的作用不仅在软件开发领域，任何需要管理频繁信息改变的地方都需要它，这就是Subversion发挥的舞台。</para>
+
+    <para>这一章是一个对Subversion高层次的介绍&mdash;它是什么；它能做什么；它是怎样做到的。</para>
+
+  </simplesect>
+
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.intro.whatis">
+
+    <title>Subversion是什么？</title>
+      
+    <para>
+    Subversion是一个自由/开源版本控制系统，它管理文件和目录可以超越时间。一组文件存放在中心<firstterm>版本库</firstterm>，这个版本库很像一个普通的文件服务器，只是它可以记录每一次文件和目录的修改，这便使你可以取得数据以前的版本，从而可以检查所作的更改。从这个方面看，许多人把版本控制系统当作一种<quote>时间机器</quote>。</para>
+    
+    <para>
+    Subversion可以通过网络访问它的版本库，从而使用户可以在不同的电脑上使用。一定程度上可以说，允许用户在各自的地方修改同一份数据是促进协作。进展可能非常的迅速，并没有一个所有的改变都会取得效果的通道，由于所有的工作都有历史版本，你不必担心由于失去某个通道而影响质量，如果存在不正确的改变，只要取消改变。</para>
+
+    <para>
+    一些版本控制系统也是软件配置管理（SCM）系统，这种系统经过特定的精巧设计来管理源代码，有许多关于软件开发的特性&mdash;本身理解编程语言、或者提供构建程序的工具。然而，Subversion不是这样一个系统，它是一个通用系统，可以管理<emphasis>任何</emphasis>类型的文件集，对你这可能是源代码&mdash;对别人，可能是一个货物清单或者是数字电影。</para>
+
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.intro.history">
+
+    <title>Subversion的历史</title>
+
+    <para>
+    早在2000年，CollabNet, Inc. (<ulink url="http://www.collab.net"/>)就开始寻找CVS替代产品的开发人员，CollabNet提供了一个协作软件套件叫做CollabNet企业版（CEE）<footnote>
+        <para>也有一个针对小团队的CollabNet团队版（CTE）。</para>
+  </footnote>，它的一个组件是版本控制系统。尽管SourceCast在初始时使用CVS作为其版本控制系统，但是CVS的局限性在一开始就很明显，CollabNet知道迟早要找到一个更好的替代品。遗憾的是，CVS成为了开源世界<foreignphrase>事实上的</foreignphrase>标准，因为<emphasis>没有</emphasis>更好的产品，至少是没有可以自由使用的。所以CollabNet决定写一个新的版本控制系统，建立在CVS思想之上的，但是修正其错误和不合理的特性。</para>
+
+    <para>
+    2000年2月，他们联系<citetitle>Open Source Development with CVS</citetitle>(Coriolis, 1999)的作者Karl Fogel，并且询问他是否希望为这个新项目工作，巧合的是，当时Karl正在与朋友Jim Blandy讨论设计一个新的版本控制系统。在1995年，他们两个曾经开办一个提供CVS支持的公司Cyclic Software，尽管他们最终卖掉了公司，但还是天天使用CVS进行日常工作，在使用CVS时的挫折最终促使他们认真地去考虑如何管理标记版本的数据，而且他们当时不仅仅提出了<quote>Subversion</quote>这个名字，并且做出了Subversion版本库的基础设计。所以当CollabNet提出邀请的时候，Karl马上同意为这个项目工作，同时Jim也得到了他的雇主，Red Hat软件赞助他到这个项目并提供了一个宽松的时间。CollabNet雇佣了Karl和Ben Collins Sussman，详细的设计从三月开始，在Behlendorf 、CollabNet、Jason Robbins  和 Greg Stein（当时是一个独立开发者，活跃在WebDAV/DeltaV系统规范阶段）的恰当激励的帮助下，Subversion很快吸引了许多活跃的开发者，结果是许多有CVS经验的人们很乐于有机会为这个项目做些事情。</para>
+
+    <para>
+    最初的设计小组固定在简单的目标上，他们不想在版本控制方法学中开垦处女地，他们只是希望修正CVS，他们决定Subversion匹配CVS的特性，保留相同的开发模型，但不复制CVS明显的缺陷。尽管它不需要成为CVS的继任者，它也应该与CVS保持足够的相似性，使得CVS用户可以轻松的做出转换。</para>
+
+    <para>
+    经过14个月的编码，2001年8月31日，Subversion自己能够<quote>成为服务</quote>了，开发者停止使用CVS保存Subversion的代码，而使用Subversion本身。</para>
+
+    <para>
+    当CollabNet开始这个项目的时候，曾经资助了大量的工作（它为全职的Subversion开发者提供薪水），Subversion像许多开源项目一样，被一些激励知识界精英的宽松透明的规则支配着。CollabNet的版权许可证完全符合Debian的自由软件方针，也就是说，任何人可以自由的下载，修改和重新发布，不需要经过CollabNet或其他人的允许。</para>
+
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.intro.features">
+
+    <title>Subversion的特性</title>
+
+    <para>
+    当讨论Subversion为版本控制领域带来的特性的时候，通过学习它在CVS基础上所作的改进会是比较有效的方法。如果你不熟悉CVS，你会不太明白所有的特性，如果你根本就不熟悉版本控制，你会瞪着眼无所适从，你最好首先阅读一下<xref
+      linkend="svn.basic"/>，它提供了一个版本控制的简单介绍。</para>
+
+    <para>Subversion提供：</para>
+
+    <variablelist>
+      <varlistentry>
+        <term>版本化的目录</term>
+        <listitem>
+          <para>
+          CVS只记录单个文件的历史，但是Subversion实现了一个可以跟踪目录树更改的<quote>虚拟</quote>版本化文件系统，文件<emphasis>和</emphasis>目录都是有版本的。</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>真实的版本历史</term>
+        <listitem>
+          <para>
+          因为CVS只记录单个文件的版本，对于拷贝和改名&mdash;这些文件经常发生的操作，会改变一个目录的内容&mdash;在CVS中并不支持。在CVS里你也不可以用一个完全不同的文件覆盖原来的同名文件而又不继承原来文件的历史。通过Subversion，你可以对文件或是目录进行增加、拷贝和改名操作，也可以新增一个具有干净历史的文件。</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>原子提交</term>
+        <listitem>
+          <para>
+          一系列的改动，要么全部提交到版本库，要么一个也不提交，这样可以让用户构建一个所要提交修改的逻辑块，防止部分修改提交到版本库。</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>版本化的元数据</term>
+        <listitem>
+          <para>
+          每一个文件或目录都有一套属性&mdash;键和它们的值，你可以建立并存储任何键/值对，属性也是随时间的流逝而纳入版本控制的，很像文件的内容。</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>可选的网络层</term>
+        <listitem>
+          <para>
+          Subversion在版本库访问方面有一个抽象概念，利于人们去实现新的网络机制，Subversion可以作为一个扩展模块与Apache结合，这给了Subversion在稳定性和交互性方面很大的好处，可以直接使用服务器的特性&mdash;认证、授权和传输压缩等等。也有一个轻型的，单独运行的Subversion服务，这个服务使用自己的协议可以轻松的用SSH封装。</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>一致的数据操作</term>
+        <listitem>
+          <para>
+          Subversion表示文件是建立在二进制文件区别算法基础上的，对于文本（可读）和二进制（不可读）文件具备一致的操作方式，两种类型的文件都压缩存放在版本库中，区别信息是在网络上双向传递的。</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>有效率的分支和标签</term>
+        <listitem>
+          <para>
+          分支与标签的代价不与工程的大小成比例，Subversion建立分支与标签时只是拷贝整个工程，使用了一种类似于硬链接的机制，因而这类操作通常只会花费很少并且相对固定的时间。
+          </para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>可修改性</term>
+        <listitem>
+          <para>
+          Subversion没有历史负担，它由一系列良好的共享C库实现，具有定义良好的API，这使得Subversion非常容易维护，可以轻易的用其他语言操作。</para>
+        </listitem>
+      </varlistentry>
+
+    </variablelist>
+
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.intro.architecture">
+
+    <title>Subversion的架构</title>
+
+    <para><xref linkend="svn.intro.architecture.dia-1"/>从高处<quote>俯视</quote>Subersion的设计。</para>
+    
+    <figure id="svn.intro.architecture.dia-1">
+      <title>Subversion的架构</title>
+      <graphic fileref="images/ch01dia1.png"/>
+    </figure>
+
+    <para>
+    一端是保存你所有纳入版本控制的数据的Subversion版本库，在另一端是你的Subvesion客户端程序，管理着所有纳入版本控制数据的本地影射（叫做<quote>工作拷贝</quote>），在这两极之间是各种各样的版本库访问（RA）层，一些使用电脑网络通过网络服务器访问版本库，一些则绕过网络服务器直接访问版本库。</para>
+
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.intro.install">
+
+    <title>安装Subversion</title>
+
+    <para>
+    Subversion建立在一个可移植层上，叫做APR&mdash;Apache Portable Runtime library，APR库提供了许多Subversion在多种操作系统上需要的功能：磁盘访问、内存管理等等。虽然Subversion可以使用Apache作为服务器程序，这种对APR的依赖并不意味着Apache是必需的组件，APR是可以独立使用的库。这意味着Subversion可以在所有可运行Apache服务器的平台上工作：Windows、Linux、各种BSD、Mac OS X、Netware以及其他。</para>
+
+    <para>
+    最简单的安装办法就是下载相应操作系统的二进制包，Subversion的网站（<ulink url="http://subversion.tigris.org"/>）上通常会有志愿者提供的包可以下载，对于微软操作系统，网站上通常会有图形化的安装包，对于类Unix系统，你可以使用它们本身的打包系统（PRMs、DEBs、ports tree等等）得到Subversion。</para>
+
+    <para>
+    你也可以选择从源代码直接编译Subversion，从网站下载最新的源代码，解压缩，根据<filename>INSTALL</filename>文件的指导进行编译。注意，通过这些源代码可以完全编译访问服务器的命令行客户端工具（通常是apr，apr-util和neno库）。但是可选部分有许多依赖，如Berkeley DB和Apache httpd。如果你希望做一个完全的编译，确定你有所有<filename>INSTALL</filename>文件中记述的包。如果你计划通过Subversiong本身工作，你可以使用客户端程序取得最新的，带血的源代码，这部分内容见<xref
+      linkend="svn.developer.contrib.get-code"/>。</para>
+
+  </sect1>
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.intro.components">
+
+    <title>Subversion的组件</title>
+    
+    <para>
+    Subversion安装之后，分为几个部分，这是一个快速浏览。不要害怕这些让你挠头的简略描述，本书有<emphasis>足够的</emphasis>内容来减少这种混乱。</para>
+
+    <variablelist>
+      <varlistentry>
+        <term>svn</term>
+        <listitem>
+          <para>命令行客户端。</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>svnversion</term>
+        <listitem>
+          <para>报告工作拷贝状态（当前修订版本的项目）的工具。</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>svnlook</term>
+        <listitem>
+          <para>检查版本库的工具。</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>svnadmin</term>
+        <listitem>
+          <para>建立、调整和修补版本库的工具。</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>svndumpfilter</term>
+        <listitem>
+          <para>过滤Subversion版本库转储文件的工具。</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>mod_dav_svn</term>
+        <listitem>
+          <para>Apache HTTP服务器的一个插件，可以让版本库在网络上可见。</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>svnserve</term>
+        <listitem>
+          <para>一种单独运行的服务器，可以作为守护进程由SSH调用，另一种让版本库在网络上可见的方式。</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+    <para>假定你已经将Subversion正确安装，你已经准备好开始，下两章将带领你使用<command>svn</command>，Subversion的客户端程序。</para>
+
+  </sect1>
+
+
+  <!-- ================================================================= -->
+  <!-- ================================================================= -->
+  <sect1 id="svn.intro.quickstart">
+
+    <title>快速入门</title>
+    
+    <para>
+    许多人为<quote>从头到尾</quote>的方式读一本介绍有趣新技术的书感到发愁，这一小节是一个很短的介绍，给许多<quote>实用</quote>的用户一个实战的机会，如果你是一个喜欢通过实验进行学习的用户，以下将告诉你怎么做，相对应，我们给出这本书相关的链接。</para>
+
+    <para>
+    如果版本控制或者Subversion和CVS都用到的<quote>拷贝-修改-合并</quote>模型对于你来说是完全的新概念，在进一步阅读之前，你首先要读<xref linkend="svn.basic"/>。</para>
+
+    <note>
+      <para>
+      以下的例子假定你有了1.2或更新的Subversion程序（运行<command>svn --version</command>来检查版本）。</para>
+    </note>
+
+    <para>
+    Subversion存储所有版本控制的数据到一个中心版本库，作为开始，新建一个版本库：</para>
+
+    <screen>
+$ svnadmin create /path/to/repos
+$ ls /path/to/repos
+conf/  dav/  db/  format  hooks/  locks/  README.txt
+</screen>
+
+    <para>
+    这个命令建立了一个新的目录<filename>/path/to/repos</filename>，包含了一个Subversion版本库。这个目录保存了一些数据库文件，你打开后看不到你的已经版本化的文件。更多的版本库创建和维护信息，见<xref linkend="svn.reposadmin"/>。</para>
+
+    <para>Subversion没有<quote>项目</quote>的概念，版本库只是一个虚拟的版本化文件系统，可以存放你想要得任何文件。有的管理员倾向于一个版本库只存放一个项目，有的则喜欢存放多个项目到一个版本库不同的目录里，每中方式的优点将会在<xref 
+ linkend="svn.reposadmin.projects.chooselayout"/>讨论。每种方式，版本库都是以<quote>项目</quote>管理文件和目录，所以或许你会在整本书中经常发现项目这个词，需要记住我们只是在谈论版本库中的一些目录（或者是一组目录）。</para>
+
+    <para>在这个例子里，我们假定你已经有了一些希望导入到Subversion版本库的项目（一组文件和目录）。首先把这些条目整理到同一个叫做<filename>myproject</filename>（或任何名称）的目录里，你的项目要有<filename>branches</filename>、<filename>tags</filename>和<filename>trunk</filename>三个顶级目录，后面你就会知道这样做的原因。<filename>trunk</filename>目录保存所有的数据，而<filename>branches</filename>和<filename>tags</filename>都是空的：</para>
+
+    <screen>
+/tmp/myproject/branches/
+/tmp/myproject/tags/
+/tmp/myproject/trunk/
+                     foo.c
+                     bar.c
+                     Makefile
+                     &hellip;
+</screen>
+
+    <para><filename>branches</filename>、<filename>tags</filename>和<filename>trunk</filename>子目录不是Subversion必需的，它们只是稍候你就会希望使用的流行习惯。</para>
+
+    <para>一旦你你已经准备好了数据，就可以使用<command>svn import</command>命令（见<xref linkend="svn.tour.other.import"/>）将其导入到版本库：
+    </para>
+
+    <screen>
+$ svn import /tmp/myproject file:///path/to/repos/myproject -m "initial import"
+Adding         /tmp/myproject/branches
+Adding         /tmp/myproject/tags
+Adding         /tmp/myproject/trunk
+Adding         /tmp/myproject/trunk/foo.c
+Adding         /tmp/myproject/trunk/bar.c
+Adding         /tmp/myproject/trunk/Makefile
+&hellip;
+Committed revision 1.
+$ 
+</screen>
+
+    <para>现在版本库包含了这个目录树的数据，如前所述，直接察看版本库看不到文件和目录；它们存放在数据库当中，但是版本库假想的文件系统现在保存了顶级的目录<filename>myproject</filename>，其中保存了你的数据。
+   </para>
+
+    <para>注意最初的<filename>/tmp/myproject</filename>并没有改变，Subversion并没有处理它（实际上，你可以随意删除这个目录）。为了开始处理版本库数据，你需要创建一个新的包含数据的<quote>工作拷贝</quote>，这是一个私有工作区。从Subversion版本库里<quote>check out</quote>出一个<filename>myproject/trunk</filename>目录的工作拷贝：
+   </para>
+
+    <screen>
+$ svn checkout file:///path/to/repos/myproject/trunk myproject
+A  myproject/foo.c
+A  myproject/bar.c
+A  myproject/Makefile
+&hellip;
+Checked out revision 1.
+</screen>
+    <para>
+    你现在在<filename>myproject</filename>目录里有了一个版本库的个人拷贝，你可以编辑你的工作备份中的文件，并且提交到版本库。</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>进入到你的工作备份，编辑一个文件的内容。</para>
+      </listitem>
+      <listitem>
+        <para>运行<command>svn diff</command>来查看你的修改的标准区别输出。</para>
+      </listitem>
+      <listitem>
+        <para>运行<command>svn commit</command>来提交你的改变到版本库。</para>
+      </listitem>
+      <listitem>
+        <para>运行<command>svn update</command>将你的工作拷贝与版本库<quote>同步</quote>。</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>对于你对工作拷贝可做操作的完全教程可以察看<xref linkend="svn.tour"/>。</para>
+
+    <para>
+    目前，你可以选择使你的版本库在网络上可见，可以参考<xref
+      linkend="svn.serverconfig"/>，学习使用不同的服务器以及配置。</para>
+
+  </sect1>
+
+
+</chapter>
+
+<!--
+local variables: 
+sgml-parent-document: ("book.xml" "chapter")
+end:
+-->

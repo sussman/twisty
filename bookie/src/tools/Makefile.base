@@ -1,0 +1,30 @@
+# This is a Makefile fragment, which is expected to be included by the
+# locale-specific Makefiles located at ../LOCALE_CODE/Makefile .  As a result,
+# the relative paths contained within are relative to the LOCALE_CODE
+# directory, and *not* to the tools directory, where this file itself resides.
+
+include ../tools/Makefile.base-vars
+NAME = book
+OUTNAME = svn-book
+DIR = book
+IMAGES = $(DIR)/images/*.png
+INSTALL_DIR = $(DESTDIR)/usr/share/doc/subversion
+include ../tools/Makefile.base-rules
+
+# Compatibility targets - the book buildsystem had quite target names which
+# were either redundant or overly verbose.  These remain for a little while,
+# whilst scripts are adapted, and people retrain their fingers.
+all-book: all
+all-pdf: pdf
+all-ps: ps
+book-version: version
+book-html: html
+book-html-chunk: html-chunk
+book-pdf: pdf
+book-ps: ps
+install-book: install
+install-book-html: install-html
+install-book-html-chunk: install-html-chunk
+install-book-pdf: install-pdf
+install-book-ps: install-ps
+book-clean: clean

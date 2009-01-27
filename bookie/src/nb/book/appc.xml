@@ -1,0 +1,24 @@
+<appendix id="svn.3rdparty">
+  <title>Third Party Tools</title>
+
+  <simplesect>
+
+    <para>Subversion's modular design (covered in <xref
+      linkend="svn.developer.layerlib"/>) and the availability of
+      language bindings (as described in <xref
+      linkend="svn.developer.usingapi.otherlangs"/>) make it a likely
+      candidate for use as an extension or backend to other pieces of
+      software.  For a listing of many third-party tools that are using
+      Subversion functionality under-the-hood, check out the Links page on the
+      Subversion website (<ulink
+        url="http://subversion.tigris.org/project_links.html"/>).</para>
+
+  </simplesect>
+
+</appendix>
+
+<!--
+local variables: 
+sgml-parent-document: ("book.xml" "appendix")
+end:
+-->

@@ -1,0 +1,447 @@
+-*- coding: utf-8; -*-
+$Id: How-to-translate.txt 2276 2006-07-04 06:43:21Z nebiac $
+--------------------------------------------------------------------------------
+Manutentore di questo file: nebiac alias federico.nebiacolombo@softeco.it
+
+INTRODUZIONE
+--------------------------------------------------------------------------------
+Questo documento raccoglie appunti, convenzioni e procedure e adottate dal gruppo di persone che
+desiderano contribuire all'opera di traduzione dall'inglese all'italiano del libro riguardante SVN.
+
+PIANO DI LAVORO  
+--------------------------------------------------------------------------------
+La scelta di utilizzare sigle in inglese permette di poter condividere con la comunita' SVN org
+il piano fin dalle fasi legate alla proposta dell'attivita'.
+
+Legenda: 
+NA =NOT ASSIGNED	           TIP=TRANSLATION IN PROGRESS        
+TBV=TO BE VERIFIED		   VIP=VERIFY IN PROGRESS             
+TC =TRANSLATION COMPLETED (INCLUDED VERIFY)
+
+Nome  #       chi ci lavora per             data prevista  stato
+File  pag.    traduzione o verifica         fine attività  capitolo      altri dettagli         
+---------------------------------------------------------------------------------------------------------------------------------
+foreword     [??????]                        [??-??-2006] [NA]  -
+copyright    [??????]                        [??-??-2006] [NA]  -
+Ch00 - 9pg   [ender]+[basetta] x verifica    [??-??-2006] [VIP] da inizio fino  <sect2 id="svn.preface.conventions.icons"> esclusa
+             [nebiac]+[Miky]                 [07-07-2006] [TIP] da  <sect2 id="svn.preface.conventions.icons"> fino a fine capitolo
+Ch01 - 10pg  [g0blin]+[nebiac] per verifica  [23-06-2006] [VIP] da inizio fino a fino a  <sect1 id="svn.intro.architecture"> esclusa
+             [nebiac]+[g0blin] per verifica  [23-6-2006]  [VIP] da <sect1 id="svn.intro.architecture"> fino a fine cap.
+Ch02 - 14pg  [phoenix]+[maxter] per verifica [??-??-2006] [TIP] da inizo fino a <sect1 id="svn.basic.in-action"> esclusa
+             [maxter]+[phoenix] per verifica [??-??-2006] [TIP] da  <sect1 id="svn.basic.in-action"> fino a <sect2 id="svn.basic.in-action.track-repos"> esclusa
+             [zup]+[ender]                   [??-07-2006] [TIP] da  <sect2 id="svn.basic.in-action.track-repos"> fino a fine capitolo
+Ch03 - 36pg  [Miky]+[nebiac] per verifica    [07-07-2006] [VIP] da inizio fino a <sect2 id="svn.tour.revs.dates"> esclusa
+             [basetta]+[ender] x verifica    [??-??-2006] [VIP] fino da <sect2 id="svn.tour.revs.dates"> fino <sect1 id="svn.tour.cycle"> esclusa
+             [??????]                        [??-??-2006] [NA]  da <sect1 id="svn.tour.cycle"> fino alla fine del capitolo
+Ch04 - 34pg  [NA]
+Ch05 - 46pg  [NA]
+Ch06 - 50pg  [NA]
+Ch07 - 61pg  [NA]
+Ch08 - 50pg  [NA]
+Ch09 - 104pg [NA]
+appa - 9pg   [NA]
+appb - 14pg  [NA]
+appc - 1pg   [NA]
+
+
+Federico Nebiacolombo  federico.nebiacolombo@softeco.it    nebiac            CONFIRMED
+Alessio Spadaro        alessio.spadaro@finservice.com      ender             CONFIRMED
+Michela Pilla          michelapilla@hotmail.com            Miky              CONFIRMED
+Daniele Piaggesi       d.piaggesi@fastwebnet.it            g0blin            CONFIRMED
+Giovanni	       xphenix2000@yahoo.it                phoenix           CONFIRMED
+Massimiliano Bariola   m.bariola@gmail.com                 maxter            CONFIRMED
+Patrick Martini        patrick@pupazzo.org                 basetta           CONFIRMED
+Piero Proietti         piero.proietti@gmail.com            TheWind           CONFIRMED
+Lorenzo Verna          v.lorenzo@gmail.com                 zup               CONFIRMED
+
+
+ASPETTI OPERATIVI
+--------------------------------------------------------------------------------
+- I sorgenti del libro sono in formato XML conservati presso il repository svn 
+ufficiale della SVN.org il cui URL e':
+
+http://svn.red-bean.com/svnbook/trunk/src/it
+
+La stessa repository puo' essere comodamente esplorata/monitorate tramite il link:
+
+http://viewvc.red-bean.com/svnbook/trunk/src/it/
+
+La prima cosa da fare e' quindi installare un client SVN ed effettuare il checkout dei src 
+xml del libro dal precedente URL. Per i dettagli consultare la sezione 
+'Checkout dei src XML (sezione italiana)' di questo documento.
+
+
+SW CONSIGLIATO 
+--------------------------------------------------------------------------------
+In questa sezione saranno descritti i TOOLS e le procedure da utilizzare 
+per effettuare /validare la traduzione a seconda delle piattaforme che verranno
+Utilizzate.
+
+Client SVN: 
+- svn: client command line.
+http://subversion.tigris.org/project_packages.html
+
+- jsvn: client Java per accedere ad una repository SVN.
+MOlto comodo se si deve lavorare sia sotto windows che Linux.
+Download from: http://jsvn.alternatecomputing.com/jsvn-0.8.jar
+I dettagli riguardo l'installazione e l'uso sono raccolti nel doc. Appunti-JSVN.doc.
+
+- Tortoisesvn: client svn integrato in windows explorer.
+http://tortoisesvn.tigris.org/
+
+- Jedit: potente editor multipiattaforma, estensibile tramite Plugin.
+Caldamente raccomandato poiche' il dizionario attualmente e' in un formato
+utilizzabile ANCHE (ma non solo) tramite un plugin di Jedit.
+http://www.jedit.org/
+
+
+IL FILE TEST-ME.TXT
+--------------------------------------------------------------------------------
+E' presente nella dir src/it della nostra repository.
+Lo scopo di questo file e' quello di fornire l'opportunita' di provare liberamente 
+i comandi svn svn (commit, update,...) tramite l'accesso alla rep. svn-it via internet.
+In particolare sentitevi liberi di modificare questo file aggiungendo righe, cancellandole,...
+E' un file di lavoro dove e' importante che ognuno impari a prendere dimestichezza 
+con svn con il client che preferisce (command line, TortoiseSVN, jsvn,...).
+
+
+PROCEDURE 
+--------------------------------------------------------------------------------
+In questa sezione saranno descritte le 'procedure' di routine quali ad esempio:
+ - Checkout,modifica,commit/update dei src XML (sezione italiana)
+ - Validazione dei src XML
+ - Dai SRC XML ad HTML
+ - Dai SRC XML ad PDF
+ - Dai SRC XML ad CHM
+
+
+Checkout dei src XML (sezione italiana)
+--------------------------------------------------------------------------------
+L'operazione di checkout, permette di creare una copia locale sincronizzata 
+con il repository svn.
+Normalmente, quindi, va effettuata all'inizio, ed ogni volta sia necessario effettuare un
+'reset' della copia locale.
+Effettuare un'operazione di checkout su una copia locale che contiene modifiche per le 
+quali NON si è ancora effettuato commit equivale a PERDERE le modifiche locali poichè vengono
+sovrascritte dai contributi provenienti dal repository.
+
+Supponiamo di avere la seguente directory 
+c:\user\prj\svn-book\DEV\src
+
+ed utilizzare il client command line 'svn'.
+Nel caso di un client diverso (jsvn, tortoise svn) la procedura va adattata.
+
+Utilizzando il client svn i comandi da impostare sono:
+
+cd c:\user\prj\svn-book\DEV\src
+svn checkout http://svn.red-bean.com/svnbook/trunk/src/it
+
+viene creata la directory .\it quindi ora la struttura e':
+
+c:\user\prj\svn-book\DEV\src\it
+
+- Modificare i src xml ponendo attenzione a non cancellare anche parzialmente i tags XML.
+ATTENZIONE: Per evitare di incappare in problemi relativi alla codifica (specie 
+in fase di validazione dei src xml) causati ad esempio dall'uso di lettere accentate italiane.
+Siate sicuri di salvare il file (almeno la prima volta) utilizzando un editor che permetta di scegliere
+il tipo di codifica UTF8. Sotto windows ad esempio NOtepad -> save as.
+
+- Prima di effettuare un commit, validarli (vedi sezione seguente)
+- Commit dei files
+Per verificare quali files necessitano commit e' sufficente usare  il comando
+svn status
+
+Effettuare il commit dei src modificati tramite il comando:
+
+svn commit <myfile> -m "questa e' un commento che spiega il motivo del cambiamento" --username <user>
+
+<myfile> : va sostituito con il file specifico.
+<user>   : va sostituito con il proprio utente.
+
+La prima volta viene richiesta la password, le seguenti la specifica dell'utente con
+l'opzione '--username' e' opzionale.
+
+
+Validazione dei src XML
+--------------------------------------------------------------------------------
+Su LINUX: 
+-------------
+Verificato su: Red Hat Enterprise 4
+Prerequisiti:
+- Il validatore XML 'xmllint' come parte della libxml2, tipicamente disponibile nelle
+distribuzioni Red Hat (RH).
+
+Cosa fare:
+Effettuare il checkout di
+src/it     (ed applicare le eventuali modifiche)
+src/tools
+
+$ cd src/it
+$ make valid
+
+In caso di errori, risolvere il problema partendo dal primo segnalato.
+
+
+Su Windows:
+-------------
+Verificato su: Windows Server 2003, Windows XP Pro.
+Prerequisiti:
+- Installare Cygwin (http://www.cygwin.com) (*1) assicurandosi di includere i pacchetti:
+	- make
+	- libxml2
+	- subversion
+
+Cosa fare:
+Effettuare il checkout di
+src/it     (ed applicare le eventuali modifiche)
+src/tools
+
+$ cd src/it
+$ make valid
+
+In caso di errori, risolvere il problema partendo dal primo segnalato.
+
+
+
+(*1) Per chi non fosse pratico di Cygwin: e' una sorta di porting sotto windows di un ambiente
+Unix/Linux. Si basa su un meccanismo di installazione molto particolare: collegandosi al sito cygwin
+e' possibile selezionare i componenti che servono da una lista molto ampia.
+Nel nostro caso il set minimo per la sola validazione, i componenti da selezionare sono:
+Devel->make
+Devel->libxml2
+Devel->Subversion (il primo della lista, basta solo il client command line)
+Shells->bash (in realta' e' presente di default, non va selezionato)
+
+Nel caso non abbiate una connessione abbastanza veloce, oppue abbiate fretta, non esitate a scrivere 
+presso la mail list svn-it chiedendo se qualche anima di buona volonta' puo' inviarsi uno zip con i precedenti 
+componenti gia' inclusi, sperando nella solidarieta' :-)
+Al termine cygwin si presenta come una shell linux che accede ai dischi locali del pc.
+Per validare basta copiare (usando ad esempio windows explorer) i propri src tradotti sotto la directory
+
+C:\cygwin\home\Administrator
+
+usata da Cygwin come home dir, nel tipico esempio nel caso si usi windows e l'utente Administrator.
+Se si usa un altro utente, ovviamente si deve cambiare la dir.
+
+
+Dai SRC XML ad HTML
+--------------------------------------------------------------------------------
+
+Premessa:
+-------------
+Il libro di Subversion è scritto usando DocBook Lite, una versione semplificata di DocBook.
+DocBook è una collezione di DTD e schemi XML che definiscono la struttura di un documento 
+(una specie di HTML, più ricco e più adatto alla definizione di libri).
+I file XML che compongono questo libro su Subversion rispettano i DTD definiti da DocBook Lite; 
+nel nostro caso si trovano in src/tools/dtd/ e vengono usati per la validazione quando eseguiamo il comando make valid.
+
+Recuperare i file XSLT:
+-----------------------
+Un grande vantaggio che deriva dall'adozione di DocBook è la grande disponibilità di fogli di stile XSL 
+in grado di trasformare i file XML in diversi formati e con diversi layout. 
+Quindi per generare le pagine HTML o i file .fo e quindi i documenti PDF partendo dai file XML del libro 
+è necessario avere i fogli di stile per DocBook.
+
+"DocBook Open Repository" su Sourceforge rende disponibile una grande collezione di XSL specifici per DocBook.
+Scaricare l'ultimo pacchetto 'docbook-xsl' dall'indirizzo 
+
+	http://sourceforge.net/project/showfiles.php?group_id=21935
+
+una volta scaricato, scompattare l'archivio e rinominarlo in src/tools/xsl 
+I passi dovrebbe essere qualcosa come:
+      $ cd src/tools
+      $ tar zxvf docbook-xsl-X.YY.Z.tar.gz
+      $ mv docbook-xsl-X.YY.Z xsl
+
+Il processo di build si aspetta di trovare i fogli di stile in src/tools/xsl/
+
+
+Utilizzo di XSLT per trasformare il libro
+------------------------------------------
+XSLT applica un foglio di stile .xsl a un file .xml e produce un nuovo documento a markup.
+Recuperare libxslt, una libreria C per XSLT, 
+ 
+ Per Linux
+ -------------
+ Scaricare da http://xmlsoft.org/XSLT/
+
+ Per Windows
+ -------------
+ Usando cygwin, si può scaricare il pacchetto utilizzando il programma di setup. 
+ Devel->libxslt
+
+
+Generazione delle pagine HTML
+------------------------------
+ Dalla directory src/it lanciare il comando
+
+        $ make all-html
+
+Ciò produrrà una versione del libro su una singola pagina HTML in book/svn-book.html ed una versione
+multipagina in book/html-chunk/.
+Nota che è un processo piuttosto pesante e può impiegare parecchi minuti.
+          
+
+Dai SRC XML ad PDF
+--------------------------------------------------------------------------------
+...da completare (benvenuti i contributi di qualche anima volenterosa:-)
+
+Dai SRC XML ad CHM
+--------------------------------------------------------------------------------
+...da completare (benvenuti i contributi di qualche anima volenterosa:-)
+
+
+CONVENZIONI
+--------------------------------------------------------------------------------
+- LETTERE ACCENTATE 
+  le lettere accententate o comunque tutti i
+  caratteri estesi (non-ASCII) devono essere inseriti usando l'UTF-8
+  come codifica di riferimento
+  Quando si salva il documento e' importante assicurarsi di utilizzare la codifica utf-8,
+  di solito presente come opzione nella dialog del comando 'save as'.
+
+- TONO DELLA TRADUZIONE
+Utilizzare le forme impersonali del tipo 'si puo'...' oppure 'e' possibile...' per
+tradurre forme del tipo 'you can...'.
+
+- CITAZIONI
+Tradurre riportando anche (prima) la frase in lingua originale, giusto perchè venga 
+mantenuto in modo sicuro lo spirito della frase (originale).
+
+- USO VIRGOLETTE DOPPIE O SINGOLE
+Si mantiene lo stesso standard utilizzato nella lingua originale (inglese)
+
+- SPAZIATURA PUNTEGGIATURA E PARENTESI
+In accordo con il testo originale in inglese: lasciare uno spazio tra le virgole o parentesi 
+e la parola successiva.
+Esempio corretto: Ecco un testo, molto breve, che contiene (a scopo dimostrativo) alcune parole.
+Esempio Scorretto: Ecco un testo,molto breve,che contiene(a scopo dimostrativo)alcune parole.
+
+- FILENAME & PATHNAME CONTENUTI NEGLI ESEMPI
+Non sono tradotti, segue un esempio:
+$ svn checkout file:///path/to/repos/myproject/trunk myproject
+A  myproject/foo.c
+A  myproject/bar.c
+A  myproject/Makefile
+
+- CONSERVAZIONE DEI PARAGRAFI IN LINGUA ORIGINALE
+Al fine di facilitare la revisione della traduzione, ogni paragrafo viene conservato nella
+lingua originae introducendo 'lang="en"' all'interno del tag <para>.
+Tale convenzione permette in fase di costruzione dei file html o pdf di filtrare i paragrafi 
+in lingua originale (ad oggi tale filtro deve essere ancora implementato nei makefile che si 
+occupano di passare da xml a html o pdf).
+Segue un esempio:
+
+    <para lang="en">In the world of open-source software, the Concurrent
+      Versions System (CVS) has long been the tool of choice for
+      version control.       
+    </para>
+
+    <para>Nel mondo del software open-source, Concurrent Versions System (CVS)
+      è stato a lungo lo strumento preferito per la gestione delle versioni.
+    </para>
+    
+Trucco: nel plug-in di dizionario per JEdit c'e' la voce <para> che serve proprio a sostituire 
+<para> con <para lang="en"> in modo semi-automatico.
+
+- COMMENTI AI COMMIT
+Su richiesta della comunità svn-book, si prega di introdurre i commenti ai commit in lingua
+inglese.
+Se si sono già introdotti dei commenti in italiano non e' un problema, si possono modificare,
+seguono alcuni appunti al riguardo. 
+
+set SVN_EDITOR="C:\Programmi\Windows NT\Accessori\wordpad.exe"
+
+SI deve conosce il numero della revisione per la quale si desidera modificare i commento.
+Per verificare la revisione corrente o quella da modificare si possono usare i comandi:
+
+svn status -v myfile 
+
+oppure
+
+svn log myfile 
+
+Per modificare il msg di log si usa il comando
+
+svn propedit -r2174 --revprop svn:log myfile 
+
+Si imposta di un nuovo volore per la proprietà 'svn:log' nella revisione 2174
+
+Da notare che NON e' necessario il commit finale poiche' NON viene modificato il contenuto ma solo le proprieta'.
+Le modifiche alle prorieta' vengono quindi direttamente trasmesse al server svn.
+
+
+
+DIZIONARIO 
+--------------------------------------------------------------------------------
+Vedi file IT-EN-Dizionario.cliplibrary contenuto in src/it nella rep. SVN BOOK-IT.
+Tale file contiene parecchi commenti che ne spiegano il formato interno.
+Attualmente (8-6-2006) e' il dizionario rispetta un formato direttamente
+utilizzabile dal plugin 'Clipper' dell'editor JEdit.
+
+I motivo principale e' rappresentato dal fatto di poter, in tal modo, inserire
+direttamente nel testo che si sta traducendo i termini contenuti nel file di
+dizionario, il tutto, ovviamente se si usa Jedit come editor.
+
+Comunque, se proprio, non si desidera usare Jedit il file e' sempre utilizzabile 
+come riferimento in quando leggibile da un normale editor di testi (o da un altro tool!).
+
+Seguono dettagli riguardo l'installazione di Jedit, l'installazione del Plugin
+e la configurazione del Plugin per usare il file IT-EN-Dizionario.cliplibrary.
+Il tutto e' molto piu' semplice da fare che non da descrivere:-)
+
+
+
+Installazione JEDIT+plugin 'Clipper'
+----------------------------------------------
+Scaricare http://www.jedit.org/
+Verificato su: Windows XP Prof.+JDK 1.5
+Scaricare Jedit 4.2 (es. jedit42install.jar) ed installarlo.
+Se necessario, sotto windows, per attivarlo usare il seguente script 'jedit.bat':
+'
+start javaw -jar "C:\Program Files\jEdit 4.2\jedit.jar" %1%
+'
+Da salvare nella directory che contiene jedit.jar (tipicamente C:\Program Files\jEdit 4.2).
+
+Dalla pagina http://plugins.jedit.org/list.php?category=11
+scaricare il plugin 'Clipper', scomprimerlo e copiare Clipper.jar nella directory
+C:\Program Files\jEdit 4.2\jars
+
+Avete appena installato il plugin(!).
+Per fare comparire la finestra del plugin: 
+Plugins-> Clipper -> Clipper
+
+Configurazione  di plugin 'Clipper' per uso dizionario
+----------------------------------------------
+Verificato su: Windows XP Prof.+JDK 1.5
+
+Attivare Jedit
+menu'Plugins-> PLuginManager -> scegliere 'Clipper' e premere il bottone
+'plug-in options'
+Nella dialog che si apre, scegliere 'clipper', 
+introdurre nel campo 'Clipper directory' il percorso dove risiede il file
+IT-EN-Dizionario.cliplibrary ad esempio 'C:\mynick\Subversion\src\it'
+
+Una volta aperta la finestra del plugin 'Clipper',
+dalla combo del plugin scegliere la voce 'svn-it_book':
+comparirà la lista dei termini nel dizionario pronta per lúso.
+
+Infine, ma e' un'opinione personale, consiglio di attivare il plugin come finestra 
+'dock at left' facendola comparire/scomparire in modo molto comodo.
+
+
+Modifica del file di dizionario
+----------------------------------------------
+Se Jedit è già attivo, per ottenere la rilettura da parte del plugin del file
+di dizionario e' necessario scollegare/ricollegare il plugin:
+menu' Plugins->Plugin Manager
+Deselezionare e riselzionare 'Clipper'.
+Prima di effettuare un commit del file di dizionario modificato e' buona abitudine
+validarlo tramite il reload da parte del plugin.
+
+IDEE VARIE
+--------------------------------------------------------------------------------
+Questa sezione contiene idee, contributi ed ogni altro argomento che non rientri propriamente nelle
+precedenti categorie (che ovviamente possono essere rinominate od estese).
+
+- fine del documento -

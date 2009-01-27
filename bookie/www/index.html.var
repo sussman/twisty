@@ -1,0 +1,31 @@
+URI: index.en.html
+Content-Language: en
+Content-Type: text/html; charset=UTF-8
+
+URI: index.es.html
+Content-Language: es
+Content-Type: text/html; charset=UTF-8
+
+URI: index.it.html
+Content-Language: it
+Content-Type: text/html; charset=UTF-8
+
+URI: index.ja.html
+Content-Language: ja
+Content-Type: text/html; charset=UTF-8
+
+URI: index.pt_BR.html
+Content-Language: pt-BR
+Content-Type: text/html; charset=UTF-8
+
+URI: index.nb.html
+Content-Language: nb
+Content-Type: text/html; charset=UTF-8
+
+URI: index.ru.html
+Content-Language: ru
+Content-Type: text/html; charset=UTF-8
+
+URI: index.zh.html
+Content-Language: zh
+Content-Type: text/html; charset=UTF-8

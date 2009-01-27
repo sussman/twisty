@@ -1,0 +1,15 @@
+-*- coding: utf-8; -*-
+
+$Id: TO-DO-SVN-BOOK-IT.txt 2256 2006-06-28 13:12:03Z nebiac $
+------------------------------------------------
+Manutentori di questo file: svn-it team
+
+O Completare il doc How-to-Translate.txt sezione da XML a HTML
+Documentare i passi per riuscire a generare HTML su Cygwin e/o Linux. 
+Modificare makefile per scartare i paragrafi lang="en"
+
+O Completare il doc How-to-Translate.txt sezione da XML a PDF
+O Completare la traduzione!
+O Riposarsi 
+
+- fine del documento -

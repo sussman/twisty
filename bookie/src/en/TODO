@@ -1,0 +1,122 @@
+This is a -*- text -*- file.
+
+SvnBook issue tracking is migrating to Trac at:
+  
+  http://svnbook.red-bean.com/trac/
+
+New issues should be filed directly into Trac.
+Existing issues will be gradually either fixed, or migrated to Trac.
+
+============================================================================
+NEEDED SOMETIME (NOT VERSION-SPECIFIC)
+============================================================================
+
+  * Example 8.5 (pool usage) is very odd.  It uses svn_pool_foo() wrappers,
+    yet uses apr_status_t, not svn_error_t, error handling.  This is weird.
+    Since it is attempting to demonstrate proper Subversion pool coding style,
+    it ought to be using SVN_ERR() and svn_error_t everywhere.  Might also
+    want to use APR_ARRAY_PUSH().
+    
+  * Fill in the "### boilerplate" stuff we left for O'Reilly.  No
+    reason for the book, printed or otherwise, to not include
+    information about feeding bugs back into the svnbook OS community.
+
+  * (perhaps) suggest the use of environment variables to represent
+    long repository URLs.  useful for lots of branching/tagging commands.
+    Maybe this can go into our existing best-practices doc?
+
+  * When using shared working copies, a user changing the permissions
+    of a file directly (svn ps svn:executable) or indirectly
+    (i.e. through an update), must own that file.  There is no way to
+    do this automatically which does not involve possible data loss.  [BEN]
+
+  * ch06 talks about Basic authentication and recommends https.
+    Add a mention of Digest authentication now that Apache's bug
+    has been fixed that broke it and potentially update the 
+    example to use it instead.  [BEN]
+
+  * we seem to inconsistently assume repositories live either in
+    /usr/local/svn/ or /usr/local/repositories/ throughout the book.
+    We ought to consistify to /var/svn.  [FITZ]
+
+  * Appendix C should be reviewed and updated from project_links.html,
+    listing only projects that the book authors wish to promote.  A
+    generic and full list of related projects can always be found at
+    project_links.html -- we hold the power of bias and
+    recommendation, and we should wield it.  See the section below for
+    votes amongst the authors on what to endorse.  [MIKE, BEN, FITZ]
+
+  * vendor branch section needs re-working.  again.  specifically,
+    note the "replacing 1.0 with 1.1 and 'missing files' stuff (files
+    not overwritten by a tarball explode wouldn't be missing, they'd
+    be untouched).  [MIKE]
+
+  * ch04: need a giant warning-box about issue #2282.  how our lack of
+    'true renames' can be really irritating when doing merges.  The
+    classic case is when branchA moves things around, and branch B
+    just changes file text.  When you merge branchA into branchB, you
+    deleting the newer file versions and adding-with-history the older
+    file versions.  Definitely a big 'gotcha' to watch out for.  [BEN]
+
+  * ch06: explain shortcoming in http checkout authorization.  because
+    checkout is done as one http request, there's only one chance to
+    authenticate (or not).  if root-dir is anonymously readable, then
+    *whole tree* will be checked out anonymously.  if root-dir
+    requires authn, then *whole tree* will be checked out as that
+    user.  until we get pipelining and do checkouts as multiple GETs,
+    it's impossible to change authn halfway through a checkout.  [BEN]
+
+  * appA: explain why 'svn commit; svn log' won't show the commit.  [BEN]
+
+============================================================================
+VOTING FOR TOOLS TO BE MENTIONED IN APPENDIX C
+============================================================================
+
+In this section, Fitz, Ben and Mike will vote on third-party tools to
+be mentioned in Appendix C.  The old "let's just reproduce the
+project_links.html file in the book" method was pathetic, lacking in
+both effort and utility.  Being weak, we determined to give everyone a
+fair shake and list every known integration point and let users
+decide.  Next time around, we'll do what we came here to do -- yield
+focused, insightful information readers can use and trust.
+
+   Clients and Plugins
+
+      TortoiseSVN
+        +1: cmpilato
+
+      AnkhSVN
+        +0: cmpilato
+
+      Subclipse
+        +0: cmpilato
+
+   Repository Converters
+
+      cvs2svn
+        +1: cmpilato
+
+   Repository Browsers
+
+      ViewCVS
+        +1: cmpilato
+
+      WebSVN
+        +1: cmpilato
+
+   Miscellaneous Tool Integrations
+
+      Trac
+        +0: cmpilato
+
+      svk:
+        +0: cmpilato
+
+   Hosting Services
+
+      CollabNet
+        +1: cmpilato
+
+      berlios.de
+        +0: cmpilato
+

@@ -1,0 +1,143 @@
+#!/usr/bin/python
+# vim:sw=4
+
+import sys
+import os
+import shutil
+import time
+
+def format_duration(seconds):
+    seconds = int(seconds)
+    hours = seconds / 3600
+    minutes = seconds % 3600 / 60
+    seconds = seconds % 60
+    return ((hours and "%dh " % hours or "")
+            + (minutes and "%dm " % minutes or "")
+            + "%ds" % seconds)
+    
+if len(sys.argv) < 3:
+    sys.stderr.write("""Usage: %s SRC-DIR TGT-DIR --dryrun
+
+Crawl SRC-DIR looking for book translations, building distributions of
+them, and exploding those distributions into TGT-DIR.
+""" % (os.path.basename(sys.argv[0])))
+    sys.exit(1)
+
+BOOKSRC = sys.argv[1]
+DROPSPOT = sys.argv[2]
+DRYRUN = (len(sys.argv) > 3)
+
+skip_locales = ('de',)
+skip_pdf_locales = ('ru', 'zh')
+
+# Update the working copy
+if DRYRUN:
+    print "SVN-Update: %s" % BOOKSRC
+else:
+    os.system('svn up -q ' + BOOKSRC)
+
+# Timestamp
+build_begin_time = time.time()
+
+# Find translations
+locales = []
+built_locales = []
+kids = os.listdir(BOOKSRC)
+for kid in kids:
+    full_path = os.path.join(BOOKSRC, kid)
+    if os.path.isfile(full_path):
+        continue
+    if os.path.exists(os.path.join(full_path, 'book')) \
+       and os.path.exists(os.path.join(full_path, 'Makefile')):
+        locales.append(kid)
+
+# Build the locales
+for i in skip_locales:
+    try:
+        locales.remove(i)
+    except ValueError:
+        pass
+locales.sort()
+cwd = os.getcwd()
+for locale in locales:
+    locale_dir = os.path.join(BOOKSRC, locale)
+    temp_dir = os.path.join(locale_dir, '__TEMPINSTALL__')
+    book_formats = [ 'html', 'html-chunk', 'html-arch', 'html-chunk-arch',
+                     'pdf' ]
+    if locale in skip_pdf_locales:
+        book_formats.remove('pdf')
+
+    if os.path.isdir(temp_dir):
+        if DRYRUN:
+            print "Erase: %s" % (temp_dir)
+        else:
+            shutil.rmtree(temp_dir)
+
+    command = (['make', 'INSTALL_SUBDIR=__TEMPINSTALL__', 'clean']
+            + map(lambda x: 'install-%s' % x, book_formats))
+    if DRYRUN:
+        print "Run: %s" % (" ".join(command))
+    else:
+        os.chdir(locale_dir)
+        try:
+            os.system(" ".join(command))
+        finally:
+            os.chdir(cwd)
+
+    dropspot_locale_path = os.path.join(DROPSPOT, locale)
+    if os.path.isdir(dropspot_locale_path):
+        if DRYRUN:
+            print "Erase: %s" % (dropspot_locale_path)
+        else:
+            shutil.rmtree(dropspot_locale_path)
+    if DRYRUN:
+        print "Move into place: %s -> %s" % (temp_dir, dropspot_locale_path)
+    else:
+        os.rename(temp_dir, dropspot_locale_path)
+    built_locales.append(locale)
+
+# Timestamp
+build_end_time = time.time()
+
+# Write out index.html
+if DRYRUN:
+    print "Write index.html:"
+    fp = sys.stdout
+else:
+    fp = open(os.path.join(DROPSPOT, 'index.html'), 'w')
+
+fp.write("""<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>Version Control with Subversion - Nightly Builds</title>
+<style type="text/css">
+h1, h2, h3 { margin: 0 }
+dl { margin-left: 3em }
+</style>
+</head>
+<body>
+<h1><i>Version Control with Subversion</i></h1>
+<h2>Automated Nightly Book Builds</h2>
+<h3>Last Build Completed At: %s GMT</h3>
+<h3>Last Build Duration: %s</h3>
+<dl>
+""" % (time.asctime(time.gmtime(build_end_time)),
+    format_duration(build_end_time - build_begin_time)))
+for locale in built_locales:
+    fp.write("""
+<dt>%s</dt>
+<dd>[<a href="%s/svn-book.html">single-page HTML (read online)</a>]</dd>
+<dd>[<a href="%s/index.html">multi-page HTML (read online)</a>]</dd>
+<dd>[<a href="%s/svn-book-html.tar.bz2"
+ >single-page HTML (in .tar.bz2)</a>]</dd>
+<dd>[<a href="%s/svn-book-html-chunk.tar.bz2"
+ >multi-page HTML (in .tar.bz2)</a>]</dd>
+""" % (locale.upper(), locale, locale, locale, locale))
+    if locale not in skip_pdf_locales:
+        fp.write('<dd>[<a href="%s/svn-book.pdf">PDF</a>]</dd>\n' % locale)
+fp.write("""
+</dl>
+</body>
+</html>
+""")
