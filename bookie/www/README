@@ -1,7 +1,0 @@
-NOTE TO BOOK AUTHORS
-====================
-
-Use the book-dist.py script in the book source directory (next to the
-Makefile) to create a tarball suitable for upload and expansion here.
-Turns out we must use the book source's "install-*" rules in order to
-get images and stuff in the right places for all book formats.
