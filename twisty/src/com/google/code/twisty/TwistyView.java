@@ -15,12 +15,15 @@
 package com.google.code.twisty;
 
 import com.google.code.twisty.zplet.ZMachineException;
+import com.google.code.twisty.TwistyInputConnection;
 
 import android.content.Context;
 import android.text.method.ArrowKeyMovementMethod;
 import android.text.method.MovementMethod;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 import android.widget.TextView;
 
 public class TwistyView extends TextView {
@@ -41,6 +44,16 @@ public class TwistyView extends TextView {
 		// TODO: enable draggable scroll etc
 	}
 
+	@Override
+	public boolean onCheckIsTextEditor() {
+	  return true;
+	}
+	
+	@Override
+	public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
+	  return new TwistyInputConnection(this, false);
+	}
+	
 	@Override
 	protected boolean getDefaultEditable() {
 		return true;

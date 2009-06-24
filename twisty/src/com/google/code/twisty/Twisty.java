@@ -403,6 +403,7 @@ public class Twisty extends Activity {
 	void sendKeyEvent(int evt, int key_code) {
 		Event e = new Event();
 		e.id = evt;
+		Log.i(TAG, "GOT KEYCODE: " + key_code);
 		screen.keyDown(e, key_code);
 	}
 
