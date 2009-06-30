@@ -14,6 +14,7 @@
 
 package com.google.code.twisty;
 
+import android.view.KeyEvent;
 import android.view.View;
 import android.util.Log;
 import android.view.inputmethod.BaseInputConnection;
@@ -24,17 +25,19 @@ import android.view.inputmethod.InputConnection;
 
 public class TwistyInputConnection extends BaseInputConnection implements InputConnection {
   
-  private static String TAG = "TwistyInputConnection";
-  
   public TwistyInputConnection(View targetView, boolean fullEditor) {
     super(targetView, fullEditor);
   }
-  
+
+  @Override
+  public boolean sendKeyEvent(KeyEvent event) {
+     return super.sendKeyEvent(event);
+  }
+
   @Override
   public boolean performEditorAction(int editorAction) {
-    // Even on a software-keyboard, this method will be called for "Enter".
-    Log.i(TAG, "I hear a keyboard clicking somewhere...");
-    return true;  // success
+    sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER));
+    return super.performEditorAction(editorAction);
   }
   
 }

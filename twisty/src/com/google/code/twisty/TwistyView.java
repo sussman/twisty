@@ -22,6 +22,7 @@ import android.text.method.ArrowKeyMovementMethod;
 import android.text.method.MovementMethod;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.widget.TextView;
@@ -53,6 +54,12 @@ public class TwistyView extends TextView {
 	public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
 	  return new TwistyInputConnection(this, false);
 	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+	  return false;
+	}
+
 	
 	@Override
 	protected boolean getDefaultEditable() {
