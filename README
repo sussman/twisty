@@ -1,5 +1,5 @@
-             Twisty, a z-machine interpreter for Android.
-             ============================================
+         Twisty, a text-adventure interpreter for Android.
+         =================================================
 
 What is this program?
 ---------------------
@@ -21,9 +21,18 @@ http://www.ifwiki.org for general information on Interactive Fiction.
 History
 -------
 
-This code began as a heavily-hacked port of 'zplet', an early
-lightweight z-machine interpreter written for Java 1.0.  It was then
-connected to Android's various UI elements.
+ *** The code in this directory is currently undergoing a rewrite ***
+
+*  We are attempting to use Android's Native Development Kit (NDK) to
+*  make JNI calls to various VM-interpreters running as C libraries.
+*  This should give us a 7x speed improvement, and also allow us to
+*  support a wider range of z-machines (via 'nitfol'), glulx games
+*  (via 'glulxe') and perhaps even TADS or other interpreters.
+
+
+This code originally began as a heavily-hacked port of 'zplet', an
+early lightweight z-machine interpreter written for Java 1.0.  It was
+then connected to Android's various UI elements.
 
 The original zplet source code is avaliable at
 
@@ -44,15 +53,15 @@ Building from Source
 To build, you'll need Eclipse 3.x, the public Android SDK, and the
 Android plugin for Eclipse.
 
-If you check out /trunk from subversion, you can create a new project
-in Eclipse "from an existing source tree."  Be sure to convert the
-project to an Android project.
+If you check out the latest head from mercurial, you can create a new
+project in Eclipse "from an existing source tree."  Be sure to convert
+the project to an Android project.
 
 
 Redistribution and Licensing
 -----------------------------
 
-Twisty is open source software, distributed under the Apache 2 license.
+Twisty is open source software, distributed under the GPL v3 license.
 For details on Licensing, see the LICENSE file.
 
 Patches are welcome!
