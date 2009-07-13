@@ -21,6 +21,11 @@ http://www.ifwiki.org for general information on Interactive Fiction.
 History
 -------
 
+*** NOTE THAT THIS VERSION OF TWISTY IS UNDER "MAINTEANCE MODE" ONLY.
+*** A REWRITE IS IN PROCESS TO USE NATIVE C CODE, ON A DIFFERENT
+*** MERCURIAL BRANCH.
+
+
 This code began as a heavily-hacked port of 'zplet', an early
 lightweight z-machine interpreter written for Java 1.0.  It was then
 connected to Android's various UI elements.
