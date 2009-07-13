@@ -50,8 +50,8 @@ any z3, z5, or z8 came from the /sdcard.
 Building from Source
 --------------------
 
-To build, you'll need Eclipse 3.x, the public Android SDK, and the
-Android plugin for Eclipse.
+To build, you'll need Eclipse 3.x, the public Android SDK and NDK, and
+the Android plugin for Eclipse.
 
 If you check out the latest head from mercurial, you can create a new
 project in Eclipse "from an existing source tree."  Be sure to convert
