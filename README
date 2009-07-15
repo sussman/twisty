@@ -92,10 +92,10 @@ The Twisty codebase contains the main Twisty "activity", a few sample
 games, and some C interpreters that expect to use GLK for I/O.  The
 Twisty activity is essentially a high-level consumer of GlkJNI.
 
-The GlkJNI codebase contains 'glkjni' and 'jglk' (the C code and java
-interfaces for GLK), as well as specific java implementations of these
-interfaces.  The one we care about is 'roboglk', which maps the
-interfaces to Android's UI.
+The GlkJNI codebase contains 'glkjni' (the C code implementing
+GLK), as well as specific java implementations of these interfaces.
+The one we care about is 'roboglk', which maps the interfaces to
+Android's UI.
 
 Assuming that these two codebases are installed at $TWISTY and
 $GLKJNI, you need to make three symbolic links from your $NDK area:
@@ -103,6 +103,9 @@ $GLKJNI, you need to make three symbolic links from your $NDK area:
   $NDK/sources/glkjni      --> $GLKJNI/glkjni
   $NDK/sources/twistyterps --> $TWISTY/twistyterps
   $NDK/apps/twisty         --> $TWISTY/twisty
+
+This allows NDK to find the C code it needs and also the Eclipse
+project it belongs to.
 
 
 C.  Building the C code
@@ -122,9 +125,8 @@ D.  Building the Java code
 In Eclipse, you'll need to create two different projects.
 
  1. Start a new project based on existing source, and use $GLKJNI as
- the target.  Specifically, you want to build the 'jglk' subdirectory
- into a .jar file (which will depend on the .jar file compiled from
- the 'roboglk' subdirectory.)
+ the target.  Specifically, the 'roboglk' subdirectory is the target
+ to build.
 
  2. Start a new *android* project based on existing source, and use
  $TWISTY/twisty as the target.  It will depend on the .jars coming out
