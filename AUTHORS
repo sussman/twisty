@@ -1,0 +1,8 @@
+
+The following people have commit access to Twisty and have contributed
+to its development:
+
+
+  marius             Marius Milner (original UI and zplet port)
+  sussman            Ben Collins-Sussan (extra UI, packaging, maintenance)
+  edward.mccardell   Edward McCardell (GlkJNI layer, roboglk implementation)

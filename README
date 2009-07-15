@@ -21,41 +21,25 @@ http://www.ifwiki.org for general information on Interactive Fiction.
 History
 -------
 
- *** The code in this directory is currently undergoing a rewrite ***
+The codebase originally began as an Android Activity constructed
+around a heavily-hacked port of 'zplet', an early lightweight
+z-machine interpreter written for Java 1.0.  It was then connected to
+Android's various UI elements.
 
-*  We are attempting to use Android's Native Development Kit (NDK) to
-*  make JNI calls to various VM-interpreters running as C libraries.
-*  This should give us a 7x speed improvement, and also allow us to
-*  support a wider range of z-machines (via 'nitfol'), glulx games
-*  (via 'glulxe') and perhaps even TADS or other interpreters.
+ *** This project is now undergoing a huge rewrite! ***
 
+We are now attempting to use Android's Native Development Kit (NDK) to
+make JNI calls to various VM-interpreters running as C libraries.
+This should give us a 7x speed improvement, and also allow us to
+support a wider range of z-machines (via 'nitfol'), glulx games (via
+'glulxe') and perhaps even TADS or other interpreters.
 
-This code originally began as a heavily-hacked port of 'zplet', an
-early lightweight z-machine interpreter written for Java 1.0.  It was
-then connected to Android's various UI elements.
-
-The original zplet source code is avaliable at
-
-   http://www.speakeasy.org/~russotto/zplet/ifol.html
-
-
-Installation & Usage
---------------------
-
-Download the latest .apk file and use 'adb install' to copy it in your
-Android emulator.  It has a few z-games built in, but can also load
-any z3, z5, or z8 came from the /sdcard.
-
-
-Building from Source
---------------------
-
-To build, you'll need Eclipse 3.x, the public Android SDK and NDK, and
-the Android plugin for Eclipse.
-
-If you check out the latest head from mercurial, you can create a new
-project in Eclipse "from an existing source tree."  Be sure to convert
-the project to an Android project.
+Specifically, we're using the GlkJNI project
+(http://code.google.com/p/glkjni) to provide an abstract UI to the
+various C interpreters.  GLK is a UI "abstraction layer" created by
+Andrew Plotkin which can be implemented in any GUI toolkit, and GlkJNI
+ports this abstraction to JNI via a set of java interfaces.  It then
+provides an Android-specific implementation of those interfaces.
 
 
 Redistribution and Licensing
@@ -65,3 +49,88 @@ Twisty is open source software, distributed under the GPL v3 license.
 For details on Licensing, see the LICENSE file.
 
 Patches are welcome!
+
+
+Insalling the .apk
+-------------------
+
+The latest .apk can be downloaded directly from Google Code and pushed
+via 'adb install', or just grab it from Android Market.  :-) The .apk
+has a few sample games built in, but you can also load any z3, z5, or
+z8 came from the /sdcard.
+
+
+Building from Source
+--------------------
+
+** For Developers Only.  Warning:  this is complex!
+
+
+
+A.  Prerequisites
+
+ 1. The Android SDK (at least version 1.5), unpacked and ready to go.
+
+ 2. a working Eclipse installation (at least 3.x) with the latest
+ Android plugin (ADT) installed, pointing to your Android SDK.
+
+ 3. The Android NDK (at least version 1.0) unpacked somewhere. (Say,
+ at location $NDK)
+
+ 4. A copy of the Twisty codebase -- which you must already have if
+ you're reading this.  (Say, at location $TWISTY.)
+
+ 5. A copy of the glkjni codebase at location $GLKJNI.  Either grab a
+ release tarball or do an svn checkout:
+
+   svn co http://glkjni.googlecode.com/svn/trunk $GLKJNI
+
+
+B.  Assembling the Pieces
+
+
+The Twisty codebase contains the main Twisty "activity", a few sample
+games, and some C interpreters that expect to use GLK for I/O.  The
+Twisty activity is essentially a high-level consumer of GlkJNI.
+
+The GlkJNI codebase contains 'glkjni' and 'jglk' (the C code and java
+interfaces for GLK), as well as specific java implementations of these
+interfaces.  The one we care about is 'roboglk', which maps the
+interfaces to Android's UI.
+
+Assuming that these two codebases are installed at $TWISTY and
+$GLKJNI, you need to make three symbolic links from your $NDK area:
+
+  $NDK/sources/glkjni      --> $GLKJNI/glkjni
+  $NDK/sources/twistyterps --> $TWISTY/twistyterps
+  $NDK/apps/twisty         --> $TWISTY/twisty
+
+
+C.  Building the C code
+
+To compile the core glkjni C code and the C interpreters into a single
+shared library: 
+
+   $ cd $NDK
+   $ make APP=twisty
+
+After compilation, the final libtwistyterps.so will be automatically
+copied to the proper location within the Eclipse project within
+$TWISTY/twisty/ .
+
+
+D.  Building the Java code.
+
+
+In Eclipse, you'll need to create two different projects.
+
+
+ 1. Start a new project based on existing source, and use $GLKJNI as
+ the target.  Specifically, you want to build the 'jglk' subdirectory
+ into a .jar file (which will depend on the .jar file compiled from
+ the 'roboglk' subdirectory.)
+
+ 2. Start a new *android* project based on existing source, and use
+ $TWISTY/twisty as the target.  It will depend on the .jars coming out
+ of the glkjni project.
+
