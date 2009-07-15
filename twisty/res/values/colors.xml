@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <drawable name="body_bg">#ffffffff</drawable>
+  <drawable name="body_fg">#ff000000</drawable>
+  <drawable name="error_bg">#ffff6600</drawable>
+  <drawable name="error_fg">#ff000000</drawable>
+  <drawable name="more_bg">#00000033</drawable>
+  <drawable name="more_fg">#ffffffff</drawable>
+  <drawable name="status_bg">#ff000000</drawable>
+  <drawable name="status_fg">#ffffffff</drawable>
+
+  <drawable name="black">#ff000000</drawable>
+  <drawable name="red">#ffff0000</drawable>
+  <drawable name="green">#ff00ff00</drawable>
+  <drawable name="blue">#ff0000ff</drawable>
+  <drawable name="yellow">#ffffff00</drawable>
+  <drawable name="magenta">#ffff00ff</drawable>
+  <drawable name="cyan">#ff00ffff</drawable>
+  <drawable name="gray">#ff999999</drawable>
+  <drawable name="white">#ffffffff</drawable>
+</resources>
