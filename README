@@ -4,7 +4,7 @@
 What is this program?
 ---------------------
 
-Twisty is a z-machine interpreter for the Android operating system.
+Twisty is a game interpreter for the Android operating system.
 It allaws you to play "text adventures' on your mobile handset.
 
 The z-machine is a virtual machine designed in 1979 by Infocom for
@@ -23,8 +23,7 @@ History
 
 The codebase originally began as an Android Activity constructed
 around a heavily-hacked port of 'zplet', an early lightweight
-z-machine interpreter written for Java 1.0.  It was then connected to
-Android's various UI elements.
+z-machine interpreter written for Java 1.0.
 
  *** This project is now undergoing a huge rewrite! ***
 
@@ -39,7 +38,9 @@ Specifically, we're using the GlkJNI project
 various C interpreters.  GLK is a UI "abstraction layer" created by
 Andrew Plotkin which can be implemented in any GUI toolkit, and GlkJNI
 ports this abstraction to JNI via a set of java interfaces.  It then
-provides an Android-specific implementation of those interfaces.
+provides an Android-specific implementation of those interfaces.  The
+best C interpreters out there expect to use GLK for I/O, so this
+allows us our pick of C interpreters.
 
 
 Redistribution and Licensing
@@ -57,7 +58,7 @@ Insalling the .apk
 The latest .apk can be downloaded directly from Google Code and pushed
 via 'adb install', or just grab it from Android Market.  :-) The .apk
 has a few sample games built in, but you can also load any z3, z5, or
-z8 came from the /sdcard.
+z8 came from the SDcard.
 
 
 Building from Source
@@ -66,12 +67,11 @@ Building from Source
 ** For Developers Only.  Warning:  this is complex!
 
 
-
 A.  Prerequisites
 
  1. The Android SDK (at least version 1.5), unpacked and ready to go.
 
- 2. a working Eclipse installation (at least 3.x) with the latest
+ 2. A working Eclipse installation (at least 3.x) with the latest
  Android plugin (ADT) installed, pointing to your Android SDK.
 
  3. The Android NDK (at least version 1.0) unpacked somewhere. (Say,
@@ -87,7 +87,6 @@ A.  Prerequisites
 
 
 B.  Assembling the Pieces
-
 
 The Twisty codebase contains the main Twisty "activity", a few sample
 games, and some C interpreters that expect to use GLK for I/O.  The
@@ -115,15 +114,12 @@ shared library:
    $ make APP=twisty
 
 After compilation, the final libtwistyterps.so will be automatically
-copied to the proper location within the Eclipse project within
-$TWISTY/twisty/ .
+copied to the proper location within $TWISTY/twisty/ .
 
 
-D.  Building the Java code.
-
+D.  Building the Java code
 
 In Eclipse, you'll need to create two different projects.
-
 
  1. Start a new project based on existing source, and use $GLKJNI as
  the target.  Specifically, you want to build the 'jglk' subdirectory
