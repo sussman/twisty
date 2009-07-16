@@ -1,1 +1,3 @@
-twisty/project/libs/armeabi/lib*
+twisty/project/libs/armeabi/lib.*
+.*\.class
+
