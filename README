@@ -71,8 +71,8 @@ A.  Prerequisites
 
  1. The Android SDK (at least version 1.5), unpacked and ready to go.
 
- 2. A working Eclipse installation (at least 3.x) with the latest
- Android plugin (ADT) installed, pointing to your Android SDK.
+ 2. A working Eclipse installation (at least 3.5, "Galileo") with the
+ latest Android plugin (ADT) installed, pointing to your Android SDK.
 
  3. The Android NDK (at least version 1.0) unpacked somewhere. (Say,
  at location $NDK)
