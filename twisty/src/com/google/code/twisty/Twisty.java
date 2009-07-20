@@ -133,6 +133,8 @@ public class Twisty extends Activity {
 		final GlkEventQueue eventQueue = null;
 		mainWin = new RoboTextBufferWindow(this, eventQueue,
 					new StandardTextBufferIO(tv), MAIN_WINDOW_ID);
+		tv.setFocusable(true);
+		setContentView(tv);
 		
 		printWelcomeMessage();
 		
