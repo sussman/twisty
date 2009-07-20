@@ -3,3 +3,4 @@ twisty/project/libs/armeabi/lib.*
 twisty/gen/com/google/code/twisty/R\.java
 twisty/\.project
 twisty/default.\properties
+twisty/bin/.*

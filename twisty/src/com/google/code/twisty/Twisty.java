@@ -25,20 +25,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import com.google.code.twisty.TwistyMessage;
-import com.google.code.twisty.zplet.Event;
-import com.google.code.twisty.zplet.StatusLine;
-import com.google.code.twisty.zplet.ZMachineException;
-import com.google.code.twisty.zplet.ZViewOutput;
 
-
-import russotto.zplet.screenmodel.ZScreen;
-import russotto.zplet.screenmodel.ZStatus;
-import russotto.zplet.screenmodel.ZWindow;
-import russotto.zplet.zmachine.ZMachine;
-import russotto.zplet.zmachine.state.ZState;
-import russotto.zplet.zmachine.zmachine3.ZMachine3;
-import russotto.zplet.zmachine.zmachine5.ZMachine5;
-import russotto.zplet.zmachine.zmachine5.ZMachine8;
+import org.brickshadow.roboglk.Glk;
+import org.brickshadow.roboglk.GlkEventQueue;
+import org.brickshadow.roboglk.GlkFactory;
+import org.brickshadow.roboglk.window.TextBufferView;
+import org.brickshadow.roboglk.window.RoboTextBufferWindow;
+import org.brickshadow.roboglk.window.StandardTextBufferIO;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -104,13 +97,12 @@ public class Twisty extends Activity {
 	public static final int PROMPT_FOR_RESTOREFILE = 2;
 	public static final int PROMPT_FOR_ZGAME = 3;
 
-	private ZScreen screen;
-	private StatusLine status_line;
-	private ZStatus status;
-	private ZMachine zm;
-	// We use listener and tb to allow for full text input without UI feedback
-	private TextKeyListener listener;
-	private SpannableStringBuilder tb;
+	public static final int MAIN_WINDOW_ID = 1729;
+	
+	private Glk glk;
+	private TextBufferView tv;
+	private RoboTextBufferWindow mainWin;
+	
 	// Passed down to ZState, so ZMachine thread can send Messages back to this thread
 	private Handler dialog_handler;
 	private TwistyMessage dialog_message; // most recent Message received
@@ -124,12 +116,31 @@ public class Twisty extends Activity {
 	private Object runningProgram;
 	private Runnable preStartZM;
 
-	/** Called with the activity is first created. */
+	/** The native C library which contains the interpreter making Glk calls. 
+	 *  To build this library, see the README file. **/
+	 static {
+	        System.loadLibrary("twistyterps");
+	 }
+	
+	/** Called when activity is first created. */
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
+		// The main 'welcome screen' window from which games are launched.
+		tv = new TextBufferView(this);
+		final GlkEventQueue eventQueue = null;
+		mainWin = new RoboTextBufferWindow(this, eventQueue,
+					new StandardTextBufferIO(tv), MAIN_WINDOW_ID);
+		
+		printWelcomeMessage();
+		
+		// TODO:  when we fire off a game, we spawn a new thread and
+		//        create *new* TextBufferView and glk objects, the way ModelTest does.
+		
+		/*  TODO: Code for various dialog-prompts.  Re-enable someday. 
+		 * 
 		dialog_handler = new Handler() { 
 			public void handleMessage(Message m) {
 				savegame_dir = "";
@@ -146,92 +157,29 @@ public class Twisty extends Activity {
 					showDialog(DIALOG_CHOOSE_ZGAME);
 				}
 			} 
-		};
-
-		setContentView(R.layout.twisty);
-		listener = TextKeyListener.getInstance(false, TextKeyListener.Capitalize.NONE);
-		tb = new SpannableStringBuilder(" ");
-
-		View all = findViewById(R.id.all);
-		all.setOnKeyListener(new View.OnKeyListener() {
-			public boolean onKey(View v, int keyCode, KeyEvent event) {
-				return onViewKey(v, keyCode, event);
-			}
-		});
-		all.setFocusable(true);
-
-		try {
-			InitZJApp();
-			if (screen == null)
-				return;
-			if (!unfreezeZM(icicle)) {
-				setupWelcomeMessage();
-			}
-		} catch (Exception e) {
-			fatal("Oops, an error occurred preparing to play");
-			Log.e(TAG, "Failed to get prepare to play", e);
-		}
-	}
-
-	private void setupWelcomeMessage() {
-		setViewVisibility(R.id.errors, View.GONE);
-		setViewVisibility(R.id.more, View.GONE);
-		setViewVisibility(R.id.status_v3, View.GONE);
-		setViewVisibility(R.id.status_v5, View.GONE);
-		printWelcomeMessage();
+		};*/
 	}
 
 	private void printWelcomeMessage() {
-		if (zmIsRunning()) {
-			Log.e(TAG, "Called printWelcomeMessage with ZM running");
-			return;
-		}
-		
 		// What version of Twisty is running?
 		PackageInfo pkginfo = null;
 		try {
 			pkginfo = this.getPackageManager().getPackageInfo("com.google.code.twisty", 0);
 		} catch (PackageManager.NameNotFoundException e) {
-			fatal("Couldn't determine Twisty version.");
+			Log.e(TAG, "Couldn't determine Twisty version.");
 		}
 			
-		// TODO: Make this part be zcode and a little more interactive
-		// so a pedantic user could type "press menu key"
-		screen.clear();
-		ZWindow w = new ZWindow(screen, 0);
-		w.set_text_style(ZWindow.ROMAN);
-		w.set_text_style(ZWindow.REVERSE);
-		w.set_text_style(ZWindow.BOLD);
-		w.bufferString("                                      ");
-		w.newline();
-		w.bufferString("  Twisty " + pkginfo.versionName 
-				+ ", (C) Google Inc.         ");
-		w.newline();
-		w.bufferString("                                      ");
-		w.newline();
-		w.set_text_style(ZWindow.ROMAN);
-		w.bufferString("Adapted from:");
-		w.newline();
-		w.bufferString("    Zplet, a Z-Machine interpreter in Java");
-		w.newline();
-		w.bufferString("    (C) Matthew T. Russotto.");
-		w.newline();
-		w.bufferString("This is open source software;");
-		w.newline();
-		w.bufferString("    see http://code.google.com/p/twisty");
-		w.newline();
-		w.newline();
-		StringBuffer phoneBlurb = new StringBuffer();
-		// TODO: make this change depending on device features
-		phoneBlurb.append("You are holding a modern-looking phone with a "
-				+ "QWERTY keypad. ");
-		appendBatteryState(phoneBlurb);
-		phoneBlurb.append("You feel an inexplicable urge to "
-				+ "press the phone's \"menu\" key. ");
-		w.bufferString(phoneBlurb.toString());
-		w.flush();
+		// TODO:  clear the screen?
+		// TODO:  set font-style to fixed, to set 'mood' for old-school text adventures
+		
+		mainWin.print("Twisty " + pkginfo.versionName + ", (C) Google Inc.");
+		mainWin.print("You are holding a modern-looking phone which can be typed upon.");		
+		// TODO:  call appendBatteryState() below, beacuse it's cute.
+		mainWin.print("You feel an inexplicable urge to press the phone's \"menu\" key.");
 	}
 	
+	/* TODO:  rewrite this someday
+	 
 	private void printHelpMessage() {
 		if (zmIsRunning()) {
 			Log.e(TAG, "Called printHelpMessage with ZM running");
@@ -279,11 +227,7 @@ public class Twisty extends Activity {
 		w.newline();
 		w.newline();
 		w.flush();
-	}
-
-	private boolean zmIsRunning() {
-		return (zm != null && zm.isRunning());
-	}
+	} */
 
 	private void appendBatteryState(StringBuffer sb) {
 		IntentFilter battFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
@@ -362,85 +306,16 @@ public class Twisty extends Activity {
 	}
 
 	/**
-	 * OnKeyListener for main TextView. Rather than duplicate key detection
-	 * fully, which would require knowledge of things like the Alt and Shift
-	 * states, we delegate this to a SpannableString and InputMethod. A bit
-	 * of a hack but it saves us from needing to care about keyboard layout
-	 * details.
-	 */
-	public boolean onViewKey(View v, int keyCode, KeyEvent event) {
-		if (screen != null) {
-			if (tb.length() != 1)
-				tb = new SpannableStringBuilder(" ");
-			if (Selection.getSelectionEnd(tb) != 1 ||
-					Selection.getSelectionStart(tb) != 1)
-				Selection.setSelection(tb, 1);
-			switch (event.getAction()) {
-			case KeyEvent.ACTION_DOWN:
-				listener.onKeyDown(v, tb, keyCode, event);
-				break;
-			case KeyEvent.ACTION_UP:
-				listener.onKeyUp(v, tb, keyCode, event);
-				break;
-			}
-			switch (tb.length()) {
-			case 0:  // delete
-			sendKeyEvent(Event.KEY_PRESS, '\b');
-			return true;
-			case 2:  // insert one char
-				sendKeyEvent(Event.KEY_PRESS, tb.charAt(1));
-				return true;
-			case 1:  // arrow, shift, click, etc
-				// Note that this requires our implementation of Event to use
-				// the same key code constants as android's KeyEvent
-				if (event.getAction() == KeyEvent.ACTION_DOWN)
-					sendKeyEvent(Event.KEY_ACTION, event.getKeyCode());
-				break;
-			}
-		}
-		return false;
-	}
-
-	void sendKeyEvent(int evt, int key_code) {
-		Event e = new Event();
-		e.id = evt;
-		Log.i(TAG, "GOT KEYCODE: " + key_code);
-		screen.keyDown(e, key_code);
-	}
-
-	/** Set up things so the zmachine can request screen updates */
-	void InitZJApp() {
-		status_line = new StatusLine(this);
-		status = new ZStatus(status_line.getLeft(), status_line.getRight());
-		int[] views = new int[] { R.id.body, R.id.status_v5 };
-		ZViewOutput[] tva = new ZViewOutput[views.length];
-		for (int i = 0; i < views.length; ++i) {
-			View v = findViewById(views[i]);
-			if (v instanceof TwistyView) {
-				TwistyView tv = (TwistyView) v;
-				tva[i] = new ZViewOutput(tv);
-			} else {
-				fatal("Internal error: View type should be TwistyView");
-				return;
-			}
-		}
-		screen = new ZScreen(tva, dialog_handler, FIXED_FONT_NAME, 
-				ROMAN_FONT_NAME, FONT_SIZE);
-	}
-
-	/**
 	 * Start a zmachine, loading the program from the given file
 	 * @param filename Name of file to load
 	 */
 	void startzm(String filename) {
-		if (zmIsRunning())
-			return;
 		runningProgram = filename;
 		Log.i(TAG, "Loading file: " + filename);
 		try {
 			startzm(new FileInputStream(filename));
 		} catch (FileNotFoundException e) {
-			fatal("File not found: " + filename);
+			Log.e(TAG, "File not found: " + filename);
 		}
 	}
 
@@ -469,54 +344,23 @@ public class Twisty extends Activity {
 	 * @param zstream Stream containing the program
 	 */
 	void startzm(InputStream zstream) {
-		byte zmemimage[] = null;
-		setViewVisibility(R.id.errors, View.GONE);
-		try {
-			zmemimage = suckstream(zstream);
-		} catch (IOException e) {
-			fatal("I/O Error:\n" + Log.getStackTraceString(e));
-			// don't set failed, may want to retry
-		}
-		screen.clear();
-		screen.clearInputQueues();
-		if (zmemimage != null) {
-			switch (zmemimage[0]) {
-			case 3:
-				setViewVisibility(R.id.status_v3, View.VISIBLE);
-				setViewVisibility(R.id.status_v5, View.GONE);
-				zm = new ZMachine3(screen, status, zmemimage);
-				break;
-			case 5:
-				setViewVisibility(R.id.status_v3, View.GONE);
-				setViewVisibility(R.id.status_v5, View.VISIBLE);
-				zm = new ZMachine5(screen, zmemimage);
-				break;
-			case 8:
-				setViewVisibility(R.id.status_v3, View.GONE);
-				setViewVisibility(R.id.status_v5, View.VISIBLE);
-				zm = new ZMachine8(screen, zmemimage);
-				break;
-			default:
-				fatal("Not a valid V3, V5, or V8 story file (" +
-						Integer.toString(zmemimage[0]) + ")");
-			}
-			if (zm != null) {
-				prepareToStartZM();  // this can null out zm for failure
-			}
-			if (zm != null) {
-				//zm.zmlog = true;  // Kills game performance. Debugging only.
-				zm.start();
-			}
-		}
+		// TODO:  this is probably where we'd launch a game thread.
 	}
 
 	private void prepareToStartZM() {
+		// TODO:  do we want to allow multiple games to run simultaneously
+		//         in multiple threads?  Probably not, there's no real point.
+		
 		if (preStartZM != null) {
 			preStartZM.run();
 			preStartZM = null;
 		}
 	}
 
+	private boolean zmIsRunning() {
+		return false;  //  TODO:  FIXME
+	}
+	
 	/** Convenience helper that turns a stream into a byte array */
 	byte[] suckstream(InputStream mystream) throws IOException {
 		byte buffer[];
@@ -549,28 +393,9 @@ public class Twisty extends Activity {
 		return buffer;
 	}
 
-	/** Displays a fatal error message */
-	void fatal(String s) {
-		setViewVisibility(R.id.status_v3, View.VISIBLE);
-		setViewVisibility(R.id.status_v5, View.GONE);
-		setItemText(R.id.statusL, "Error");
-		setItemText(R.id.statusR, "");
-		setViewVisibility(R.id.errors, View.VISIBLE);
-		setItemText(R.id.errors, s);
-	}
-
 	/** Stops the currently running zmachine. */
 	public void stopzm() {
-		if (zmIsRunning()) {
-			zm.abort();
-			try {
-				zm.join();
-			} catch (InterruptedException e) {
-			}
-		}
-		zm = null;
-		setViewVisibility(R.id.status_v3, View.GONE);
-		setViewVisibility(R.id.status_v5, View.GONE);
+		// TODO:  nothing here right now.
 	}
 
 	@Override
@@ -605,10 +430,10 @@ public class Twisty extends Activity {
 	{
 		switch (item.getItemId()) {
 		case MENU_RESTART:
-			zm.restart();
+			// TODO:  zm.restart();
 			break;
 		case MENU_STOP:
-			stopzm();
+			// TODO:  stopzm();
 			// After the zmachine exits, the welcome message should show
 			// again.
 			break;
@@ -616,27 +441,10 @@ public class Twisty extends Activity {
 			pickFile();
 			break;
 		case MENU_SHOW_HELP:
-			printHelpMessage();
-			break;
-		case DEBUG_PAUSE_RESUME:
-			if (zm.pauseZM()) {
-				zm.resumeZM();
-			} else {
-				fatal("pause failed");
-			}
-			break;
-		case DEBUG_ZM_DUMP:
-			String[] l = zm.zmLogEntries.toArray(new String[0]);
-			zm.zmLogEntries.clear();
-			ZViewOutput o = zm.screen.getView(0);
-			for (String s : l) {
-				o.output(s, false, null);
-				o.newline();
-			}
-			zm.zmLog = true;
+			// TODO:  printHelpMessage();
 			break;
 		default:
-			screen.clear();
+			// TODO:  screen.clear();
 			startzm(item.getItemId());
 		break;
 		}
@@ -666,33 +474,6 @@ public class Twisty extends Activity {
 			showDialog(DIALOG_NO_SDCARD); // no sdcard to scan
 	}
 
-	/** Called from UI thread to request cleanup or whatever */
-	public void onZmFinished(final ZMachineException e) {
-		zm = null;
-		if (e != null) {
-			// Report that an error occurred
-			StringBuilder sb = new StringBuilder("Fatal error\n");
-			if (e.getPc() >= 0) {
-				sb.append("@ zmachine pc = 0x");
-				sb.append(Integer.toHexString(e.getPc()));
-				sb.append('\n');
-			}
-			sb.append(e.getMessage());
-			if (e.getCause() != null) {
-				StackTraceElement[] stack = e.getCause().getStackTrace();
-				for (StackTraceElement frame: stack) {
-					sb.append(frame.toString());
-					sb.append('\n');
-				}
-			}
-			// trim back trailing \n
-			sb.deleteCharAt(sb.length() - 1);
-			fatal(sb.toString());
-		} else {
-			// Normal ending, return to welcome screen
-			setupWelcomeMessage();
-		}
-	}
 
 	// Return the path to the saved-games directory.
 	// If SDcard not present, or if /sdcard/twisty is a file, return null.
@@ -811,8 +592,8 @@ public class Twisty extends Activity {
 					// Directly modify the message-object passed to us by the z-machine thread:
 					dialog_message.path = savefile_path;
 					// Wake up the ZMachine thread again
-					synchronized (screen) {
-						screen.notify();
+					synchronized (mainWin) {  // TODO:  should sync around game thread!
+						mainWin.notify();
 					}
 				}
 			})
@@ -821,8 +602,8 @@ public class Twisty extends Activity {
 					// This makes op_save() fail.
 					dialog_message.path = "";
 					// Wake up the ZMachine thread again
-					synchronized (screen) {
-						screen.notify();
+					synchronized (mainWin) {
+						mainWin.notify();
 					}
 				}
 			})
@@ -851,8 +632,8 @@ public class Twisty extends Activity {
 					dismissDialog(DIALOG_ENTER_RESTOREFILE);
 					// Return control to the z-machine thread
 					dialog_message.path = savefile_path;
-					synchronized (screen) {
-						screen.notify();
+					synchronized (mainWin) {  // TODO:  should sync around game-thread!
+						mainWin.notify();
 					}
 				}
 			});
@@ -862,8 +643,8 @@ public class Twisty extends Activity {
 					dismissDialog(DIALOG_ENTER_RESTOREFILE);
 					// Return control to the z-machine thread
 					dialog_message.path = "";
-					synchronized (screen) {
-						screen.notify();
+					synchronized (mainWin) {  // TODO: should sync around game-thread!
+						mainWin.notify();
 					}
 				}
 			});
@@ -896,8 +677,8 @@ public class Twisty extends Activity {
 					// A path of "" makes op_save() fail.
 					dialog_message.path = "";
 					// Wake up the ZMachine thread again
-					synchronized (screen) {
-						screen.notify();
+					synchronized (mainWin) {  // TODO: should sync around game-thread!
+						mainWin.notify();
 					}
 				}
 			})
@@ -949,28 +730,6 @@ public class Twisty extends Activity {
 
 	@Override
 	protected void onSaveInstanceState(Bundle bundle) {
-		// Save zmachine state, if any
-		if (zm != null && runningProgram != null && zm.pauseZM()) {
-			if (runningProgram instanceof String) {
-				// running a game file
-				bundle.putString(RUNNING_FILE, (String) runningProgram);
-			} else if (runningProgram instanceof Integer) {
-				// running a resource
-				bundle.putInt(RUNNING_RESOURCE, ((Integer) runningProgram).intValue());
-			}
-			// TODO(marius): Context.openFileOutput() or byte array in bundle
-			// FileOutputStream fos = openFileOutput("frozen", 0);
-			Log.i(TAG, "Saving zm state to memory");
-			ZState zs = new ZState(zm);
-			byte[] result = zs.mem_save(zm.pc);
-			if (result == null) {
-				Log.e(TAG, "Saving zm state failed");
-			} else {
-				Log.i(TAG, "Saving zm state done: result = " + result.toString() + ", size = " + result.length);
-				bundle.putByteArray(FROZEN_GAME, result);
-			}
-			zm.resumeZM();
-		}
 		// Hopefully this will save all the view states:
 		super.onSaveInstanceState(bundle);
 	}
@@ -978,36 +737,7 @@ public class Twisty extends Activity {
 	private boolean unfreezeZM(Bundle icicle) {
 		if (icicle == null)
 			return false;
-		String filename = icicle.getString(RUNNING_FILE);
-		int rsrc = icicle.getInt(RUNNING_RESOURCE, -1);
-		final byte[] frozen_game = icicle.getByteArray(FROZEN_GAME);
-		if (frozen_game == null)
-			return false;
-		Log.i(TAG, "unfreezing running game");
-		preStartZM = new Runnable() {
-			public void run() {
-				Log.i(TAG, "unfreeze: restoring");
-				ZState zs = new ZState(zm);
-				if (zs.restore_from_mem(frozen_game)) {
-					zm.restore(zs);
-					Log.i(TAG, "unfreeze: successful");
-				} else {
-					Log.w(TAG, "unfreeze: restore failed");
-					zm = null;
-					setupWelcomeMessage();
-				}
-			}
-		};
-		boolean result = false;
-		if (rsrc != -1) {
-			startzm(rsrc);
-			result = true;
-		} else if (filename != null){
-			startzm(filename);
-			result = true;
-		}
-		preStartZM = null;
 		Log.i(TAG, "unfreeze: finished");
-		return result;
+		return true;
 	}
 }
