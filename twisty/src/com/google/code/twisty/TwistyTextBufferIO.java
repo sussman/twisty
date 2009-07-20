@@ -1,4 +1,4 @@
-package org.brickshadow.modeltest;
+package com.google.code.twisty;
 
 
 import org.brickshadow.roboglk.window.RoboTextBufferWindow;
