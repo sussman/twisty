@@ -57,10 +57,11 @@ static int str_len(char *s1);
 
 __inline__ static void verb_help(void);
 static void verb_jump(void);
-static void verb_yada(void);
+static void verb_yada(int newline);
 static void verb_quote(void);
 static void verb_move(void);
 static void verb_quit(void);
+static void verb_spam(void);
 #ifndef ANDROID
 static void verb_script(void);
 static void verb_unscript(void);
@@ -206,13 +207,16 @@ void glk_main(void)
             verb_jump();
         }
         else if (str_eq(cmd, "yada")) {
-            verb_yada();
+            verb_yada(TRUE);
         }
         else if (str_eq(cmd, "quote")) {
             verb_quote();
         }
         else if (str_eq(cmd, "quit")) {
             verb_quit();
+        }
+        else if (str_eq(cmd, "spam")) {
+            verb_spam();
         }
 #ifndef ANDROID
         else if (str_eq(cmd, "save")) {
@@ -324,6 +328,7 @@ static void verb_help(void)
     glk_put_string("HELP: Display this list.\n");
     glk_put_string("JUMP: A verb which just prints some text.\n");
     glk_put_string("YADA: A verb which prints a very long stream of text.\n");
+    glk_put_string("SPAM: A verb which prints a very very long stream of text.\n");
     glk_put_string("MOVE: A verb which prints some text, and also changes the status line display.\n");
     glk_put_string("QUOTE: A verb which displays a block quote in a temporary third window.\n");
     glk_put_string("SCRIPT: Turn on transcripting, so that output will be echoed to a text file.\n");
@@ -338,7 +343,7 @@ static void verb_jump(void)
     glk_put_string("You jump on the fruit, spotlessly.\n");
 }
 
-static void verb_yada(void)
+static void verb_yada(int newline)
 {
     /* This is a goofy (and overly ornate) way to print a long paragraph. 
         It just shows off line wrapping in the Glk implementation. */
@@ -386,8 +391,17 @@ static void verb_yada(void)
             first = TRUE;
         }
     }
-    
-    glk_put_char('\n');
+
+    if (newline) {
+        glk_put_char('\n');
+    }
+}
+
+static void verb_spam(void) {
+    verb_yada(FALSE);
+    verb_yada(FALSE);
+    verb_yada(FALSE);
+    verb_yada(TRUE);
 }
 
 static void verb_quote(void)
@@ -399,7 +413,7 @@ static void verb_quote(void)
         can't be open. But better safe, etc. */
     if (!quotewin) {
         /* A five-line window above the main window, fixed size. */
-        quotewin = glk_window_open(mainwin, winmethod_Above | winmethod_Fixed, 
+        quotewin = glk_window_open(mainwin, winmethod_Above | winmethod_Fixed,
             5, wintype_TextBuffer, 0);
         if (!quotewin) {
             /* It's possible the quotewin couldn't be opened. In that
