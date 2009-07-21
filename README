@@ -46,10 +46,18 @@ allows us our pick of C interpreters.
 Redistribution and Licensing
 -----------------------------
 
-Twisty is open source software, distributed under the GPL v3 license.
-For details on Licensing, see the LICENSE file.
+Twisty is open source software, and is distributed under the GPL v3
+license.  It depends heavily on the GlkJNI project, which is also
+under GPL v3.  It also depends on 'nitfol', a z-machine interpreter
+under the GPL v2.
 
-Patches are welcome!
+Three free, classic games are packaged with the application;  for
+details on their licensing, see the LICENSE file.  (This doesn't
+violate the GPL as far as we know, as these games aren't linked into
+the code, nor are they necessary fo the code to build or run.  They
+are merely interpreted and provided for convenience to users.)
+
+Patches are welcome!  Please mail us at twisty-dev@googlegroups.com.
 
 
 Insalling the .apk
@@ -117,7 +125,7 @@ shared library:
    $ make APP=twisty
 
 After compilation, the final libtwistyterps.so will be automatically
-copied to the proper location within $TWISTY/twisty/ .
+copied to the proper location within $TWISTY.
 
 
 D.  Building the Java code
