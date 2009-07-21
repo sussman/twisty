@@ -108,7 +108,7 @@ public class Twisty extends Activity {
 	// The main GLK UI machinery.
 	private Glk glk;
 	private TwistyTextBufferIO mainWin;
-	private TextBufferView tv;
+	private TextBufferView tv, tv2;
 	private Thread terpThread;
 	
 	// Passed down to ZState, so ZMachine thread can send Messages back to this thread
@@ -143,9 +143,6 @@ public class Twisty extends Activity {
 		setContentView(tv);
 		// TODO:  set font to fixed-width.
 		printWelcomeMessage();
-		
-		// The GLK object for I/O between Android UI and our C library
-		glk = new TwistyGlk(this, tv);
 		
 		/*  TODO: Code for various dialog-prompts.  Re-enable someday. 
 		 * 
@@ -351,6 +348,12 @@ public class Twisty extends Activity {
 		// TODO:  this is probably where we'd launch a game thread.
 		// For now, we don't pay attention to the incoming stream, we just
 		// dumbly fire up the 'model' glk program in our C library.
+		tv2 = new TextBufferView(this);
+		tv2.setFocusable(true);
+		setContentView(tv2);
+		
+		// The GLK object for I/O between Android UI and our C library
+		glk = new TwistyGlk(this, tv2);
 		
 		terpThread = new Thread(new Runnable() {
 	           @Override
