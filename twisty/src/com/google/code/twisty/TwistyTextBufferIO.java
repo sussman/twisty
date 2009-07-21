@@ -5,6 +5,7 @@ import org.brickshadow.roboglk.GlkStyle;
 import org.brickshadow.roboglk.window.StandardTextBufferIO;
 import org.brickshadow.roboglk.window.TextBufferView;
 
+import android.os.Handler;
 import android.text.Spannable;
 
 
@@ -13,9 +14,23 @@ public class TwistyTextBufferIO extends StandardTextBufferIO {
 	private int currentStyle = GlkStyle.Normal;
 	private boolean isReverse = false;
 	
-	public TwistyTextBufferIO(TextBufferView tv) {
+	public TwistyTextBufferIO(final TextBufferView tv) {
 		super(tv);
 		
+		Handler handler = tv.getHandler();
+		if (handler == null) {
+			initView();
+		} else {
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					initView();
+				}
+			});
+		}
+	}
+	
+	private void initView() {
 		// TODO: read these from a resource
 		tv.setBackgroundColor(0xFFFFFFFF);
 		tv.setTextColor(0xFF000000);

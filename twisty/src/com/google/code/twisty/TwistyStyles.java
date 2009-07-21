@@ -21,14 +21,10 @@ public class TwistyStyles {
 	static {
 		styles = new TwistyStyle[MAX_STYLE + 1];
 		
-		/* For now, all styles are black on white. */
+		/* For now, all styles are black on white,
+		 * Courier 12 point normal. */
 		int black = 0xFF000000;
 		int white = 0xFFFFFFFF;
-		
-		/*
-		 * TODO: read this from a resource
-		 *       For now every style is the same.
-		 */
 		
 		for (int style = 0; style <= MAX_STYLE; style++) {
 			styles[style] = new TwistyStyle(
