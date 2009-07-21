@@ -46,6 +46,19 @@ static int current_room;
 /* A flag indicating whether you should look around. */
 static int need_look; 
 
+/* Resets static variables. */
+void glk_shutdown(void)
+{
+    mainwin = NULL;
+    statuswin = NULL;
+    quotewin = NULL;
+    scriptref = NULL;
+    scriptstr = NULL;
+    current_room = 0;
+    need_look = 0;
+}
+
+
 /* Forward declarations */
 void glk_main(void);
 
