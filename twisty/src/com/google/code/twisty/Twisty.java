@@ -15,6 +15,14 @@
 
 package com.google.code.twisty;
 
+// Note to developers: this Android activity is essentially a high-level consumer
+// of the 'glkjni' project, which maps the classic GLK I/O API (used by game-
+// interpreters to do UI) to JNI.  This allows us to run well-known C interpreters 
+// as a native C library for maximum performance.  In particular, to build
+// this project you'll need to get a copy of the glkjni code and have Eclipse link
+// the 'roboglk' directory into your twisty project.  See the README file for a full
+// explanation of how to build both the C and java code in this project.
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -97,9 +105,11 @@ public class Twisty extends Activity {
 	public static final int PROMPT_FOR_RESTOREFILE = 2;
 	public static final int PROMPT_FOR_ZGAME = 3;
 	
+	// The main GLK UI machinery.
 	private Glk glk;
 	private TwistyTextBufferIO mainWin;
 	private TextBufferView tv;
+	private Thread terpThread;
 	
 	// Passed down to ZState, so ZMachine thread can send Messages back to this thread
 	private Handler dialog_handler;
@@ -115,7 +125,7 @@ public class Twisty extends Activity {
 	private Runnable preStartZM;
 
 	/** The native C library which contains the interpreter making Glk calls. 
-	 *  To build this library, see the README file. **/
+	    To build this library, see the README file. */
 	 static {
 	        System.loadLibrary("twistyterps");
 	 }
@@ -125,16 +135,17 @@ public class Twisty extends Activity {
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-
+		
 		// The main 'welcome screen' window from which games are launched.
 		tv = new TextBufferView(this);
 		mainWin = new TwistyTextBufferIO(tv);
 		tv.setFocusable(true);
 		setContentView(tv);
+		// TODO:  set font to fixed-width.
 		printWelcomeMessage();
 		
-		// TODO:  when we fire off a game, we spawn a new thread and
-		//        create *new* TextBufferView and glk objects, the way ModelTest does.
+		// The GLK object for I/O between Android UI and our C library
+		glk = new TwistyGlk(this, tv);
 		
 		/*  TODO: Code for various dialog-prompts.  Re-enable someday. 
 		 * 
@@ -165,9 +176,7 @@ public class Twisty extends Activity {
 		} catch (PackageManager.NameNotFoundException e) {
 			Log.e(TAG, "Couldn't determine Twisty version.");
 		}
-			
-		// TODO:  clear the screen?
-		// TODO:  set font-style to fixed, to set 'mood' for old-school text adventures
+
 		StringBuffer battstate = new StringBuffer();
 		appendBatteryState(battstate);
 		
@@ -175,7 +184,7 @@ public class Twisty extends Activity {
 		mainWin.doPrint("(This is open source software;\nsee http://code.google.com/p/twisty)\n\n\n");
 		mainWin.doPrint("You are holding a modern-looking phone which can be typed upon.  ");
 		mainWin.doPrint(battstate.toString() + "  ");
-		mainWin.doPrint("You feel an inexplicable urge to press the phone's \"menu\" key.");
+		mainWin.doPrint("You feel an inexplicable urge to press the phone's \"menu\" key.\n\n");
 	}
 	
 	/* TODO:  rewrite this someday
@@ -306,7 +315,7 @@ public class Twisty extends Activity {
 	}
 
 	/**
-	 * Start a zmachine, loading the program from the given file
+	 * Start an interpreter, loading the program from the given file
 	 * @param filename Name of file to load
 	 */
 	void startzm(String filename) {
@@ -320,7 +329,7 @@ public class Twisty extends Activity {
 	}
 
 	/**
-	 * Start a zmachine, loading the program from the given resource
+	 * Start an interpreter, loading the program from the given resource
 	 * @param resource Identifier of resource to load
 	 */
 	void startzm(int resource) {
@@ -334,17 +343,33 @@ public class Twisty extends Activity {
 		startzm(r.openRawResource(resource));
 	}
 
-	/** Convenience helper to set visibility of any view */
-	void setViewVisibility(int id, int vis) {
-		findViewById(id).setVisibility(vis);
-	}
-
 	/**
 	 * Start a zmachine, loading the program from the given stream
 	 * @param zstream Stream containing the program
 	 */
 	void startzm(InputStream zstream) {
 		// TODO:  this is probably where we'd launch a game thread.
+		// For now, we don't pay attention to the incoming stream, we just
+		// dumbly fire up the 'model' glk program in our C library.
+		
+		terpThread = new Thread(new Runnable() {
+	           @Override
+	            public void run() {
+	               String[] args = new String[] {"twistyterp"};
+	               if (GlkFactory.startup(glk, args)) {
+	                   GlkFactory.run();
+	               }
+	               Log.i("twistyterp", "The interpreter has finished");
+	               finish();
+	            } 
+	        });
+	        terpThread.start();
+	}
+	
+	
+	/** Convenience helper to set visibility of any view */
+	void setViewVisibility(int id, int vis) {
+		findViewById(id).setVisibility(vis);
 	}
 
 	private void prepareToStartZM() {
