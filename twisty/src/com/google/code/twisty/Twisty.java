@@ -96,12 +96,10 @@ public class Twisty extends Activity {
 	public static final int PROMPT_FOR_SAVEFILE = 1;
 	public static final int PROMPT_FOR_RESTOREFILE = 2;
 	public static final int PROMPT_FOR_ZGAME = 3;
-
-	public static final int MAIN_WINDOW_ID = 1729;
 	
 	private Glk glk;
+	private TwistyTextBufferIO mainWin;
 	private TextBufferView tv;
-	private RoboTextBufferWindow mainWin;
 	
 	private TwistyTextBufferIO startScreen;
 	
@@ -132,16 +130,10 @@ public class Twisty extends Activity {
 
 		// The main 'welcome screen' window from which games are launched.
 		tv = new TextBufferView(this);
+		mainWin = new TwistyTextBufferIO(tv);
 		final GlkEventQueue eventQueue = null;
-		
-		startScreen = new TwistyTextBufferIO(tv);
-		
-		mainWin = new RoboTextBufferWindow(this, eventQueue,
-					startScreen, MAIN_WINDOW_ID);
-		
 		tv.setFocusable(true);
 		setContentView(tv);
-		
 		printWelcomeMessage();
 		
 		// TODO:  when we fire off a game, we spawn a new thread and
@@ -179,13 +171,16 @@ public class Twisty extends Activity {
 			
 		// TODO:  clear the screen?
 		// TODO:  set font-style to fixed, to set 'mood' for old-school text adventures
-		
-		startScreen.doReverseVideo(true);
-		startScreen.doPrint("Twisty " + pkginfo.versionName + ", (C) Google Inc.");
-		startScreen.doReverseVideo(false);
-		startScreen.doPrint("\n\nYou are holding a modern-looking phone which can be typed upon.");		
-		// TODO:  call appendBatteryState() below, beacuse it's cute.
-		startScreen.doPrint(" You feel an inexplicable urge to press the phone's \"menu\" key.");
+		StringBuffer battstate = new StringBuffer();
+		appendBatteryState(battstate);
+
+		mainWin.doReverseVideo(true);
+		mainWin.doPrint("Twisty " + pkginfo.versionName + ", (C) Google Inc.");
+		mainWin.doReverseVideo(false);
+		mainWin.doPrint("\n\n(This is open source software;\nsee http://code.google.com/p/twisty)\n\n\n");
+		mainWin.doPrint("You are holding a modern-looking phone which can be typed upon.  ");
+		mainWin.doPrint(battstate.toString() + "  ");
+		mainWin.doPrint("You feel an inexplicable urge to press the phone's \"menu\" key.");
 	}
 	
 	/* TODO:  rewrite this someday
