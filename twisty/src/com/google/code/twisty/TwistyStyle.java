@@ -5,42 +5,43 @@ import android.text.style.BackgroundColorSpan;
 import android.text.style.TextAppearanceSpan;
 
 public class TwistyStyle {
-	private final TextAppearanceSpan normalText;
-	private final TextAppearanceSpan reverseText;
-	private final BackgroundColorSpan normalBg;
-	private final BackgroundColorSpan reverseBg;
+	private final String family;
+	private final int style;
+	private final int size;
+	private final int foreColor;
+	private final int backColor;
 	
-	/**
-	 * Creates a new {@code TwistyStyle}
-	 * 
-	 * @param normal
-	 *           the {@code TextAppearanceSpan} for normal printing
-	 * @param normalBg
-	 *           the {@code ColorStateList} for the normal background
-	 * @param reverseBg
-	 *           the {@code ColorStateList} for reverse background
-	 */
-	public TwistyStyle(TextAppearanceSpan normal,
-			int normalBgColor, int reverseBgColor) {
+	private ColorStateList foreState;
+	private ColorStateList backState;
+
+	// TODO: ColorStateList for hyperlinks
+	
+	public TwistyStyle(String family, int style, int size,
+			int foreColor, int backColor) {
+		this.family = family;
+		this.style = style;
+		this.size = size;
+		this.foreColor = foreColor;
+		this.backColor = backColor;
 		
-		normalText = normal;
-		normalBg = new BackgroundColorSpan(normalBgColor);
-		reverseBg = new BackgroundColorSpan(reverseBgColor);
-		reverseText = new TextAppearanceSpan(
-				normal.getFamily(),
-				normal.getTextStyle(),
-				normal.getTextSize(),
-				ColorStateList.valueOf(normalBgColor),
-				ColorStateList.valueOf(normalBgColor));
+		foreState = ColorStateList.valueOf(foreColor);
+		backState = ColorStateList.valueOf(backColor);
 	}
 	
 	// TODO: A constructor that reads the data from a resource
 	
 	public TextAppearanceSpan getStyle(boolean reverse) {
-		return (reverse ? reverseText : normalText);
+		return new TextAppearanceSpan(
+				family,
+				style,
+				size,
+				(reverse ? backState : foreState),
+				foreState);
 	}
 	
 	public BackgroundColorSpan getBg(boolean reverse) {
-		return (reverse ? reverseBg : normalBg);
+		return new BackgroundColorSpan(
+				(reverse ? foreColor : backColor)
+				);
 	}
 }

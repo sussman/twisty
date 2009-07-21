@@ -10,7 +10,7 @@ import android.text.Spannable;
 
 public class TwistyTextBufferIO extends StandardTextBufferIO {
 
-	private int currentStyle = 0xFFFFFFFF;
+	private int currentStyle = GlkStyle.Normal;
 	private boolean isReverse = false;
 	
 	public TwistyTextBufferIO(TextBufferView tv) {
@@ -20,7 +20,7 @@ public class TwistyTextBufferIO extends StandardTextBufferIO {
 		tv.setBackgroundColor(0xFFFFFFFF);
 		tv.setTextColor(0xFF000000);
 		
-		doStyle(GlkStyle.Normal);
+		applyStyle();
 	}
 
 	@Override
@@ -29,23 +29,20 @@ public class TwistyTextBufferIO extends StandardTextBufferIO {
 			return;
 		}
 		
-		applyStyle(style);
 		currentStyle = style;
+		applyStyle();
 	}
 	
-	private void applyStyle(int style) {
+	private void applyStyle() {
 		Spannable text = (Spannable) tv.getText();
 		int len = text.length();
-		TwistyStyle spans = TwistyStyles.getStyleSpan(style);
+		TwistyStyle spans = TwistyStyles.getStyleSpan(currentStyle);
 		
 		text.setSpan(spans.getStyle(isReverse),
-				len, len, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+				len, len, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
 		
-		/* TODO: don't apply this span if isReverse == false
-		 *       and the background color == window background
-		 */
 		text.setSpan(spans.getBg(isReverse),
-				len, len, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+				len, len, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
 	}
 	
 	public void doReverseVideo(boolean reverse) {
@@ -53,7 +50,7 @@ public class TwistyTextBufferIO extends StandardTextBufferIO {
 			return;
 		}
 		isReverse = reverse;
-		applyStyle(currentStyle);
+		applyStyle();
 	}
 
 }

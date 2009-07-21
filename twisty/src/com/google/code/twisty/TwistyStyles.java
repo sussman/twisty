@@ -5,6 +5,7 @@ import org.brickshadow.roboglk.GlkStyle;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.text.style.TextAppearanceSpan;
+import android.util.Log;
 
 /**
  * A utility class that maps Glk styles to Twisty styles.
@@ -24,9 +25,6 @@ public class TwistyStyles {
 		int black = 0xFF000000;
 		int white = 0xFFFFFFFF;
 		
-		ColorStateList foreColor =
-			ColorStateList.valueOf(black);
-		
 		/*
 		 * TODO: read this from a resource
 		 *       For now every style is the same.
@@ -34,19 +32,16 @@ public class TwistyStyles {
 		
 		for (int style = 0; style <= MAX_STYLE; style++) {
 			styles[style] = new TwistyStyle(
-				new TextAppearanceSpan(
 						"Courier",
 						Typeface.NORMAL,
 						12,
-						foreColor,
-						foreColor),
-				white,
-				black);
+						black,
+						white);
 		}
 	}
 
 	public static TwistyStyle getStyleSpan(int style) {
-		if (style > MAX_STYLE) {
+		if (style > MAX_STYLE || style < 0) {
 			return styles[GlkStyle.Normal];
 		}
 		return styles[style];
