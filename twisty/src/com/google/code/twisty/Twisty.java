@@ -168,10 +168,13 @@ public class Twisty extends Activity {
 			
 		// TODO:  clear the screen?
 		// TODO:  set font-style to fixed, to set 'mood' for old-school text adventures
+		StringBuffer battstate = new StringBuffer();
+		appendBatteryState(battstate);
 		
 		mainWin.doPrint("Twisty " + pkginfo.versionName + ", (C) Google Inc.\n\n");
-		mainWin.doPrint("You are holding a modern-looking phone which can be typed upon.  ");		
-		// TODO:  call appendBatteryState() below, beacuse it's cute.
+		mainWin.doPrint("(This is open source software;\nsee http://code.google.com/p/twisty)\n\n\n");
+		mainWin.doPrint("You are holding a modern-looking phone which can be typed upon.  ");
+		mainWin.doPrint(battstate.toString() + "  ");
 		mainWin.doPrint("You feel an inexplicable urge to press the phone's \"menu\" key.");
 	}
 	
