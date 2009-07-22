@@ -37,6 +37,7 @@ import com.google.code.twisty.TwistyMessage;
 import org.brickshadow.roboglk.Glk;
 import org.brickshadow.roboglk.GlkEventQueue;
 import org.brickshadow.roboglk.GlkFactory;
+import org.brickshadow.roboglk.GlkStyle;
 import org.brickshadow.roboglk.window.TextBufferView;
 import org.brickshadow.roboglk.window.RoboTextBufferWindow;
 import org.brickshadow.roboglk.window.StandardTextBufferIO;
@@ -180,6 +181,8 @@ public class Twisty extends Activity {
 		StringBuffer battstate = new StringBuffer();
 		appendBatteryState(battstate);
 
+		mainWin.doStyle(GlkStyle.Preformatted);
+		
 		mainWin.doReverseVideo(true);
 		mainWin.doPrint("Twisty " + pkginfo.versionName + ", (C) Google Inc.");
 		mainWin.doReverseVideo(false);

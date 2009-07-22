@@ -21,14 +21,15 @@ public class TwistyStyles {
 	static {
 		styles = new TwistyStyle[MAX_STYLE + 1];
 		
-		/* For now, all styles are black on white,
-		 * Courier 12 point normal. */
+		/* For now, all styles are black on white. */
 		int black = 0xFF000000;
 		int white = 0xFFFFFFFF;
 		
 		for (int style = 0; style <= MAX_STYLE; style++) {
+			String family =
+				(style == GlkStyle.Preformatted ? "Courier" : "Helvetica");
 			styles[style] = new TwistyStyle(
-						"Courier",
+						family,
 						Typeface.NORMAL,
 						12,
 						black,

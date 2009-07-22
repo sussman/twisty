@@ -125,7 +125,7 @@ public class TwistyGlk implements Glk {
         mainWin = new RoboTextBufferWindow(
                 activity,
                 eventQueue,
-                new StandardTextBufferIO(tv),
+                new TwistyTextBufferIO(tv),
                 id);
         wins[0] = mainWin;
     }

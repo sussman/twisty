@@ -36,7 +36,7 @@ public class TwistyStyle {
 				style,
 				size,
 				(reverse ? backState : foreState),
-				foreState);
+				null);
 	}
 	
 	public BackgroundColorSpan getBg(boolean reverse) {
