@@ -26,6 +26,7 @@ package com.google.code.twisty;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import com.google.code.twisty.TwistyMessage;
+
 
 import org.brickshadow.roboglk.Glk;
 import org.brickshadow.roboglk.GlkEventQueue;
@@ -112,6 +114,9 @@ public class Twisty extends Activity {
 	private TextBufferView tv, tv2;
 	private Thread terpThread;
 	
+	// The curses.z5 file path
+	File cursesFile;
+	
 	private TwistyTextBufferIO startScreen;
 	
 	// Passed down to ZState, so ZMachine thread can send Messages back to this thread
@@ -138,6 +143,10 @@ public class Twisty extends Activity {
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		
+		/* TODO: this is very simple and just throws an exception
+		 *       if curses.z5 can't be copied to the sdcard. */ 
+		ensureStoryFile();
 		
 		// The main 'welcome screen' window from which games are launched.
 		tv = new TextBufferView(this);
@@ -167,6 +176,50 @@ public class Twisty extends Activity {
 				}
 			} 
 		};*/
+	}
+	
+	/*
+	 * Copies curses.z5 to sdcard so it can be accessed by a glk file
+	 * stream.
+	 */
+	private void ensureStoryFile() {
+		String storagestate = Environment.getExternalStorageState();
+    	if (!storagestate.equals(Environment.MEDIA_MOUNTED)) {
+    		throw new RuntimeException("no writable media");
+    	}
+    	String sdpath = Environment.getExternalStorageDirectory().getPath();
+		File savedir = new File(sdpath + "/twisty");
+		if (!savedir.exists()) {
+			savedir.mkdirs();
+		}
+		else if (!savedir.isDirectory()) {
+			throw new RuntimeException("output dir is a file");
+		}
+		cursesFile = new File(savedir, "curses.z5");
+		if (!cursesFile.exists()) {
+			Resources r = new Resources(getAssets(),
+					new DisplayMetrics(), null);
+			InputStream istream = r.openRawResource(R.raw.curses);
+			
+			// quick-n-dirty file copy
+			FileOutputStream ostream = null;
+			byte[] buffer = new byte[4096];
+			int bytesRead;
+			try {
+				ostream = new FileOutputStream(cursesFile);
+				while ((bytesRead = istream.read(buffer)) != -1) {
+					ostream.write(buffer, 0, bytesRead);
+				}
+			} catch (IOException e) {
+				throw new RuntimeException("could not copy story");
+			} finally {
+				if (ostream != null) {
+					try {
+						ostream.close();
+					} catch (IOException e) {}
+				}
+			}
+		}
 	}
 
 	private void printWelcomeMessage() {
@@ -355,7 +408,8 @@ public class Twisty extends Activity {
 	void startzm(InputStream zstream) {
 		// TODO:  this is probably where we'd launch a game thread.
 		// For now, we don't pay attention to the incoming stream, we just
-		// dumbly fire up the 'model' glk program in our C library.
+		// dumbly fire up the 'nitfol' glk program in our C library using
+		// curses.z5.
 		tv2 = new TextBufferView(this);
 		tv2.setFocusable(true);
 		setContentView(tv2);
@@ -366,7 +420,11 @@ public class Twisty extends Activity {
 		terpThread = new Thread(new Runnable() {
 	           @Override
 	            public void run() {
-	               String[] args = new String[] {"twistyterp"};
+	        	   // When twistyterps supports multiple interpreters,
+	        	   // it will be important that the first arg to startup
+	        	   // be the correct interpreter name.
+	               String[] args = new String[] {"nitfol",
+	            		   cursesFile.getAbsolutePath()};
 	               if (GlkFactory.startup(glk, args)) {
 	                   GlkFactory.run();
 	               }

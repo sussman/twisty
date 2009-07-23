@@ -110,6 +110,7 @@ $GLKJNI, you need to make three symbolic links from your $NDK area:
 
   $NDK/sources/glkjni      --> $GLKJNI/glkjni
   $NDK/sources/twistyterps --> $TWISTY/twistyterps
+  $NDK/sources/nitfol      --> $TWISTY/twistyterps/nitfol
   $NDK/apps/twisty         --> $TWISTY/twisty
 
 This allows NDK to find the C code it needs and also the Eclipse
