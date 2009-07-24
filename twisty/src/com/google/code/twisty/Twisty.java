@@ -152,7 +152,7 @@ public class Twisty extends Activity {
 		tv = new TextBufferView(this);
 		mainWin = new TwistyTextBufferIO(tv);
 		final GlkEventQueue eventQueue = null;
-		tv.setFocusable(true);
+		tv.setFocusableInTouchMode(true);
 		setContentView(tv);
 		// TODO:  set font to fixed-width.
 		printWelcomeMessage();
@@ -411,8 +411,9 @@ public class Twisty extends Activity {
 		// dumbly fire up the 'nitfol' glk program in our C library using
 		// curses.z5.
 		tv2 = new TextBufferView(this);
-		tv2.setFocusable(true);
+		tv2.setFocusableInTouchMode(true);
 		setContentView(tv2);
+		tv2.requestFocus();
 		
 		// The GLK object for I/O between Android UI and our C library
 		glk = new TwistyGlk(this, tv2);

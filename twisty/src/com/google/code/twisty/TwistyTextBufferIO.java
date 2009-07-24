@@ -22,7 +22,6 @@ import org.brickshadow.roboglk.window.TextBufferView;
 
 import android.os.Handler;
 import android.text.Spannable;
-import android.util.TypedValue;
 
 
 public class TwistyTextBufferIO extends StandardTextBufferIO {
@@ -57,6 +56,8 @@ public class TwistyTextBufferIO extends StandardTextBufferIO {
 		tv.setTextSize(style.getSize());
 		
 		applyStyle();
+		
+		tv.requestFocus();
 	}
 
 	@Override
