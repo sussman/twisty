@@ -1,0 +1,52 @@
+                      Twisty Licensing & Distribution
+                      ===============================
+
+
+ * Twisty's own source code is distributed under an GPL 3 License
+   (printed in the first section below.)  Notices at the top of each
+   twisty source file announce this license.
+
+ * The GLK-JNI layer is also under GPL 3.
+
+ * The Nitfol z-machine interpreter is distributed under a GPL 3
+   license.  (It's actually GPL v2, but allows distribution under
+   "future versions" of the license.)
+
+
+---------------------------------------------------------------------------
+
+              Licenses on Bundled Games
+
+
+* 'Adventure' is a re-creation of the very first text adventure game
+  ever.  It was originally written by William Crowther and Donald
+  Woods for a mainframe, but later recreated from scratch (by Graham
+  Nelson) to run on the z-machine.
+
+  The source and binary are freely distributed around the internet,
+  with no license or distribution terms attached.  The Inform 6 source
+  code can be fetched from
+
+    http://www.ifarchive.org/if-archive/games/source/inform/Advent.inf
+
+
+* 'Anchorhead' is a Lovecraftian-style horror game by Michael
+  S. Gentry, and a finalist and winner in the 1998 Xyzzy Awards.
+  According to the 'help' message within the game, the game is
+  "absolutely freeware".
+
+
+* 'Curses' is a game by Graham Nelson <graham@gnelson.demon.co.uk>,
+   and is freely distributable by anyone, provided there's no profit involved.
+
+   The official blurb from Graham is:
+
+      "Curses" is not shareware, it's free: I wrote it for fun.  It
+       may be freely distributed provided you aren't making a profit
+       on the deal; I have allowed several magazines to put it on
+       cover discs, so feel free to get in touch if you have that in
+       mind.  But it _is_ copyright, and the source code is _not_
+       public.  Moreover, the secret debugging commands may only be
+       divulged to a druid of good standing.
+
+      --from http://ifarchive.smallwhitehouse.org/if-archive/games/zcode/curses_rel16.txt
