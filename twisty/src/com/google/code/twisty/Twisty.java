@@ -426,6 +426,7 @@ public class Twisty extends Activity {
 	        	   // be the correct interpreter name.
 	               String[] args = new String[] {"nitfol",
 	            		   cursesFile.getAbsolutePath()};
+	               GlkFactory.shutdown();
 	               if (GlkFactory.startup(glk, args)) {
 	                   GlkFactory.run();
 	               }

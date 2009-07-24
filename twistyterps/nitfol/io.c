@@ -1544,3 +1544,55 @@ void zwin_init(int number, glui32 wintype,
   game_windows[number].win = glk_window_open(
 }
 */
+
+void nitfol_io_c_shutdown(void)
+{
+	int i, j;
+	colorstyle defaultstyle;
+	struct z_window *zwin;
+
+	defaultstyle.fore = 1;
+	defaultstyle.back = 1;
+	defaultstyle.style = 0;
+
+	for (i = 0; i < num_z_windows; i++) {
+		zwin = &game_windows[i];
+		zwin->actual = defaultstyle;
+		zwin->biggest_height = 0;
+		zwin->buffer_size = 0;
+		if (zwin->color_buffer) {
+			n_free(zwin->color_buffer);
+			zwin->color_buffer = NULL;
+		}
+		zwin->curr_offset = 0;
+		zwin->current = defaultstyle;
+		zwin->defined = FALSE;
+		zwin->dirty = FALSE;
+		zwin->draw_callback = NULL;
+		zwin->glk_input_pending = FALSE;
+		zwin->height = 0;
+		for (j = 0; j < 12; j++) {
+			zwin->images[i].height = 0;
+			zwin->images[i].image_num = 0;
+			zwin->images[i].width = 0;
+			zwin->images[i].x = 0;
+			zwin->images[i].y = 0;
+		}
+		zwin->last_height = 0;
+		zwin->max_offset = 0;
+		zwin->method = 0;
+		zwin->mouse_callback = NULL;
+		zwin->pending_input_length = 0;
+		zwin->pending_input_type = 0;
+		zwin->str = NULL;
+		if (zwin->text_buffer) {
+			n_free(zwin->text_buffer);
+			zwin->text_buffer = NULL;
+		}
+		zwin->transcript = NULL;
+		zwin->width = 0;
+		zwin->win = NULL;
+		zwin->wintype = 0;
+		zwin->x1 = zwin->x2 = zwin->y1 = zwin->y2 = 0;
+	}
+}

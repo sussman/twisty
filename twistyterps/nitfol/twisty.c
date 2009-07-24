@@ -8,6 +8,7 @@
 void nitfol_z_io_c_shutdown(void);
 void nitfol_op_v6_c_shutdown(void);
 void nitfol_main_c_shutdown(void);
+void nitfol_io_c_shutdown(void);
 
 /*
  * Resets global/static variables. Some of this may not be needed
@@ -54,6 +55,7 @@ void glk_shutdown() {
 	fgcolortable[0] = -1L;
 	bgcolortable[0] = -1L;
 
+	nitfol_io_c_shutdown();
 	nitfol_z_io_c_shutdown();
 	nitfol_op_v6_c_shutdown();
 	nitfol_main_c_shutdown();
