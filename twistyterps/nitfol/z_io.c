@@ -1130,3 +1130,28 @@ void op_print_unicode(void)
     }
   }
 }
+
+/* Better safe than sorry. */
+void nitfol_z_io_c_shutdown(void)
+{
+	int i;
+
+	lower_win = NULL;
+	upper_win = NULL;
+	current_window = NULL;
+
+	stream2 = NULL;
+	stream4 = NULL;
+	output_stream = 0;
+	for (i = 0; i < 16; i++) {
+		stream3_table_starts[i] = 0;
+		stream3_table_locations[i] = 0;
+	}
+	stream3_nesting_depth = 0;
+
+	font = 1;
+
+	abort_output = FALSE;
+
+	upper_roomname_length = 0;
+}

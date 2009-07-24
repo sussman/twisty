@@ -131,3 +131,9 @@ void glk_main(void)
   init_undo();
   decode();
 }
+
+/* Better safe than sorry. */
+void nitfol_main_c_shutdown(void)
+{
+	savefile = NULL;
+}

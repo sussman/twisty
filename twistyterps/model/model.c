@@ -19,6 +19,8 @@
 #include <android/log.h>
 #endif
 
+#include <stdio.h>
+
 /* We also define our own TRUE and FALSE and NULL. */
 #ifndef TRUE
 #define TRUE 1
@@ -75,6 +77,7 @@ static void verb_quote(void);
 static void verb_move(void);
 static void verb_quit(void);
 static void verb_spam(void);
+static void verb_size(void);
 #ifndef ANDROID
 static void verb_script(void);
 static void verb_unscript(void);
@@ -231,6 +234,9 @@ void glk_main(void)
         else if (str_eq(cmd, "spam")) {
             verb_spam();
         }
+        else if (str_eq(cmd, "size")) {
+            verb_size();
+        }
 #ifndef ANDROID
         else if (str_eq(cmd, "save")) {
             verb_save();
@@ -342,6 +348,7 @@ static void verb_help(void)
     glk_put_string("JUMP: A verb which just prints some text.\n");
     glk_put_string("YADA: A verb which prints a very long stream of text.\n");
     glk_put_string("SPAM: A verb which prints a very very long stream of text.\n");
+    glk_put_string("SIZE: A verb which prints the window size.\n");
     glk_put_string("MOVE: A verb which prints some text, and also changes the status line display.\n");
     glk_put_string("QUOTE: A verb which displays a block quote in a temporary third window.\n");
     glk_put_string("SCRIPT: Turn on transcripting, so that output will be echoed to a text file.\n");
@@ -456,6 +463,23 @@ static void verb_move(void)
     need_look = TRUE;
     
     glk_put_string("You walk for a while.\n");
+}
+
+static void verb_size(void)
+{
+    glui32 wid = 0;
+    glui32 hgt = 0;
+    char str[2];
+
+    glk_window_get_size(mainwin, &wid, &hgt);
+
+    glk_put_string("The width is ");
+    snprintf(str, 2, "%u", wid);
+    glk_put_string(str);
+    glk_put_string("\nThe height is ");
+    snprintf(str, 2, "%u", hgt);
+    glk_put_string(str);
+    glk_put_char('\n');
 }
 
 static void verb_quit(void)

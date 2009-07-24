@@ -343,3 +343,18 @@ void op_erase_picture(void)
 
 }
 
+/* Better safe than sorry */
+void nitfol_op_v6_c_shutdown(void)
+{
+	int i, j;
+
+	lower_win = NULL;
+	LEdestroy(older_pieces);
+	current_window = 0;
+
+	for (i = 0; i < 8; i++) {
+		for (j = 0; j < 16; j++) {
+			window_props[i][j] = 0;
+		}
+	}
+}
