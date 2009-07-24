@@ -106,7 +106,7 @@ The one we care about is 'roboglk', which maps the interfaces to
 Android's UI.
 
 Assuming that these two codebases are installed at $TWISTY and
-$GLKJNI, you need to make three symbolic links from your $NDK area:
+$GLKJNI, you need to make these symbolic links from your $NDK area:
 
   $NDK/sources/glkjni      --> $GLKJNI/glkjni
   $NDK/sources/twistyterps --> $TWISTY/twistyterps

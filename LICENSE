@@ -1,17 +1,21 @@
                       Twisty Licensing & Distribution
                       ===============================
 
+This is free software distributed as a whole under the GNU General
+Public License version 3.  See the COPYING file for the full license.
 
- * Twisty's own source code is distributed under an GPL 3 License
-   (printed in the first section below.)  Notices at the top of each
-   twisty source file announce this license.
+ * The GLK-JNI layer (which is a compilation and link-time dependency
+   for this software) is also under GPL v3.
 
- * The GLK-JNI layer is also under GPL 3.
+ * The Nitfol z-machine interpreter was originally distributed under a
+   GPL v2 license "or later versions", and thus we're distributing it
+   here under version 3.
 
- * The Nitfol z-machine interpreter is distributed under a GPL 3
-   license.  (It's actually GPL v2, but allows distribution under
-   "future versions" of the license.)
-
+ * The bundled games are under their own separate free licenses,
+   listed below.  Note that they're not affected by the GPL, since
+   they are neither compile nor run-time dependencies; Twisty merely
+   'interprets' them as playable games and they're distributed within
+   the package only for users' convenience.
 
 ---------------------------------------------------------------------------
 
