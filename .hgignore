@@ -2,5 +2,4 @@ twisty/libs/armeabi/lib.*
 .*\.class
 twisty/gen/com/google/code/twisty/R\.java
 twisty/\.project
-twisty/default.\properties
 twisty/bin/.*
