@@ -44,6 +44,7 @@ import org.brickshadow.roboglk.window.TextBufferView;
 import org.brickshadow.roboglk.window.RoboTextBufferWindow;
 import org.brickshadow.roboglk.window.StandardTextBufferIO;
 
+import android.R;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -70,8 +71,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Gallery;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.RadioButton;
 import android.widget.TextView;
@@ -117,8 +122,6 @@ public class Twisty extends Activity {
 	// The curses.z5 file path
 	File cursesFile;
 	
-	private TwistyTextBufferIO startScreen;
-	
 	// Passed down to ZState, so ZMachine thread can send Messages back to this thread
 	private Handler dialog_handler;
 	private TwistyMessage dialog_message; // most recent Message received
@@ -147,14 +150,29 @@ public class Twisty extends Activity {
 		/* TODO: this is very simple and just throws an exception
 		 *       if curses.z5 can't be copied to the sdcard. */ 
 		ensureStoryFile();
+
+		// An imageview to show the twisty icon
+		ImageView iv = new ImageView(this);
+		iv.setBackgroundColor(0xffffff);
+		iv.setImageResource(R.drawable.app_icon);
+		iv.setAdjustViewBounds(true);
+		iv.setLayoutParams(new Gallery.LayoutParams(LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT));
 		
 		// The main 'welcome screen' window from which games are launched.
 		tv = new TextBufferView(this);
 		mainWin = new TwistyTextBufferIO(tv);
 		final GlkEventQueue eventQueue = null;
 		tv.setFocusableInTouchMode(true);
-		setContentView(tv);
-		// TODO:  set font to fixed-width.
+		
+		// put it all together
+		LinearLayout ll = new LinearLayout(this);
+		ll.setBackgroundColor(0xffffffff);
+		ll.setOrientation(android.widget.LinearLayout.VERTICAL);
+		ll.addView(iv);
+		ll.addView(tv);
+		setContentView(ll);
+		
 		printWelcomeMessage();
 		
 		/*  TODO: Code for various dialog-prompts.  Re-enable someday. 
