@@ -23,7 +23,6 @@ import org.brickshadow.roboglk.GlkSChannel;
 import org.brickshadow.roboglk.GlkWinType;
 import org.brickshadow.roboglk.GlkWindow;
 import org.brickshadow.roboglk.window.RoboTextBufferWindow;
-import org.brickshadow.roboglk.window.StandardTextBufferIO;
 import org.brickshadow.roboglk.window.TextBufferView;
 
 import android.app.Activity;
@@ -125,8 +124,8 @@ public class TwistyGlk implements Glk {
         mainWin = new RoboTextBufferWindow(
                 activity,
                 eventQueue,
-                new StandardTextBufferIO(tv),
-                //new TwistyTextBufferIO(tv), /* styled text = slow input */
+                //new TextBufferIO(tv),
+                new TwistyTextBufferIO(tv), /* styled text = slow input */
                 id);
         wins[0] = mainWin;
     }

@@ -16,7 +16,7 @@
 package com.google.code.twisty;
 
 import org.brickshadow.roboglk.GlkStyle;
-import org.brickshadow.roboglk.window.StandardTextBufferIO;
+import org.brickshadow.roboglk.window.TextBufferIO;
 
 import org.brickshadow.roboglk.window.TextBufferView;
 
@@ -24,7 +24,7 @@ import android.os.Handler;
 import android.text.Spannable;
 
 
-public class TwistyTextBufferIO extends StandardTextBufferIO {
+public class TwistyTextBufferIO extends TextBufferIO {
 
 	private int currentStyle = GlkStyle.Normal;
 	private boolean isReverse = false;

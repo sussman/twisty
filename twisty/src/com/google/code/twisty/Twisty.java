@@ -42,7 +42,6 @@ import org.brickshadow.roboglk.GlkFactory;
 import org.brickshadow.roboglk.GlkStyle;
 import org.brickshadow.roboglk.window.TextBufferView;
 import org.brickshadow.roboglk.window.RoboTextBufferWindow;
-import org.brickshadow.roboglk.window.StandardTextBufferIO;
 
 
 import android.app.Activity;
