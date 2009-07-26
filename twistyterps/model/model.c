@@ -78,6 +78,7 @@ static void verb_move(void);
 static void verb_quit(void);
 static void verb_spam(void);
 static void verb_size(void);
+static void verb_style(void);
 #ifndef ANDROID
 static void verb_script(void);
 static void verb_unscript(void);
@@ -237,6 +238,9 @@ void glk_main(void)
         else if (str_eq(cmd, "size")) {
             verb_size();
         }
+        else if (str_eq(cmd, "style")) {
+            verb_style();
+	}
 #ifndef ANDROID
         else if (str_eq(cmd, "save")) {
             verb_save();
@@ -422,6 +426,14 @@ static void verb_spam(void) {
     verb_yada(FALSE);
     verb_yada(FALSE);
     verb_yada(TRUE);
+}
+
+static void verb_style(void) {
+    glk_put_string("A typewritten note appears, which says ");
+    glk_set_style(style_Preformatted);
+    glk_put_string("LOREM IPSUM etc.");
+    glk_set_style(style_Normal);
+    glk_put_char('\n');
 }
 
 static void verb_quote(void)
