@@ -9,7 +9,8 @@ LOCAL_SRC_FILES := automap.c solve.c infix.c copying.c debug.c inform.c \
 	stack.c zscii.c tokenise.c struct.c objects.c portfunc.c hash.c \
 	sound.c graphics.c blorb.c main.c startunix.c twisty.c
 
-LOCAL_CFLAGS := -I$(LOCAL_PATH)/../glkjni -DANDROID
+LOCAL_CFLAGS := -I$(LOCAL_PATH)/../glkjni -DANDROID -DSMART_TOKENISER -DFAST \
+	-DUSE_INLINE -DNO_TICK
 LOCAL_STATIC_LIBRARIES := glkjni
 LOCAL_LDLIBS    := -L$(SYSROOT)/usr/lib -llog
 
