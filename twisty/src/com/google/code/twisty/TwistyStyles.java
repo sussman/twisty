@@ -28,9 +28,11 @@ public class TwistyStyles {
 		for (int style = 0; style <= MAX_STYLE; style++) {
 			String family =
 				(style == GlkStyle.Preformatted ? "Courier" : "Helvetica");
+			int typeface =
+				(style == GlkStyle.Subheader ? Typeface.BOLD : Typeface.NORMAL);
 			styles[style] = new TwistyStyle(
 						family,
-						Typeface.NORMAL,
+						typeface,
 						12,
 						black,
 						white);

@@ -22,12 +22,19 @@ import org.brickshadow.roboglk.window.TextBufferView;
 
 import android.os.Handler;
 import android.text.Spannable;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.TextAppearanceSpan;
 
 
 public class TwistyTextBufferIO extends TextBufferIO {
 
 	private int currentStyle = GlkStyle.Normal;
+	private int backColor = -1;
 	private boolean isReverse = false;
+	private TextAppearanceSpan lastStyle;
+	private int lastStyleStart;
+	private BackgroundColorSpan lastBg;
+	private int lastBgStart;
 	
 	public TwistyTextBufferIO(final TextBufferView tv) {
 		super(tv);
@@ -47,7 +54,8 @@ public class TwistyTextBufferIO extends TextBufferIO {
 	
 	private void initView() {
 		TwistyStyle style = TwistyStyles.getStyleSpan(GlkStyle.Normal);
-		tv.setBackgroundColor(style.getBackColor());
+		backColor = style.getBackColor();
+		tv.setBackgroundColor(backColor);
 		/* 
 		 * TODO: remember that when style hints are supported, this
 		 *       size change will have to be made when style_Normal is
@@ -61,13 +69,29 @@ public class TwistyTextBufferIO extends TextBufferIO {
 	}
 
 	@Override
+	public boolean doDistinguishStyles(int styl1, int styl2) {
+		/* TODO: this is a hack until full style support */
+		if (styl1 == GlkStyle.Preformatted
+				|| styl2 == GlkStyle.Preformatted
+				|| styl1 == GlkStyle.Subheader
+				|| styl2 == GlkStyle.Subheader) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	@Override
 	public void doStyle(int style) {
 		if (style == currentStyle) {
 			return;
 		}
-		
+
+		int prevStyle = currentStyle;
 		currentStyle = style;
-		applyStyle();
+		if (doDistinguishStyles(prevStyle, currentStyle)) {
+			applyStyle();
+		}
 	}
 	
 	private void applyStyle() {
@@ -75,11 +99,29 @@ public class TwistyTextBufferIO extends TextBufferIO {
 		int len = text.length();
 		TwistyStyle spans = TwistyStyles.getStyleSpan(currentStyle);
 		
-		text.setSpan(spans.getStyle(isReverse),
+		TextAppearanceSpan style = spans.getStyle(isReverse);
+		if (lastStyle != null) {
+			text.setSpan(lastStyle,
+					lastStyleStart, len, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		}
+		text.setSpan(style,
 				len, len, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+		lastStyle = style;
+		lastStyleStart = len;
 		
-		text.setSpan(spans.getBg(isReverse),
-				len, len, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+		BackgroundColorSpan bg = spans.getBg(isReverse);
+		int newBackColor = bg.getBackgroundColor();
+		if (newBackColor != backColor) {
+			backColor = newBackColor;
+			if (lastBg != null) {
+				text.setSpan(lastBg,
+						lastBgStart, len, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			}
+			text.setSpan(bg,
+					len, len, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+			lastBg = bg;
+			lastBgStart = len;
+		}
 	}
 	
 	public void doReverseVideo(boolean reverse) {
