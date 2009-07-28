@@ -17,6 +17,7 @@ package com.google.code.twisty;
 
 import java.io.File;
 
+import org.brickshadow.roboglk.BlorbResource;
 import org.brickshadow.roboglk.Glk;
 import org.brickshadow.roboglk.GlkEventQueue;
 import org.brickshadow.roboglk.GlkSChannel;
@@ -64,8 +65,8 @@ public class TwistyGlk implements Glk {
     }
 
     @Override
-    public boolean getImageInfo(int num, int[] dim) {
-        return false;
+    public boolean getImageInfo(BlorbResource bres, int[] dim) {
+    	return false;
     }
 
     @Override
@@ -94,7 +95,7 @@ public class TwistyGlk implements Glk {
     }
 
     @Override
-    public void setSoundLoadHint(int num, boolean flag) {}
+    public void setSoundLoadHint(BlorbResource bres, boolean flag) {}
 
     @Override
     public void setStyleHint(int wintype, int styl, int hint, int val) {}
@@ -113,6 +114,7 @@ public class TwistyGlk implements Glk {
     public void windowOpen(GlkWindow splitwin, int method, int size,
             int wintype, int id, GlkWindow[] wins) {
 
+    	Log.w("windowOpen", "requested type " + wintype);
         if (splitwin != null && mainWin != null) {
             return;
         }
