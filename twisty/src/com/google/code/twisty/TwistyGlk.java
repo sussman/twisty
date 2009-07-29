@@ -37,12 +37,13 @@ public class TwistyGlk implements Glk {
     private final Activity activity;
     
     private RoboTextBufferWindow mainWin;
-    private final TextBufferView tv;
+    private final TwistyGlkLayout glkLayout;
     
-    public TwistyGlk(Activity activity, TextBufferView tv) {
+    public TwistyGlk(Activity activity, TwistyGlkLayout glkLayout) {
         this.activity = activity;
-        this.tv = tv;
         eventQueue = new GlkEventQueue();
+        this.glkLayout = glkLayout;
+        glkLayout.initialize(eventQueue);
     }
     
     @Override
@@ -102,34 +103,18 @@ public class TwistyGlk implements Glk {
 
     @Override
     public void windowClose(GlkWindow win) {
-        if (win != mainWin) {
-            Log.e("roboglk", "window_close: invalid id");
-            return;
-        }
-        
-        mainWin = null;
+        glkLayout.removeGlkWindow(win);
     }
 
     @Override
     public void windowOpen(GlkWindow splitwin, int method, int size,
             int wintype, int id, GlkWindow[] wins) {
 
-    	Log.w("windowOpen", "requested type " + wintype);
-        if (splitwin != null && mainWin != null) {
-            return;
-        }
-        if (wintype != GlkWinType.TextBuffer) {
-            return;
-        }
-
+        GlkWindow[] newWins =
+        	glkLayout.addGlkWindow(splitwin, method, size, wintype, id);
         
-        mainWin = new RoboTextBufferWindow(
-                activity,
-                eventQueue,
-                //new TextBufferIO(tv),
-                new TwistyTextBufferIO(tv), /* styled text = slow input */
-                id);
-        wins[0] = mainWin;
+        wins[0] = newWins[0];
+        wins[1] = newWins[1];
     }
 
 }

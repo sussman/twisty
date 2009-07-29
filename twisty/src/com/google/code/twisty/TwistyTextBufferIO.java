@@ -65,6 +65,7 @@ public class TwistyTextBufferIO extends TextBufferIO {
 		
 		applyStyle();
 		
+		// TODO: figure out if new windows automatically get focus?
 		tv.requestFocus();
 	}
 

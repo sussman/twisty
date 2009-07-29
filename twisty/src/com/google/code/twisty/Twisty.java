@@ -114,8 +114,9 @@ public class Twisty extends Activity {
 	
 	// The main GLK UI machinery.
 	private Glk glk;
+	private TwistyGlkLayout glkLayout;
 	private TwistyTextBufferIO mainWin;
-	private TextBufferView tv, tv2;
+	private TextBufferView tv;
 	private Thread terpThread;
 	
 	// The curses.z5 file path
@@ -163,6 +164,9 @@ public class Twisty extends Activity {
 		mainWin = new TwistyTextBufferIO(tv);
 		final GlkEventQueue eventQueue = null;
 		tv.setFocusableInTouchMode(true);
+		
+		// The Glk window layout manager
+		glkLayout = new TwistyGlkLayout(this);
 		
 		// put it all together
 		LinearLayout ll = new LinearLayout(this);
@@ -427,13 +431,14 @@ public class Twisty extends Activity {
 		// For now, we don't pay attention to the incoming stream, we just
 		// dumbly fire up the 'nitfol' glk program in our C library using
 		// curses.z5.
-		tv2 = new TextBufferView(this);
-		tv2.setFocusableInTouchMode(true);
-		setContentView(tv2);
-		tv2.requestFocus();
+		//tv2 = new TextBufferView(this);
+		//tv2.setFocusableInTouchMode(true);
+		setContentView(glkLayout);
+		glkLayout.requestFocus();
+		//tv2.requestFocus();
 		
 		// The GLK object for I/O between Android UI and our C library
-		glk = new TwistyGlk(this, tv2);
+		glk = new TwistyGlk(this, glkLayout);
 		
 		terpThread = new Thread(new Runnable() {
 	           @Override
