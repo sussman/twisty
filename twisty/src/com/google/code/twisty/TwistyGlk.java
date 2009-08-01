@@ -19,16 +19,15 @@ import java.io.File;
 
 import org.brickshadow.roboglk.BlorbResource;
 import org.brickshadow.roboglk.Glk;
-import org.brickshadow.roboglk.GlkEventQueue;
+import org.brickshadow.roboglk.GlkLayout;
 import org.brickshadow.roboglk.GlkSChannel;
 import org.brickshadow.roboglk.GlkWinType;
 import org.brickshadow.roboglk.GlkWindow;
-import org.brickshadow.roboglk.window.RoboTextBufferWindow;
-import org.brickshadow.roboglk.window.TextBufferView;
+import org.brickshadow.roboglk.util.GlkEventQueue;
 
 import android.app.Activity;
 import android.os.Message;
-import android.util.Log;
+
 
 public class TwistyGlk implements Glk {
 
@@ -36,10 +35,10 @@ public class TwistyGlk implements Glk {
     
     private final Activity activity;
     
-    private RoboTextBufferWindow mainWin;
-    private final TwistyGlkLayout glkLayout;
+    private GlkWindow mainWin;
+    private final GlkLayout glkLayout;
     
-    public TwistyGlk(Activity activity, TwistyGlkLayout glkLayout) {
+    public TwistyGlk(Activity activity, GlkLayout glkLayout) {
         this.activity = activity;
         eventQueue = new GlkEventQueue();
         this.glkLayout = glkLayout;
@@ -105,10 +104,17 @@ public class TwistyGlk implements Glk {
     public void windowClose(GlkWindow win) {
         glkLayout.removeGlkWindow(win);
     }
-
+    
     @Override
     public void windowOpen(GlkWindow splitwin, int method, int size,
             int wintype, int id, GlkWindow[] wins) {
+    	
+    	if (splitwin != null || mainWin != null) {
+    		return;
+    	}
+    	if (wintype != GlkWinType.TextBuffer) {
+    		return;
+    	}
 
         GlkWindow[] newWins =
         	glkLayout.addGlkWindow(splitwin, method, size, wintype, id);

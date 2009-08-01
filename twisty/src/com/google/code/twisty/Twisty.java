@@ -37,11 +37,14 @@ import com.google.code.twisty.TwistyMessage;
 
 
 import org.brickshadow.roboglk.Glk;
-import org.brickshadow.roboglk.GlkEventQueue;
 import org.brickshadow.roboglk.GlkFactory;
+import org.brickshadow.roboglk.GlkLayout;
 import org.brickshadow.roboglk.GlkStyle;
-import org.brickshadow.roboglk.window.TextBufferView;
-import org.brickshadow.roboglk.window.RoboTextBufferWindow;
+import org.brickshadow.roboglk.io.StyleManager;
+import org.brickshadow.roboglk.io.TextBufferIO;
+import org.brickshadow.roboglk.util.GlkEventQueue;
+import org.brickshadow.roboglk.util.UISync;
+import org.brickshadow.roboglk.view.TextBufferView;
 
 
 import android.app.Activity;
@@ -114,8 +117,8 @@ public class Twisty extends Activity {
 	
 	// The main GLK UI machinery.
 	private Glk glk;
-	private TwistyGlkLayout glkLayout;
-	private TwistyTextBufferIO mainWin;
+	private GlkLayout glkLayout;
+	private TextBufferIO mainWin;
 	private TextBufferView tv;
 	private Thread terpThread;
 	
@@ -147,6 +150,8 @@ public class Twisty extends Activity {
 		super.onCreate(icicle);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		
+		UISync.setInstance(this);
+		
 		/* TODO: this is very simple and just throws an exception
 		 *       if curses.z5 can't be copied to the sdcard. */ 
 		ensureStoryFile();
@@ -161,12 +166,12 @@ public class Twisty extends Activity {
 		
 		// The main 'welcome screen' window from which games are launched.
 		tv = new TextBufferView(this);
-		mainWin = new TwistyTextBufferIO(tv);
+		mainWin = new TextBufferIO(tv, new StyleManager());
 		final GlkEventQueue eventQueue = null;
 		tv.setFocusableInTouchMode(true);
 		
 		// The Glk window layout manager
-		glkLayout = new TwistyGlkLayout(this);
+		glkLayout = new GlkLayout(this);
 		
 		// put it all together
 		LinearLayout ll = new LinearLayout(this);
@@ -448,11 +453,25 @@ public class Twisty extends Activity {
 	        	   // be the correct interpreter name.
 	               String[] args = new String[] {"nitfol",
 	            		   cursesFile.getAbsolutePath()};
-	               GlkFactory.shutdown();
+	               int res = -1;
 	               if (GlkFactory.startup(glk, args)) {
-	                   GlkFactory.run();
+	                   res = GlkFactory.run();
 	               }
-	               Log.i("twistyterp", "The interpreter has finished");
+	               GlkFactory.shutdown();
+	               switch (res) {
+	               case -1:
+	            	   Log.i("twistyterp", "The interpreter did not start");
+	            	   break;
+	               case 0:
+	            	   Log.i("twistyterp", "The interpreter exited normally");
+	            	   break;
+	               case 1:
+	            	   Log.i("twistyterp", "The interpreter exited abnormally");
+	            	   break;
+	               case 2:
+	            	   Log.i("twistyterp", "The interpreter was interrupted");
+	            	   break;
+	               }
 	               finish();
 	            } 
 	        });
