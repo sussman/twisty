@@ -98,7 +98,9 @@ public class TwistyGlk implements Glk {
     public void setSoundLoadHint(BlorbResource bres, boolean flag) {}
 
     @Override
-    public void setStyleHint(int wintype, int styl, int hint, int val) {}
+    public void setStyleHint(int wintype, int styl, int hint, int val) {
+    	glkLayout.setStyleHint(wintype, styl, hint, val);
+    }
 
     @Override
     public void windowClose(GlkWindow win) {
