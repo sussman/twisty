@@ -19,6 +19,7 @@ import java.io.File;
 
 import org.brickshadow.roboglk.BlorbResource;
 import org.brickshadow.roboglk.Glk;
+import org.brickshadow.roboglk.GlkFileMode;
 import org.brickshadow.roboglk.GlkLayout;
 import org.brickshadow.roboglk.GlkSChannel;
 import org.brickshadow.roboglk.GlkWinType;
@@ -87,29 +88,40 @@ public class TwistyGlk implements Glk {
 
     @Override
     public File promptFile(int usage, int fmode) {
-    	// TODO(sussman):  look at usage, decide which dialog to bring up
-    	// TODO(sussman):  open File object according to fmode 
-    	
     	// This "terp thread" isn't allowed to inflate dialogs directly;
-    	// only the main Twisty UI thread can do that.
-    	
-    	// TODO(sussman):  expand the message object for more detailed requests
+    	// only the main Twisty UI thread can do that.  So we use the twistyHandler
+    	// to send a TwistyMessage to Twisty, and let it do the prompting.
     	TwistyMessage msg = new TwistyMessage();
         msg.path = "";
 
-        // Ask Twisty to prompt the user for a savegame-filename, then we block.
-        // (We're blocking on the glkLayout just because it's an object
-        // we share with the Twisty instance.)
-        synchronized (glkLayout) {
-        	try {
-        		Message.obtain(twistyHandler, Twisty.PROMPT_FOR_SAVEFILE, msg).sendToTarget();
-        		glkLayout.wait();
-        	}
-        	catch (Exception e) {
-        		return null; //  failure
-        	}
+        // Ask Twisty to prompt the user, then block until we're notify()'d.
+        // (We're blocking on the glkLayout just because it's a sharde object.)
+        if ((fmode & GlkFileMode.Read) == GlkFileMode.Read) {
+        	 synchronized (glkLayout) {
+             	try {
+             		Message.obtain(twistyHandler, Twisty.PROMPT_FOR_READFILE, msg).sendToTarget();
+             		glkLayout.wait();
+             	}
+             	catch (Exception e) {
+             		return null; //  failure
+             	}
+             }
         }
-
+        else if ((fmode & GlkFileMode.Write) == GlkFileMode.Write) {
+       	 synchronized (glkLayout) {
+            	try {
+            		Message.obtain(twistyHandler, Twisty.PROMPT_FOR_WRITEFILE, msg).sendToTarget();
+            		glkLayout.wait();
+            	}
+            	catch (Exception e) {
+            		return null; //  failure
+            	}
+            }
+        }
+        else {
+        	return null;
+        }
+        
         // Twisty should have modified our TwistyMessage object, and
         // then called notify() to wake us up.
         return new File(msg.path);

@@ -104,15 +104,15 @@ public class Twisty extends Activity {
 	private String savefile_path = "";
 
 	// Dialog boxes we manage
-	private static final int DIALOG_ENTER_SAVEFILE = 1;
-	private static final int DIALOG_ENTER_RESTOREFILE = 2;
+	private static final int DIALOG_ENTER_WRITEFILE = 1;
+	private static final int DIALOG_ENTER_READFILE = 2;
 	private static final int DIALOG_CHOOSE_ZGAME = 3;
 	private static final int DIALOG_CANT_SAVE = 4;
 	private static final int DIALOG_NO_SDCARD = 5;
 
 	// Messages we receive from external threads, via our Handler
-	public static final int PROMPT_FOR_SAVEFILE = 1;
-	public static final int PROMPT_FOR_RESTOREFILE = 2;
+	public static final int PROMPT_FOR_WRITEFILE = 1;
+	public static final int PROMPT_FOR_READFILE = 2;
 	public static final int PROMPT_FOR_ZGAME = 3;
 	
 	// The main GLK UI machinery.
@@ -187,13 +187,13 @@ public class Twisty extends Activity {
 			public void handleMessage(Message m) {
 				savegame_dir = "";
 				savefile_path = "";
-				if (m.what == PROMPT_FOR_SAVEFILE) {
+				if (m.what == PROMPT_FOR_WRITEFILE) {
 					dialog_message = (TwistyMessage) m.obj;
-					promptForSavefile();
+					promptForWritefile();
 				}
-				else if (m.what == PROMPT_FOR_RESTOREFILE) {
+				else if (m.what == PROMPT_FOR_READFILE) {
 					dialog_message = (TwistyMessage) m.obj;
-					promptForRestorefile();
+					promptForReadfile();
 				}
 				else if (m.what == PROMPT_FOR_ZGAME) {
 					showDialog(DIALOG_CHOOSE_ZGAME);
@@ -659,25 +659,24 @@ public class Twisty extends Activity {
 		return files;
 	}
 
-	// TODO(sussman):  this should be called by TwistyGlk.promptFile()
-	public void promptForSavefile() {
+	public void promptForWritefile() {
 		String dir = ensureSavedGamesDir(true);
 		if (dir == null) {
 			showDialog(DIALOG_CANT_SAVE);
 			return;
 		}
 		savegame_dir = dir;	
-		showDialog(DIALOG_ENTER_SAVEFILE);
+		showDialog(DIALOG_ENTER_WRITEFILE);
 	}
 
-	private void promptForRestorefile() {
+	private void promptForReadfile() {
 		String dir = ensureSavedGamesDir(false);
 		if (dir == null) {
 			showDialog(DIALOG_CANT_SAVE);
 			return;
 		}
 		savegame_dir = dir;
-		showDialog(DIALOG_ENTER_RESTOREFILE);
+		showDialog(DIALOG_ENTER_READFILE);
 	}
 
 	// Used by 'Restore Game' dialog box;  scans /sdcard/twisty and updates
@@ -715,12 +714,12 @@ public class Twisty extends Activity {
 	protected Dialog onCreateDialog(int id) {
 		switch (id) {
 
-		case DIALOG_ENTER_SAVEFILE:
+		case DIALOG_ENTER_WRITEFILE:
 			LayoutInflater factory = LayoutInflater.from(this);
 			final View textEntryView = factory.inflate(R.layout.save_file_prompt, null);
 			final EditText et = (EditText) textEntryView.findViewById(R.id.savefile_entry);
 			return new AlertDialog.Builder(Twisty.this)
-			.setTitle("Save Game")
+			.setTitle("Write to file")
 			.setView(textEntryView)
 			.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
@@ -745,10 +744,10 @@ public class Twisty extends Activity {
 			})
 			.create();
 
-		case DIALOG_ENTER_RESTOREFILE:
+		case DIALOG_ENTER_READFILE:
 			restoredialog = new Dialog(Twisty.this);
 			restoredialog.setContentView(R.layout.restore_file_prompt);
-			restoredialog.setTitle("Restore Saved Game");
+			restoredialog.setTitle("Read a file");
 			android.widget.RadioGroup rg = (RadioGroup) restoredialog.findViewById(R.id.radiomenu);
 			updateRestoreRadioButtons(rg);
 			android.widget.Button okbutton = (Button) restoredialog.findViewById(R.id.restoreokbutton);
@@ -765,7 +764,7 @@ public class Twisty extends Activity {
 						RadioButton checkedbutton = (RadioButton) rg.findViewById(checkedid);
 						savefile_path = savegame_dir + "/" + checkedbutton.getText();
 					}
-					dismissDialog(DIALOG_ENTER_RESTOREFILE);
+					dismissDialog(DIALOG_ENTER_READFILE);
 					// Return control to the z-machine thread
 					dialog_message.path = savefile_path;
 					synchronized (glkLayout) {
@@ -776,7 +775,7 @@ public class Twisty extends Activity {
 			android.widget.Button cancelbutton = (Button) restoredialog.findViewById(R.id.restorecancelbutton);
 			cancelbutton.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					dismissDialog(DIALOG_ENTER_RESTOREFILE);
+					dismissDialog(DIALOG_ENTER_READFILE);
 					// Return control to the z-machine thread
 					dialog_message.path = "";
 					synchronized (glkLayout) {
@@ -840,7 +839,7 @@ public class Twisty extends Activity {
 	protected void onPrepareDialog(int id, Dialog dialog) {
 		super.onPrepareDialog(id, dialog);
 		switch(id) {
-		case DIALOG_ENTER_RESTOREFILE:
+		case DIALOG_ENTER_READFILE:
 			android.widget.RadioGroup rg = (RadioGroup) restoredialog.findViewById(R.id.radiomenu);
 			updateRestoreRadioButtons(rg);
 			break;
