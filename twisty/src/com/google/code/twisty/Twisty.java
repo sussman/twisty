@@ -125,7 +125,7 @@ public class Twisty extends Activity {
 	// The curses.z5 file path
 	File cursesFile;
 	
-	// Passed down to ZState, so ZMachine thread can send Messages back to this thread
+	// Passed down to TwistyGlk object, so terp thread can send Messages back to this thread
 	private Handler dialog_handler;
 	private TwistyMessage dialog_message; // most recent Message received
 	// Persistent dialogs created in onCreateDialog() and updated by onPrepareDialog()
@@ -183,8 +183,6 @@ public class Twisty extends Activity {
 		
 		printWelcomeMessage();
 		
-		/*  TODO: Code for various dialog-prompts.  Re-enable someday. 
-		 * 
 		dialog_handler = new Handler() { 
 			public void handleMessage(Message m) {
 				savegame_dir = "";
@@ -201,7 +199,7 @@ public class Twisty extends Activity {
 					showDialog(DIALOG_CHOOSE_ZGAME);
 				}
 			} 
-		};*/
+		};
 	}
 	
 	/*
@@ -443,7 +441,7 @@ public class Twisty extends Activity {
 		//tv2.requestFocus();
 		
 		// The GLK object for I/O between Android UI and our C library
-		glk = new TwistyGlk(this, glkLayout);
+		glk = new TwistyGlk(this, glkLayout, dialog_handler);
 		
 		terpThread = new Thread(new Runnable() {
 	           @Override
@@ -661,7 +659,8 @@ public class Twisty extends Activity {
 		return files;
 	}
 
-	private void promptForSavefile() {
+	// TODO(sussman):  this should be called by TwistyGlk.promptFile()
+	public void promptForSavefile() {
 		String dir = ensureSavedGamesDir(true);
 		if (dir == null) {
 			showDialog(DIALOG_CANT_SAVE);
@@ -726,11 +725,11 @@ public class Twisty extends Activity {
 			.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
 					savefile_path = savegame_dir + "/" + et.getText().toString();
-					// Directly modify the message-object passed to us by the z-machine thread:
+					// Directly modify the message-object passed to us by the terp thread:
 					dialog_message.path = savefile_path;
-					// Wake up the ZMachine thread again
-					synchronized (mainWin) {  // TODO:  should sync around game thread!
-						mainWin.notify();
+					// Wake up the terp thread again
+					synchronized (glkLayout) {
+						glkLayout.notify();
 					}
 				}
 			})
@@ -738,9 +737,9 @@ public class Twisty extends Activity {
 				public void onClick(DialogInterface dialog, int whichButton) {
 					// This makes op_save() fail.
 					dialog_message.path = "";
-					// Wake up the ZMachine thread again
-					synchronized (mainWin) {
-						mainWin.notify();
+					// Wake up the terp thread again
+					synchronized (glkLayout) {
+						glkLayout.notify();
 					}
 				}
 			})
@@ -769,8 +768,8 @@ public class Twisty extends Activity {
 					dismissDialog(DIALOG_ENTER_RESTOREFILE);
 					// Return control to the z-machine thread
 					dialog_message.path = savefile_path;
-					synchronized (mainWin) {  // TODO:  should sync around game-thread!
-						mainWin.notify();
+					synchronized (glkLayout) {
+						glkLayout.notify();
 					}
 				}
 			});
@@ -780,8 +779,8 @@ public class Twisty extends Activity {
 					dismissDialog(DIALOG_ENTER_RESTOREFILE);
 					// Return control to the z-machine thread
 					dialog_message.path = "";
-					synchronized (mainWin) {  // TODO: should sync around game-thread!
-						mainWin.notify();
+					synchronized (glkLayout) {
+						glkLayout.notify();
 					}
 				}
 			});
@@ -813,9 +812,9 @@ public class Twisty extends Activity {
 				public void onClick(DialogInterface dialog, int whichButton) {
 					// A path of "" makes op_save() fail.
 					dialog_message.path = "";
-					// Wake up the ZMachine thread again
-					synchronized (mainWin) {  // TODO: should sync around game-thread!
-						mainWin.notify();
+					// Wake up the terp thread again
+					synchronized (glkLayout) {
+						glkLayout.notify();
 					}
 				}
 			})

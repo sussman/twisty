@@ -27,6 +27,7 @@ import org.brickshadow.roboglk.util.GlkEventQueue;
 
 import android.app.Activity;
 import android.os.Message;
+import android.os.Handler;
 
 
 public class TwistyGlk implements Glk {
@@ -34,12 +35,16 @@ public class TwistyGlk implements Glk {
     private final GlkEventQueue eventQueue;
     
     private final Activity activity;
+    private final Twisty myTwisty;
+    private final Handler twistyHandler;
     
     private GlkWindow mainWin;
     private final GlkLayout glkLayout;
     
-    public TwistyGlk(Activity activity, GlkLayout glkLayout) {
+    public TwistyGlk(Activity activity, GlkLayout glkLayout, Handler msgHandler) {
         this.activity = activity;
+        this.myTwisty = (Twisty) activity;
+        this.twistyHandler = msgHandler;
         eventQueue = new GlkEventQueue();
         this.glkLayout = glkLayout;
         glkLayout.initialize(eventQueue);
@@ -82,7 +87,32 @@ public class TwistyGlk implements Glk {
 
     @Override
     public File promptFile(int usage, int fmode) {
-        return null;
+    	// TODO(sussman):  look at usage, decide which dialog to bring up
+    	// TODO(sussman):  open File object according to fmode 
+    	
+    	// This "terp thread" isn't allowed to inflate dialogs directly;
+    	// only the main Twisty UI thread can do that.
+    	
+    	// TODO(sussman):  expand the message object for more detailed requests
+    	TwistyMessage msg = new TwistyMessage();
+        msg.path = "";
+
+        // Ask Twisty to prompt the user for a savegame-filename, then we block.
+        // (We're blocking on the glkLayout just because it's an object
+        // we share with the Twisty instance.)
+        synchronized (glkLayout) {
+        	try {
+        		Message.obtain(twistyHandler, Twisty.PROMPT_FOR_SAVEFILE, msg).sendToTarget();
+        		glkLayout.wait();
+        	}
+        	catch (Exception e) {
+        		return null; //  failure
+        	}
+        }
+
+        // Twisty should have modified our TwistyMessage object, and
+        // then called notify() to wake us up.
+        return new File(msg.path);
     }
 
     @Override
