@@ -121,6 +121,7 @@ public class Twisty extends Activity {
 	private TextBufferIO mainWin;
 	private TextBufferView tv;
 	private Thread terpThread;
+	private String gamePath;
 	
 	// The curses.z5 file path
 	File cursesFile;
@@ -264,7 +265,7 @@ public class Twisty extends Activity {
 		mainWin.doPrint("Twisty " + pkginfo.versionName + ", (C) Google Inc.");
 		mainWin.doReverseVideo(false);
 		mainWin.doPrint("\n\n(This is open source software;\nsee http://code.google.com/p/twisty)\n\n\n");
-		mainWin.doPrint("You are holding a modern-looking phone which can be typed upon.  ");
+		mainWin.doPrint("You are holding a modern-looking phone which can be typed upon. ");
 		mainWin.doPrint(battstate.toString() + "  ");
 		mainWin.doPrint("You feel an inexplicable urge to press the phone's \"menu\" key.\n\n");
 	}
@@ -396,40 +397,12 @@ public class Twisty extends Activity {
 		}
 	}
 
-	/**
-	 * Start an interpreter, loading the program from the given file
-	 * @param filename Name of file to load
-	 */
-	void startzm(String filename) {
-		runningProgram = filename;
-		Log.i(TAG, "Loading file: " + filename);
-		try {
-			startzm(new FileInputStream(filename));
-		} catch (FileNotFoundException e) {
-			Log.e(TAG, "File not found: " + filename);
-		}
-	}
 
 	/**
-	 * Start an interpreter, loading the program from the given resource
-	 * @param resource Identifier of resource to load
+	 * Start a terp thread, loading the program from the given game file
+	 * @param path Path to the gamefile to execute
 	 */
-	void startzm(int resource) {
-		if (zmIsRunning())
-			return;
-		runningProgram = new Integer(resource);
-		Log.i(TAG, "Loading resource: " + resource);
-		Resources r = new Resources(getAssets(),
-				new DisplayMetrics(),
-				null);
-		startzm(r.openRawResource(resource));
-	}
-
-	/**
-	 * Start a zmachine, loading the program from the given stream
-	 * @param zstream Stream containing the program
-	 */
-	void startzm(InputStream zstream) {
+	void startzm(String path) {
 		// TODO:  this is probably where we'd launch a game thread.
 		// For now, we don't pay attention to the incoming stream, we just
 		// dumbly fire up the 'nitfol' glk program in our C library using
@@ -439,6 +412,7 @@ public class Twisty extends Activity {
 		setContentView(glkLayout);
 		glkLayout.requestFocus();
 		//tv2.requestFocus();
+		gamePath = path;
 		
 		// The GLK object for I/O between Android UI and our C library
 		glk = new TwistyGlk(this, glkLayout, dialog_handler);
@@ -449,8 +423,8 @@ public class Twisty extends Activity {
 	        	   // When twistyterps supports multiple interpreters,
 	        	   // it will be important that the first arg to startup
 	        	   // be the correct interpreter name.
-	               String[] args = new String[] {"nitfol",
-	            		   cursesFile.getAbsolutePath()};
+	               String[] args = new String[] {"nitfol", gamePath};
+	            		   // cursesFile.getAbsolutePath()};
 	               int res = -1;
 	               if (GlkFactory.startup(glk, args)) {
 	                   res = GlkFactory.run();
@@ -580,7 +554,7 @@ public class Twisty extends Activity {
 			break;
 		default:
 			// TODO:  screen.clear();
-			startzm(item.getItemId());
+			// startzm(item.getItemId());
 		break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -592,7 +566,7 @@ public class Twisty extends Activity {
 		if (storagestate.equals(Environment.MEDIA_MOUNTED)
 				|| storagestate.equals(Environment.MEDIA_MOUNTED_READ_ONLY)) {
 			final ProgressDialog pd = ProgressDialog.show(Twisty.this,
-					"Scanning Media", "Searching for Z-Games...", true);
+					"Scanning Media", "Searching for Games...", true);
 			Thread t = new Thread() {
 				public void run() {
 					// populate our list of zgames:

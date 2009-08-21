@@ -36,7 +36,6 @@ public class TwistyGlk implements Glk {
     private final GlkEventQueue eventQueue;
     
     private final Activity activity;
-    private final Twisty myTwisty;
     private final Handler twistyHandler;
     
     private GlkWindow mainWin;
@@ -44,7 +43,6 @@ public class TwistyGlk implements Glk {
     
     public TwistyGlk(Activity activity, GlkLayout glkLayout, Handler msgHandler) {
         this.activity = activity;
-        this.myTwisty = (Twisty) activity;
         this.twistyHandler = msgHandler;
         eventQueue = new GlkEventQueue();
         this.glkLayout = glkLayout;
