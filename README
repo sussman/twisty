@@ -77,12 +77,12 @@ Building from Source
 
 A.  Prerequisites
 
- 1. The Android SDK (at least version 1.5), unpacked and ready to go.
+ 1. The Android SDK (at least version 1.6), unpacked and ready to go.
 
  2. A working Eclipse installation (at least 3.5, "Galileo") with the
  latest Android plugin (ADT) installed, pointing to your Android SDK.
 
- 3. The Android NDK (at least version 1.0) unpacked somewhere. (Say,
+ 3. The Android NDK (at least version 1.6) unpacked somewhere. (Say,
  at location $NDK)
 
  4. A copy of the Twisty codebase -- which you must already have if
@@ -106,15 +106,18 @@ The one we care about is 'roboglk', which maps the interfaces to
 Android's UI.
 
 Assuming that these two codebases are installed at $TWISTY and
-$GLKJNI, you need to make these symbolic links from your $NDK area:
+$GLKJNI, you need to make this symbolic link from your $NDK area:
 
-  $NDK/sources/glkjni      --> $GLKJNI/glkjni
-  $NDK/sources/twistyterps --> $TWISTY/twistyterps
-  $NDK/sources/nitfol      --> $TWISTY/twistyterps/nitfol
-  $NDK/apps/twisty         --> $TWISTY/twisty
+  $NDK/apps/twisty         --> $TWISTY
 
-This allows NDK to find the C code it needs and also the Eclipse
-project it belongs to.
+... and then make another symbolic link within your $TWISTY area:
+
+  $TWISTY/jni/glkjni       --> $GLKJNI/glkjni
+
+In other words, $NDK/apps/twisty/ should be a symlink to the root of
+your Twisty code workspace, and twisty's jni directory needs a symlink
+to the glkjni codebase.  This allows NDK to find all the C code it
+needs, and also which Eclipse project to put the .so in.
 
 
 C.  Building the C code
@@ -127,6 +130,8 @@ shared library:
 
 After compilation, the final libtwistyterps.so will be automatically
 copied to the proper location within $TWISTY.
+
+(To forcibly rebuild, do a 'make APP=twisty clean' first.)
 
 
 D.  Building the Java code
