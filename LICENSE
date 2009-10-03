@@ -7,9 +7,15 @@ Public License version 3.  See the COPYING file for the full license.
  * The GLK-JNI layer (which is a compilation and link-time dependency
    for this software) is also under GPL v3.
 
- * The Nitfol z-machine interpreter was originally distributed under a
-   GPL v2 license "or later versions", and thus we're distributing it
-   here under version 3.
+ * The Nitfol z-machine interpreter (version 0.5) was originally
+   distributed under a GPL v2 license "or later versions", and thus
+   we're distributing it here under version 3, slightly modified to
+   link into our glkjni GLK implementation.
+
+ * The Git glulx interpreter (version 1.2.4) is normally distributed
+   under the MIT license.  Because the MIT license is compatible with
+   the GPL, this doesn't affect the overal GPLv3 license for Twisty.
+   Again, the version herein is slightly tweaked to work with glkjni.
 
  * The bundled games are under their own separate free licenses,
    listed below.  Note that they're not affected by the GPL, since
