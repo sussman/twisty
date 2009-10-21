@@ -120,8 +120,9 @@ public class Twisty extends Activity {
 	private GlkLayout glkLayout;
 	private TextBufferIO mainWin;
 	private TextBufferView tv;
-	private Thread terpThread;
+	private Thread terpThread = null;
 	private String gamePath;
+	private Boolean gameIsRunning = false;
 	
 	// The curses.z5 file path
 	File cursesFile;
@@ -447,7 +448,8 @@ public class Twisty extends Activity {
 	               finish();
 	            } 
 	        });
-	        terpThread.start();
+		terpThread.start();
+		gameIsRunning = true;
 	}
 	
 	
@@ -456,18 +458,10 @@ public class Twisty extends Activity {
 		findViewById(id).setVisibility(vis);
 	}
 
-	private void prepareToStartZM() {
-		// TODO:  do we want to allow multiple games to run simultaneously
-		//         in multiple threads?  Probably not, there's no real point.
-		
-		if (preStartZM != null) {
-			preStartZM.run();
-			preStartZM = null;
-		}
-	}
 
-	private boolean zmIsRunning() {
-		return false;  //  TODO:  FIXME
+	private boolean terpIsRunning() {
+		Log.i(TAG, "Query whether game is running!");
+		return gameIsRunning;
 	}
 	
 	/** Convenience helper that turns a stream into a byte array */
@@ -502,9 +496,11 @@ public class Twisty extends Activity {
 		return buffer;
 	}
 
-	/** Stops the currently running zmachine. */
-	public void stopzm() {
-		// TODO:  nothing here right now.
+	/** Stops the currently running interpreter. */
+	public void stopTerp() {
+		if (terpThread != null)
+			terpThread.interrupt();
+		gameIsRunning = false;
 	}
 
 	@Override
@@ -519,7 +515,7 @@ public class Twisty extends Activity {
 	{
 		super.onPrepareOptionsMenu(menu);
 		menu.clear();
-		if (!zmIsRunning()) {
+		if (!terpIsRunning()) {
 			menu.add(Menu.NONE, R.raw.advent, 0, "Adventure").setShortcut('0', 'a');
 			menu.add(Menu.NONE, R.raw.anchor, 1, "Anchorhead").setShortcut('1', 'b');
 			menu.add(Menu.NONE, R.raw.curses, 2, "Curses").setShortcut('2', 'c');
@@ -542,7 +538,7 @@ public class Twisty extends Activity {
 			// TODO:  zm.restart();
 			break;
 		case MENU_STOP:
-			// TODO:  stopzm();
+			stopTerp();
 			// After the zmachine exits, the welcome message should show
 			// again.
 			break;
@@ -770,7 +766,7 @@ public class Twisty extends Activity {
 					dismissDialog(DIALOG_CHOOSE_ZGAME);
 					String path = (String) zgame_paths.get(checkedId);
 					if (path != null) {
-						stopzm();
+						stopTerp();
 						startzm(path);
 					}
 				}
