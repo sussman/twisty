@@ -46,10 +46,12 @@ allows us our pick of C interpreters.
 Redistribution and Licensing
 -----------------------------
 
-Twisty is open source software, and is distributed under the GPL v3
-license.  It depends heavily on the GlkJNI project, which is also
-under GPL v3.  It also depends on 'nitfol', a z-machine interpreter
-under the GPL v2.
+Twisty is open source software, and is distributed as a whole under
+the GPL v3 license.  It depends heavily on the GlkJNI project, which
+is also under GPL v3; on 'nitfol', a z-machine interpreter, under the
+GPL v2 (which we're releasing under a "later version", GPL v3); and
+also on 'git', a Glulx interpreter, under an MIT license.  The
+collective Twisty product is thus safely all GPLv3-able.
 
 Three free, classic games are packaged with the application;  for
 details on their licensing, see the LICENSE file.  (This doesn't
@@ -83,7 +85,9 @@ A.  Prerequisites
  latest Android plugin (ADT) installed, pointing to your Android SDK.
 
  3. The Android NDK (at least version 1.6) unpacked somewhere. (Say,
- at location $NDK)
+ at location $NDK).  Remember that after unpacking it, you need to run
+ the 'host-setup.sh' script to prep the kit.  Read the details inside
+ its docs/INSTALL.txt file.
 
  4. A copy of the Twisty codebase -- which you must already have if
  you're reading this.  (Say, at location $TWISTY.)
@@ -92,6 +96,9 @@ A.  Prerequisites
  release tarball or do an svn checkout:
 
    svn co http://glkjni.googlecode.com/svn/trunk $GLKJNI
+
+ After getting glkjni, you may need to tweak the Makefile
+ appropriately for your OS.
 
 
 B.  Assembling the Pieces
@@ -146,3 +153,5 @@ D.  Building the Java code
     $GLKJNI/roboglk and select that directory.  It should now appear
     in the list with $TWISTY/src and $TWISTY/gen.  Say OK.
 
+ 3. In the same Project->Properties panel, choose "Java Compiler" and
+    make sure it's set to Java compliance level 1.6.
