@@ -1,0 +1,179 @@
+         Twisty, a text-adventure interpreter for Android.
+         =================================================
+
+What is this program?
+---------------------
+
+Twisty is a game interpreter for the Android operating system.
+It allaws you to play "text adventures" on your mobile handset.
+
+The z-machine is a virtual machine designed in 1979 by Infocom for
+playing text adventures, and it has been re-implemented on nearly every
+computer and PDA since then.  This application allows Android users to
+play Infocom classics just as 'Zork', as well hundreds of newer text
+adventures written in the last ten years or so.
+
+You can find numerous z-machine games to download at
+http://ifarchive.org.  We also recommend visiting
+http://www.ifwiki.org for general information on Interactive Fiction.
+
+
+History
+-------
+
+The codebase originally began as an Android Activity constructed
+around a heavily-hacked port of 'zplet', an early lightweight
+z-machine interpreter written for Java 1.0.
+
+ *** This project is now undergoing a huge rewrite! ***
+
+We are now attempting to use Android's Native Development Kit (NDK) to
+make JNI calls to various VM-interpreters running as C libraries.
+This should give us a 7x speed improvement, and also allow us to
+support a wider range of z-machines (via 'nitfol'), glulx games (via
+'glulxe') and perhaps even TADS or other interpreters.
+
+Specifically, we're using the GlkJNI project
+(http://code.google.com/p/glkjni) to provide an abstract UI to the
+various C interpreters.  GLK is a UI "abstraction layer" created by
+Andrew Plotkin which can be implemented in any GUI toolkit, and GlkJNI
+ports this abstraction to JNI via a set of java interfaces.  It then
+provides an Android-specific implementation of those interfaces.  The
+best C interpreters out there expect to use GLK for I/O, so this
+allows us our pick of C interpreters.
+
+
+Redistribution and Licensing
+-----------------------------
+
+Twisty is open source software, and is distributed as a whole under
+the GPL v3 license.  It depends heavily on the GlkJNI project, which
+is also under GPL v3; on 'nitfol', a z-machine interpreter, under the
+GPL v2 (which we're releasing under a "later version", GPL v3); and
+also on 'git', a Glulx interpreter, under an MIT license.  The
+collective Twisty product is thus safely all GPLv3-able.
+
+Three free, classic games are packaged with the application;  for
+details on their licensing, see the LICENSE file.  (This doesn't
+violate the GPL as far as we know, as these games aren't linked into
+the code, nor are they necessary for the code to build or run.  They
+are merely interpreted and provided for convenience to users.)
+
+Patches are welcome!  Please mail us at twisty-dev@googlegroups.com.
+
+
+Installing the .apk
+-------------------
+
+The latest .apk can be downloaded directly from Google Code and pushed
+via 'adb install', or just grab it from Android Market.  :-) The .apk
+has a few sample games built in, but you can also load any z3, z5, or
+z8 came from the SDcard.
+
+
+Building from Source
+--------------------
+
+** For Developers Only.  Warning:  this is complex!
+
+
+A.  Prerequisites
+
+ 1. The Android SDK (at least version 1.6), unpacked and ready to go. 
+ You can download the current SDK from http://developer.android.com/sdk 
+
+ 2. A working Eclipse installation (at least 3.5, "Galileo") with the
+ latest Android Development tools plugin (ADT) installed. To download 
+ the current ADT within Eclipse, open Preferences>Install/Update/Available
+ Sites, and Add "https://dl-ssl.google.com/android/eclipse/". You will also
+ need to provide a path to the SDK by opening Preferences>Android.
+
+ 3. The Android NDK (at least version 1.6) unpacked somewhere. (Say,
+ at location $NDK).  Remember that after unpacking it, you need to run
+ the 'host-setup.sh' script to prep the kit.  Read the details inside
+ its docs/INSTALL.txt file.
+
+ 4. A copy of the Twisty codebase -- which you must already have if
+ you're reading this.  (Say, at location $TWISTY.)
+
+ 5. A copy of the glkjni codebase at location $GLKJNI.  Either grab a
+ release tarball or do an svn checkout:
+
+   svn co http://glkjni.googlecode.com/svn/trunk $GLKJNI
+
+ After getting glkjni, you may need to tweak the Makefile
+ appropriately for your OS.
+
+B.  Assembling the Pieces
+
+The Twisty codebase contains the main Twisty "activity", a few sample
+games, and some C interpreters that expect to use GLK for I/O.  The
+Twisty activity is essentially a high-level consumer of GlkJNI.
+
+The GlkJNI codebase contains 'glkjni' (the C code implementing
+GLK), as well as specific java implementations of these interfaces.
+The one we care about is 'roboglk', which maps the interfaces to
+Android's UI.
+
+Assuming that these two codebases are installed at $TWISTY and
+$GLKJNI, you need to make this symbolic link from your $NDK area:
+
+  $NDK/apps/twisty         --> $TWISTY
+
+... and then make another symbolic link within your $TWISTY area:
+
+  $TWISTY/jni/glkjni       --> $GLKJNI/glkjni
+
+In other words, $NDK/apps/twisty/ should be a symlink to the root of
+your Twisty code workspace, and twisty's jni directory needs a symlink
+to the glkjni codebase.  This allows NDK to find all the C code it
+needs, and also which Eclipse project to put the .so in.
+
+
+C.  Building the C code
+
+To compile the core glkjni C code and the C interpreters into a single
+shared library: 
+
+   $ cd $NDK
+   $ make APP=twisty
+
+After compilation, the final libtwistyterps.so will be automatically
+copied to $TWISTY/twisty/libs/armeabi/
+
+(To forcibly rebuild, do a 'make APP=twisty clean' first.)
+
+
+D.  Building the Java code
+
+ 1. Start a new "generic project" and choose "Android project".  In
+    the following dialog box, choose "based on existing source" and
+    then select $TWISTY/twisty/.
+
+ 2. Now open the project's properties (Project->Properties) and choose
+    "Java Build Path" from the list on the left.  Then choose the
+    'Source' tab and press the 'Link Source' button.  Navigate to
+    $GLKJNI/roboglk and select that directory.  It should now appear
+    in the list with $TWISTY/src and $TWISTY/gen. Now select the 'Order 
+    and Export' tab and arrange the build class order from top to bottom
+    as Twisty/glkjni/roboglk, Twisty/src, Twisty/gen, and Android 1.6. 
+    The box next to Android 1.6 should be checked.
+
+ 3. In the same Project->Properties panel, choose 'Java Compiler' and
+    make sure it's set to Java compliance level 1.6.
+
+E.  Running Twisty in the Android Virtual Device (AVD)
+
+ 1. Twisty should now build correctly. To run it in an AVD, you must first
+    configure an AVD. This can be done through the menu Window->Android SDK
+    and AVD manager. Select 'Virtual devices' on the left, then press the
+    'New' button to create a new entry. Add a name and specify the target as 
+    'Android 1.6 - API level 4'. For SD card, you can make a new, blank card
+    by just indicating the size, e.g., 64M. Finally, choose a skin. You may
+    make more than one AVD. 
+
+ 2. To specify the AVD to run, select Run->Run Configuration. Select the 
+    'target' tab, and then check the box next to your choice of AVD.
+
+ 3. Select 'Run'. The emulator should launch, report mounting of the SDcard,
+    and then begin the Twisty activity.

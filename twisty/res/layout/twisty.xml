@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/all" android:orientation="vertical"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
+    android:focusable="true" android:focusableInTouchMode="true">
+  <LinearLayout android:id="@+id/status_v3" android:orientation="horizontal"
+      android:layout_width="fill_parent" android:layout_height="wrap_content"
+      android:background="@drawable/status_bg" >
+    <TextView android:id="@+id/statusL" android:textSize="12sp" android:textStyle="bold"
+      android:layout_width="wrap_content" android:layout_height="wrap_content"
+       android:layout_weight="1"
+       android:textColor="@drawable/status_fg" />
+    <TextView android:id="@+id/statusR"
+      android:textSize="12sp"
+      android:textStyle="bold"
+      android:layout_width="wrap_content" android:layout_height="wrap_content"
+      android:textColor="@drawable/status_fg" />
+  </LinearLayout>
+    <TextView android:textSize="12sp"
+      android:layout_width="fill_parent" android:layout_height="wrap_content"
+      android:layout_weight="0"
+      android:background="@drawable/error_bg" 
+      android:textColor="@drawable/error_fg"
+      android:id="@+id/errors"/>
+    <com.google.code.twisty.TwistyView android:id="@+id/status_v5"
+      android:layout_width="fill_parent" android:layout_height="wrap_content"
+      android:layout_weight="0"
+      android:background="@drawable/status_bg" android:typeface="monospace"/>
+    <com.google.code.twisty.TwistyView android:id="@+id/body"
+      android:layout_width="fill_parent" android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:background="@drawable/body_bg"
+      android:scrollbars="vertical" android:fadingEdge="vertical" android:fadingEdgeLength="6sp" android:typeface="monospace"/>
+    <TextView android:textSize="12sp"
+      android:layout_width="wrap_content" android:layout_height="wrap_content"
+      android:layout_weight="0"
+      android:text="@string/more_prompt"
+      android:background="@drawable/more_bg" 
+      android:textColor="@drawable/more_fg"
+      android:id="@+id/more"/>
+</LinearLayout>
