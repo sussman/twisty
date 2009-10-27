@@ -34,12 +34,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import com.google.code.twisty.TwistyMessage;
-
+import com.google.code.twisty.R;
 
 import org.brickshadow.roboglk.Glk;
 import org.brickshadow.roboglk.GlkFactory;
 import org.brickshadow.roboglk.GlkLayout;
 import org.brickshadow.roboglk.GlkStyle;
+import org.brickshadow.roboglk.GlkStyleHint;
+import org.brickshadow.roboglk.GlkWinType;
 import org.brickshadow.roboglk.io.StyleManager;
 import org.brickshadow.roboglk.io.TextBufferIO;
 import org.brickshadow.roboglk.util.GlkEventQueue;
@@ -57,6 +59,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Environment;
@@ -120,6 +123,7 @@ public class Twisty extends Activity {
 	private GlkLayout glkLayout;
 	private TextBufferIO mainWin;
 	private TextBufferView tv;
+	private LinearLayout ll;
 	private Thread terpThread = null;
 	private String gamePath;
 	private Boolean gameIsRunning = false;
@@ -176,8 +180,8 @@ public class Twisty extends Activity {
 		glkLayout = new GlkLayout(this);
 		
 		// put it all together
-		LinearLayout ll = new LinearLayout(this);
-		ll.setBackgroundColor(0xffffffff);
+		ll = new LinearLayout(this);
+		ll.setBackgroundColor(Color.argb(0xFF, 0xFE, 0xFF, 0xCC));
 		ll.setOrientation(android.widget.LinearLayout.VERTICAL);
 		ll.addView(iv);
 		ll.addView(tv);
@@ -260,7 +264,7 @@ public class Twisty extends Activity {
 		StringBuffer battstate = new StringBuffer();
 		appendBatteryState(battstate);
 
-		mainWin.doStyle(GlkStyle.Preformatted);
+		mainWin.doStyle(GlkStyle.Normal);
 		
 		mainWin.doReverseVideo(true);
 		mainWin.doPrint("Twisty " + pkginfo.versionName + ", (C) Google Inc.");
@@ -417,6 +421,7 @@ public class Twisty extends Activity {
 		
 		// The GLK object for I/O between Android UI and our C library
 		glk = new TwistyGlk(this, glkLayout, dialog_handler);
+		glk.setStyleHint(GlkWinType.AllTypes, GlkStyle.Normal, GlkStyleHint.Size, -2);
 		
 		terpThread = new Thread(new Runnable() {
 	           @Override
@@ -498,6 +503,7 @@ public class Twisty extends Activity {
 
 	/** Stops the currently running interpreter. */
 	public void stopTerp() {
+		setContentView(ll);
 		if (terpThread != null)
 			terpThread.interrupt();
 		gameIsRunning = false;
