@@ -483,20 +483,14 @@ public class Twisty extends Activity {
 	
     /* Helper to suck all data from an InputStream and push to an OutputStream */
     void suckstream(InputStream instream, OutputStream outstream) throws IOException {
-    	byte buffer[], oldbuffer[];
-    	int currentbytes = 0, got = 0, bytesleft = 65536, buffersize = 65536;
-
-    	buffer = new byte[buffersize];
-    	while (got != -1) {
-    		bytesleft -= got;
-    		currentbytes += got;
-    		if (bytesleft == 0) {
-    			outstream.write(buffer, 0, currentbytes);
-    			bytesleft = buffersize;
-    			currentbytes = 0;
-    		}
-    		got = instream.read(buffer, currentbytes, bytesleft);
-        }
+    	int got = 0, buffersize = 65536;
+    	byte buffer[] = new byte[buffersize];
+    	while (true) {
+    		got = instream.read(buffer, 0, buffersize);
+    		if (got == -1)
+    			break; // got no data; end of stream
+    		outstream.write(buffer, 0, got);
+    	}
     }
     
     
