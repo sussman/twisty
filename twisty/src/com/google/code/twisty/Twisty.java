@@ -24,11 +24,11 @@ package com.google.code.twisty;
 // explanation of how to build both the C and java code in this project.
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -65,12 +65,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.text.Selection;
-import android.text.SpannableStringBuilder;
-import android.text.method.TextKeyListener;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -385,7 +381,7 @@ public class Twisty extends Activity {
 			if (resultCode == RESULT_OK && data != null) {
 				// File picker completed
 				Log.i(TAG, "Opening user-picked file: " + data);
-				startzm(data);
+				startTerp(data);
 			}
 			break;
 		default:
@@ -407,26 +403,19 @@ public class Twisty extends Activity {
 	 * Start a terp thread, loading the program from the given game file
 	 * @param path Path to the gamefile to execute
 	 */
-	void startzm(String path) {
-		// TODO:  this is probably where we'd launch a game thread.
-		// For now, we don't pay attention to the incoming stream, we just
-		// dumbly fire up the 'nitfol' glk program in our C library using
-		// curses.z5.
-		//tv2 = new TextBufferView(this);
-		//tv2.setFocusableInTouchMode(true);
+	void startTerp(String path) {
 		setContentView(glkLayout);
 		glkLayout.requestFocus();
-		//tv2.requestFocus();
 		gamePath = path;
 		
-		// The GLK object for I/O between Android UI and our C library
+		// Make a GLK object which encapsulates I/O between Android UI and our C library
 		glk = new TwistyGlk(this, glkLayout, dialog_handler);
 		glk.setStyleHint(GlkWinType.AllTypes, GlkStyle.Normal, GlkStyleHint.Size, -2);
 		
 		terpThread = new Thread(new Runnable() {
 	           @Override
 	            public void run() {
-	        	   // When twistyterps supports multiple interpreters,
+	        	   // TODO: When twistyterps supports multiple interpreters,
 	        	   // it will be important that the first arg to startup
 	        	   // be the correct interpreter name.
 	               String[] args = new String[] {"nitfol", gamePath};
@@ -457,7 +446,60 @@ public class Twisty extends Activity {
 		gameIsRunning = true;
 	}
 	
+	/* Starts one of the 'built in' games from an android raw resource. */
+    void startTerp(int resource) {
+    	Integer gamenum = new Integer(resource);
+    	String opaqueFilename = gamenum.toString();
+    	Log.i(TAG, "Loading game resource: " + opaqueFilename);
+    	
+    	// The absolute disk path to the privately-stored gamefile:
+    	File gamefile = getFileStreamPath(opaqueFilename);
+    	Log.i(TAG, "Looking for gamefile at " + gamefile.getAbsolutePath());
+    	
+		if (! gamefile.exists()) {
+			// Do a one-time dump from raw resource to disk.
+			FileOutputStream foutstream;
+			Resources r = new Resources(getAssets(), new DisplayMetrics(), null);
+			InputStream gamestream = r.openRawResource(resource);
+			try {
+				foutstream = openFileOutput(opaqueFilename, MODE_PRIVATE);
+			} catch (FileNotFoundException e) {
+				Log.i(TAG, "Failed to open outputstream for filename " + opaqueFilename);
+				return;
+			}
+			try {
+				Log.i(TAG, "About to spew raw data to disk...");
+				suckstream(gamestream, foutstream);
+			} catch (IOException e) {
+				Log.i(TAG, "Failed to copy raw game to file." + opaqueFilename);
+				return;
+			}
+			Log.i(TAG, "Completed dump of raw data to disk.");
+		}
+    	
+		Log.i(TAG, "Starting gamefile located at " + gamefile.getAbsolutePath());
+		startTerp(gamefile.getAbsolutePath());
+    }
 	
+    /* Helper to suck all data from an InputStream and push to an OutputStream */
+    void suckstream(InputStream instream, OutputStream outstream) throws IOException {
+    	byte buffer[], oldbuffer[];
+    	int currentbytes = 0, got = 0, bytesleft = 65536, buffersize = 65536;
+
+    	buffer = new byte[buffersize];
+    	while (got != -1) {
+    		bytesleft -= got;
+    		currentbytes += got;
+    		if (bytesleft == 0) {
+    			outstream.write(buffer, 0, currentbytes);
+    			bytesleft = buffersize;
+    			currentbytes = 0;
+    		}
+    		got = instream.read(buffer, currentbytes, bytesleft);
+        }
+    }
+    
+    
 	/** Convenience helper to set visibility of any view */
 	void setViewVisibility(int id, int vis) {
 		findViewById(id).setVisibility(vis);
@@ -469,37 +511,6 @@ public class Twisty extends Activity {
 		return gameIsRunning;
 	}
 	
-	/** Convenience helper that turns a stream into a byte array */
-	byte[] suckstream(InputStream mystream) throws IOException {
-		byte buffer[];
-		byte oldbuffer[];
-		int currentbytes = 0;
-		int bytesleft;
-		int got;
-		int buffersize = 65536;
-
-		buffer = new byte[buffersize];
-		bytesleft = buffersize;
-		got = 0;
-		while (got != -1) {
-			bytesleft -= got;
-			currentbytes += got;
-			if (bytesleft == 0) {
-				oldbuffer = buffer;
-				buffer = new byte[buffersize + currentbytes];
-				System.arraycopy(oldbuffer, 0, buffer, 0, currentbytes);
-				oldbuffer = null;
-				bytesleft = buffersize;
-			}
-			got = mystream.read(buffer, currentbytes, bytesleft);
-		}
-		if (buffer.length != currentbytes) {
-			oldbuffer = buffer;
-			buffer = new byte[currentbytes];
-			System.arraycopy(oldbuffer, 0, buffer, 0, currentbytes);
-		}
-		return buffer;
-	}
 
 	/** Stops the currently running interpreter. */
 	public void stopTerp() {
@@ -525,13 +536,11 @@ public class Twisty extends Activity {
 			menu.add(Menu.NONE, R.raw.advent, 0, "Adventure").setShortcut('0', 'a');
 			menu.add(Menu.NONE, R.raw.anchor, 1, "Anchorhead").setShortcut('1', 'b');
 			menu.add(Menu.NONE, R.raw.curses, 2, "Curses").setShortcut('2', 'c');
-			menu.add(Menu.NONE, MENU_PICK_FILE, 3, "Open file...").setShortcut('5', 'o');
+			menu.add(Menu.NONE, MENU_PICK_FILE, 3, "Open Game...").setShortcut('5', 'o');
 			menu.add(Menu.NONE, MENU_SHOW_HELP, 4, "Help!?").setShortcut('6', 'h');
 		} else {
 			menu.add(Menu.NONE, MENU_RESTART, 0, "Restart").setShortcut('7', 'r');
 			menu.add(Menu.NONE, MENU_STOP, 1, "Stop").setShortcut('9', 's');
-			// menu.add(Menu.NONE, DEBUG_ZM_DUMP, 2, "Dump");
-			// menu.add(Menu.NONE, DEBUG_PAUSE_RESUME, 3, "Pause/Resume");
 		}
 		return true;
 	}
@@ -555,8 +564,7 @@ public class Twisty extends Activity {
 			// TODO:  printHelpMessage();
 			break;
 		default:
-			// TODO:  screen.clear();
-			// startzm(item.getItemId());
+			startTerp(item.getItemId());
 		break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -773,7 +781,7 @@ public class Twisty extends Activity {
 					String path = (String) zgame_paths.get(checkedId);
 					if (path != null) {
 						stopTerp();
-						startzm(path);
+						startTerp(path);
 					}
 				}
 			});
