@@ -124,9 +124,6 @@ public class Twisty extends Activity {
 	private String gamePath;
 	private Boolean gameIsRunning = false;
 	
-	// The curses.z5 file path
-	File cursesFile;
-	
 	// Passed down to TwistyGlk object, so terp thread can send Messages back to this thread
 	private Handler dialog_handler;
 	private TwistyMessage dialog_message; // most recent Message received
@@ -137,8 +134,7 @@ public class Twisty extends Activity {
 	private String[] discovered_zgames;
 	// A persistent map of button-ids to zgames found on the sdcard (absolute paths)
 	private HashMap<Integer, String> zgame_paths = new HashMap<Integer, String>();
-	private Object runningProgram;
-	private Runnable preStartZM;
+
 
 	/** The native C library which contains the interpreter making Glk calls. 
 	    To build this library, see the README file. */
@@ -153,10 +149,6 @@ public class Twisty extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		
 		UISync.setInstance(this);
-		
-		/* TODO: this is very simple and just throws an exception
-		 *       if curses.z5 can't be copied to the sdcard. */ 
-		ensureStoryFile();
 
 		// An imageview to show the twisty icon
 		ImageView iv = new ImageView(this);
@@ -204,49 +196,6 @@ public class Twisty extends Activity {
 		};
 	}
 	
-	/*
-	 * Copies curses.z5 to sdcard so it can be accessed by a glk file
-	 * stream.
-	 */
-	private void ensureStoryFile() {
-		String storagestate = Environment.getExternalStorageState();
-    	if (!storagestate.equals(Environment.MEDIA_MOUNTED)) {
-    		throw new RuntimeException("no writable media");
-    	}
-    	String sdpath = Environment.getExternalStorageDirectory().getPath();
-		File savedir = new File(sdpath + "/twisty");
-		if (!savedir.exists()) {
-			savedir.mkdirs();
-		}
-		else if (!savedir.isDirectory()) {
-			throw new RuntimeException("output dir is a file");
-		}
-		cursesFile = new File(savedir, "curses.z5");
-		if (!cursesFile.exists()) {
-			Resources r = new Resources(getAssets(),
-					new DisplayMetrics(), null);
-			InputStream istream = r.openRawResource(R.raw.curses);
-			
-			// quick-n-dirty file copy
-			FileOutputStream ostream = null;
-			byte[] buffer = new byte[4096];
-			int bytesRead;
-			try {
-				ostream = new FileOutputStream(cursesFile);
-				while ((bytesRead = istream.read(buffer)) != -1) {
-					ostream.write(buffer, 0, bytesRead);
-				}
-			} catch (IOException e) {
-				throw new RuntimeException("could not copy story");
-			} finally {
-				if (ostream != null) {
-					try {
-						ostream.close();
-					} catch (IOException e) {}
-				}
-			}
-		}
-	}
 
 	private void printWelcomeMessage() {
 		// What version of Twisty is running?
@@ -509,8 +458,10 @@ public class Twisty extends Activity {
 	/** Stops the currently running interpreter. */
 	public void stopTerp() {
 		setContentView(ll);
-		if (terpThread != null)
+		if (terpThread != null) {
 			terpThread.interrupt();
+			Log.i(TAG, "Interrupted terpThread.");
+		}
 		gameIsRunning = false;
 	}
 
