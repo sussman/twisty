@@ -91,6 +91,7 @@ public class Twisty extends Activity {
 	private static final int DEBUG_ZM_DUMP = 105;
 	private static final int DEBUG_PAUSE_RESUME = 106;
 	private static final int MENU_SHOW_HELP = 107;
+	private static final int MENU_PICK_SETTINGS = 108;
 	
 	private static String TAG = "Twisty";
 	private static final String FIXED_FONT_NAME = "Courier";
@@ -457,12 +458,12 @@ public class Twisty extends Activity {
 
 	/** Stops the currently running interpreter. */
 	public void stopTerp() {
-		setContentView(ll);
 		if (terpThread != null) {
 			terpThread.interrupt();
 			Log.i(TAG, "Interrupted terpThread.");
 		}
 		gameIsRunning = false;
+		setContentView(ll);
 	}
 
 	@Override
@@ -481,8 +482,9 @@ public class Twisty extends Activity {
 			menu.add(Menu.NONE, R.raw.advent, 0, "Adventure").setShortcut('0', 'a');
 			menu.add(Menu.NONE, R.raw.anchor, 1, "Anchorhead").setShortcut('1', 'b');
 			menu.add(Menu.NONE, R.raw.curses, 2, "Curses").setShortcut('2', 'c');
-			menu.add(Menu.NONE, MENU_PICK_FILE, 3, "Open Game...").setShortcut('5', 'o');
-			menu.add(Menu.NONE, MENU_SHOW_HELP, 4, "Help!?").setShortcut('6', 'h');
+			menu.add(Menu.NONE, MENU_PICK_FILE, 3, "Open Game...").setShortcut('3', 'o');
+			menu.add(Menu.NONE, MENU_PICK_SETTINGS, 4, "Settings").setShortcut('4', 's');
+			menu.add(Menu.NONE, MENU_SHOW_HELP, 5, "Help!?").setShortcut('5', 'h');
 		} else {
 			menu.add(Menu.NONE, MENU_RESTART, 0, "Restart").setShortcut('7', 'r');
 			menu.add(Menu.NONE, MENU_STOP, 1, "Stop").setShortcut('9', 's');
@@ -505,6 +507,9 @@ public class Twisty extends Activity {
 		case MENU_PICK_FILE:
 			pickFile();
 			break;
+		case MENU_PICK_SETTINGS:
+			pickSettings();
+			break;
 		case MENU_SHOW_HELP:
 			// TODO:  printHelpMessage();
 			break;
@@ -514,6 +519,13 @@ public class Twisty extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+	
+	
+	/** Launch UI to adjust application settings **/
+	private void pickSettings() {
+		
+	}
+	
 
 	/** Launch UI to pick a file to load and execute */
 	private void pickFile() {
