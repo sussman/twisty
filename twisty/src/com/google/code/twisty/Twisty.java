@@ -127,6 +127,7 @@ public class Twisty extends Activity {
 	
 	// Passed down to TwistyGlk object, so terp thread can send Messages back to this thread
 	private Handler dialog_handler;
+	private Handler terp_handler;
 	private TwistyMessage dialog_message; // most recent Message received
 	// Persistent dialogs created in onCreateDialog() and updated by onPrepareDialog()
 	private Dialog restoredialog;
@@ -194,6 +195,26 @@ public class Twisty extends Activity {
 					showDialog(DIALOG_CHOOSE_ZGAME);
 				}
 			} 
+		};
+		terp_handler = new Handler() {
+			public void handleMessage(Message m) {
+               switch (m.arg1) {
+               case -1:
+            	   Log.i("twistyterp", "The interpreter did not start");
+            	   break;
+               case 0:
+            	   Log.i("twistyterp", "The interpreter exited normally");
+            	   break;
+               case 1:
+            	   Log.i("twistyterp", "The interpreter exited abnormally");
+            	   break;
+               case 2:
+            	   Log.i("twistyterp", "The interpreter was interrupted");
+            	   break;
+               }
+               setContentView(ll);
+               gameIsRunning = false;
+			}
 		};
 	}
 	
@@ -361,7 +382,6 @@ public class Twisty extends Activity {
 		// Make a GLK object which encapsulates I/O between Android UI and our C library
 		glk = new TwistyGlk(this, glkLayout, dialog_handler);
 		glk.setStyleHint(GlkWinType.AllTypes, GlkStyle.Normal, GlkStyleHint.Size, -2);
-		
 		terpThread = new Thread(new Runnable() {
 	           @Override
 	            public void run() {
@@ -375,22 +395,10 @@ public class Twisty extends Activity {
 	                   res = GlkFactory.run();
 	               }
 	               GlkFactory.shutdown();
-	               switch (res) {
-	               case -1:
-	            	   Log.i("twistyterp", "The interpreter did not start");
-	            	   break;
-	               case 0:
-	            	   Log.i("twistyterp", "The interpreter exited normally");
-	            	   break;
-	               case 1:
-	            	   Log.i("twistyterp", "The interpreter exited abnormally");
-	            	   break;
-	               case 2:
-	            	   Log.i("twistyterp", "The interpreter was interrupted");
-	            	   break;
-	               }
-	               finish();
-	            } 
+	               Message m = terp_handler.obtainMessage();
+	               m.arg1 = res;
+	               terp_handler.sendMessage(m);
+	            }
 	        });
 		terpThread.start();
 		gameIsRunning = true;
