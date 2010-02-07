@@ -314,6 +314,7 @@ void z_init(strid_t zfile)
 
   z_random(0); /* Initialize random number generator */
 
+  z_memory = NULL;
   init_windows(is_fixed, 80, 24);
 
   glk_stream_set_position(zfile, zfile_offset, seekmode_Start);

@@ -470,8 +470,6 @@ public class Twisty extends Activity {
 			terpThread.interrupt();
 			Log.i(TAG, "Interrupted terpThread.");
 		}
-		gameIsRunning = false;
-		setContentView(ll);
 	}
 
 	@Override
