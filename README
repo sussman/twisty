@@ -96,13 +96,6 @@ A.  Prerequisites
  4. A copy of the Twisty codebase -- which you must already have if
  you're reading this.  (Say, at location $TWISTY.)
 
- 5. A copy of the glkjni codebase at location $GLKJNI.  Either grab a
- release tarball or do an svn checkout:
-
-   svn co http://glkjni.googlecode.com/svn/trunk $GLKJNI
-
- After getting glkjni, you may need to tweak the Makefile
- appropriately for your OS.
 
 B.  Assembling the Pieces
 
@@ -120,13 +113,8 @@ $GLKJNI, you need to make this symbolic link from your $NDK area:
 
   $NDK/apps/twisty         --> $TWISTY
 
-... and then make another symbolic link within your $TWISTY area:
-
-  $TWISTY/jni/glkjni       --> $GLKJNI/glkjni
-
 In other words, $NDK/apps/twisty/ should be a symlink to the root of
-your Twisty code workspace, and twisty's jni directory needs a symlink
-to the glkjni codebase.  This allows NDK to find all the C code it
+your Twisty code workspace.  This allows NDK to find all the C code it
 needs, and also which Eclipse project to put the .so in.
 
 
@@ -152,12 +140,13 @@ D.  Building the Java code
 
  2. Now open the project's properties (Project->Properties) and choose
     "Java Build Path" from the list on the left.  Then choose the
-    'Source' tab and press the 'Link Source' button.  Navigate to
-    $GLKJNI/roboglk and select that directory.  It should now appear
-    in the list with $TWISTY/src and $TWISTY/gen. Now select the 'Order 
-    and Export' tab and arrange the build class order from top to bottom
-    as Twisty/glkjni/roboglk, Twisty/src, Twisty/gen, and Android 1.6. 
-    The box next to Android 1.6 should be checked.
+    'Source' tab and press the 'Link Source' button.  Navigate to the
+    'roboglk' directory at the top of twisty tree and and select that.
+    It should now appear in the list with $TWISTY/src and
+    $TWISTY/gen. Now select the 'Order and Export' tab and arrange the
+    build class order from top to bottom as Twisty/glkjni/roboglk,
+    Twisty/src, Twisty/gen, and Android 1.6.  The box next to Android
+    1.6 should be checked.
 
  3. In the same Project->Properties panel, choose 'Java Compiler' and
     make sure it's set to Java compliance level 1.6.
