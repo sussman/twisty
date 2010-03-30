@@ -29,9 +29,11 @@ import org.brickshadow.roboglk.util.GlkEventQueue;
 import android.app.Activity;
 import android.os.Message;
 import android.os.Handler;
+import android.util.Log;
 
 
 public class TwistyGlk implements Glk {
+	private final String TAG = "TwistyGlk";
 
     private final GlkEventQueue eventQueue;
     
@@ -150,10 +152,15 @@ public class TwistyGlk implements Glk {
     @Override
     public void windowOpen(GlkWindow splitwin, int method, int size,
             int wintype, int id, GlkWindow[] wins) {
+    	 
+    	Log.d(TAG, "windowOpen: " + wintype + ":" + size + ":" + method);
     	
-    	if (splitwin != null || mainWin != null) {
-    		return;
+    	if (wintype == GlkWinType.TextGrid) {
+    		Log.d(TAG, "converting grid win to buffer win.");
+    		wintype = GlkWinType.TextBuffer;
     	}
+    	
+    	// Right now, the only supported window type is TextBuffer.
     	if (wintype != GlkWinType.TextBuffer) {
     		return;
     	}
