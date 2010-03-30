@@ -19,7 +19,7 @@ package org.brickshadow.roboglk.io;
 
 
 import org.brickshadow.roboglk.GlkStyle;
-import org.brickshadow.roboglk.AbstractGlkTextWindow;
+import org.brickshadow.roboglk.GlkTextWindow;
 import org.brickshadow.roboglk.view.TextWindowView;
 
 import android.text.Editable;
@@ -35,7 +35,7 @@ public abstract class TextIO {
 	/**
      * The glk window wrapper associated with a view.
      */
-    protected AbstractGlkTextWindow win;
+    protected GlkTextWindow win;
     
     protected final TextWindowView tv;
     
@@ -95,7 +95,7 @@ public abstract class TextIO {
     	}
     }
     
-    public void setWindow(AbstractGlkTextWindow win) {
+    public void setWindow(GlkTextWindow win) {
         this.win = win;
     }
     

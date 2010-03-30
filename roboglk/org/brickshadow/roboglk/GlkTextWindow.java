@@ -29,7 +29,7 @@ import android.app.Activity;
 import android.view.KeyEvent;
 
 
-public abstract class GlkTextWindow extends AbstractGlkTextWindow {
+public abstract class GlkTextWindow extends GlkWindow {
 
 	private final TextIO io;
 	private final GlkEventQueue queue;
@@ -61,7 +61,6 @@ public abstract class GlkTextWindow extends AbstractGlkTextWindow {
 		io.setWindow(this);
 	}
 	
-	@Override
 	public void recordKey(char c) {
 		if (c == '\n') {
             processKey(GlkKeycode.Return);
@@ -74,7 +73,6 @@ public abstract class GlkTextWindow extends AbstractGlkTextWindow {
         }
 	}
 
-	@Override
 	public void recordKey(int c) {
 		switch (c) {
         case KeyEvent.KEYCODE_DEL:
@@ -140,7 +138,6 @@ public abstract class GlkTextWindow extends AbstractGlkTextWindow {
         queue.putEvent(GlkEventQueue.newCharInputEvent(this, c));
     }
 
-	@Override
 	public void recordLine(char[] line, int len, boolean isEvent) {
 		int inputLen = (len > maxInputLength ?
                 maxInputLength : len);

@@ -21,109 +21,101 @@ package org.brickshadow.roboglk;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
+import android.util.Log;
+
 
 /**
  * A Glk window.
  * <p>
- * Not all types of windows will require each of these methods; GlkJNI
- * will not call a method on the wrong type of window. The various
- * other {@code GlkXXXWindow} classes are abstract convenience classes which
- * provide do-nothing implementations of inapplicable methods.
+ * This is the base class for all other {@code GlkWindow} types. It provides
+ * stubs for all of the window methods which will optionally log warnings if
+ * called.
+ * <p>
+ * Concrete classes derived from {@code GlkWindow} implement various window
+ * types described in Section 3, Windows, of the GLK spec. Not all derived
+ * classes will require all of these methods. {@code GlkJNI} will not call a
+ * method on the wrong type of window. 
+ * <p>
+ * In general, the name of the method will be the same as the C function
+ * defined in the spec, converted to camel case with the {@code 'glk_window_'}
+ * prefix removed.
  */
-public interface GlkWindow {
-
-    /**
-     * Clears the window.
-     */
-    void clear();
+public class GlkWindow {
+	// 0 = nothing, 1 = methodName, 2 = methodName and stack trace
+	static private int log_level;
+	
+	/**
+	 * Debugging helper to log when a method on the base class is called.
+	 * TODO(gmadrid): get rid of this at some point
+	 * @param methodName
+	 */
+	static private void MaybeLogUsage(String methodName) {
+		if (log_level == 0) return;
+		if (log_level == 1) Log.w("GlkWindow", methodName + " unimplemented.");
+		if (log_level == 2) 
+			Log.w("GlkWindow", methodName + " unimplemented", new Exception());
+	}
 
     /**
      * Returns the size of the window in the {@code dim[]} array.
      * <ul>
      * <li><b>{@code dim[0]}</b> - the window width</li>
      * <li><b>{@code dim[1]}</b> - the window height</li>
-     * <p>
+     * </ul>
      * Applies to: text, graphics, pair
      * 
      * @param dim
-     *           The width and height of the window.<p>
+     *           Two element array in which to return the 
+     *           width and height of the window.<p>
+     * @see See GLK spec Section 3.3, Changing Window Constraints
      */
-    void getSize(int[] dim);
+    public void getSize(int[] dim) {
+    	MaybeLogUsage("getSize");
+    }
 
     /**
-     * Requests a mouse event for the window. This will not be called
-     * if there is already a reqeust for mouse input in the window.
+     * Rearranges the children of the window.
      * <p>
-     * Applies to: text, graphics
-     */
-    void requestMouseEvent();
-
-    /**
-     * Cancels mouse events for the window. This method may be called
-     * when there is no pending request for a mouse event.
-     * <p>
-     * Applies to: text, graphics
-     */
-    void cancelMouseEvent();
-
-    /**
-     * Changes the current output style of the window.
-     * <p>
-     * Applies to: text
+     * Applies to: pair
      * 
-     * @param val
-     *           One of the constants in {@link GlkStyle}.<p>
+     * @param method
+     *           The new split method.<p>
+     * @param size
+     *           The new size constraint.<p>
+     * @param key
+     *           The new key window.<p>
+     * @see GLK spec Section 3.3, Changing Window Constraints
      */
-    void setStyle(int val);
+    public void setArrangement(int method, int size, GlkWindow key) {
+    	MaybeLogUsage("setArrangement");
+    }
 
     /**
-     * Returns the current value of a style attribute in the window.
+     * Positions the cursor in the window.
      * <p>
-     * Applies to: text
+     * Applies to: text grid
      * 
-     * @param styl
-     *           One of the constants in {@link GlkStyle}.<p>
-     * @param hint
-     *           One of the constants in {@link GlkStyleHint}.<p>
-     * @throws RuntimeException
-     *           if the style attribute cannot be measured.
-     * @return
-     *           The current value of the style attribute.
+     * @param xpos
+     *           The x position of the cursor. If this is past the end of
+     *           a line, the cursor moves to the beginning of the next
+     *           line.<p>
+     * @param ypos
+     *           The y position of the cursor. If this is greater than the
+     *           height of the window, the cursor goes "off screen" and
+     *           further printing has no effect.
+     * @see See GLK spec Section 3.5.4, Text Grid Windows
      */
-    int measureStyle(int styl, int hint);
+    public void moveCursor(int xpos, int ypos) {
+    	MaybeLogUsage("moveCursor");
+    }
 
     /**
-     * Checks if two styles are visually distinguishable in the
-     * window.
-     * <p>
-     * Applies to: text
-     * 
-     * @param styl1
-     *           One of the constants in {@link GlkStyle}.<p>
-     * @param styl2
-     *           One of the constants in {@link GlkStyle}.<p>
-     * @return
-     *           True if the styles are visually distingushable.
+     * Clears the window.
+     * @see see GLK spec Section 3.7, Other Window Functions.
      */
-    boolean distinguishStyles(int styl1, int styl2);
-
-    /**
-     * Prints a string in the window. It is possible for this method
-     * to be called twice in immediate succession, and since the
-     * underlying C library does not manage scrolling/pausing, this
-     * method may be called while the Java frontend has paused output.
-     * <p>
-     * Applies to: text
-     * <p>
-     * <b>Note:</b> GlkJNI buffers text output until the next call to
-     * {@code glk_select}, {@code glk_poll}, {@code glk_set_style},
-     * {@code glk_set_hyperlink}, {@code glk_request_line_input},
-     * {@code glk_window_move_cursor}, or {@code glk_exit}.
-     * 
-     * @param str
-     *           The string to print.<p>
-     */
-    void print(String str);
+    public void clear() {
+    	MaybeLogUsage("clear");
+    }
 
     /**
      * Requests character input in the window. This method will not be
@@ -132,16 +124,22 @@ public interface GlkWindow {
      * Applies to: text
      * @param unicode
      *           True if Unicode input is requested, false for Latin-1.
+     * @see see GLK spec Section 4.1, Character Input Events
      */
-    void requestCharEvent(boolean unicode);
+    public void requestCharEvent(boolean unicode) {
+    	MaybeLogUsage("requestCharEvent");
+    }
 
     /**
      * Cancels character input for the text window. This method may be
      * called when there is no pending request for character input.
      * <p>
      * Applies to: text
+     * @see see GLK spec Section 4.1, Character Input Events
      */
-    void cancelCharEvent();
+    public void cancelCharEvent() {
+    	MaybeLogUsage("cancelCharEvent");
+    }
 
     /**
      * Requests Latin-1 line input in the text window.
@@ -162,9 +160,11 @@ public interface GlkWindow {
      * @param initlen
      *           If non-zero, the length of pre-existing data in the
      *           buffer.<p>
+     * @see see GLK spec Section 4.2, Line Input Events
      */
-    void requestLineEvent(ByteBuffer buf, int maxlen,
-            int initlen);
+    public void requestLineEvent(ByteBuffer buf, int maxlen, int initlen) {
+    	MaybeLogUsage("requestLineEvent");
+    }
 
     /**
      * Requests Unicode line input in the text window.
@@ -185,9 +185,135 @@ public interface GlkWindow {
      * @param initlen
      *           If non-zero, the length of pre-existing data in the
      *           buffer.<p>
+     * @see see GLK spec Section 4.2, Line Input Events
      */
-    void requestLineEventUni(IntBuffer buf, int maxlen,
-            int initlen);
+    public void requestLineEventUni(IntBuffer buf, int maxlen, int initlen) {
+    	MaybeLogUsage("requestLineEventUni");
+    }
+
+    /**
+     * Cancels line input for the text window. This method may be called
+     * when there is no pending request for line input.
+     * <p>
+     * Applies to: text
+     *  
+     * @return
+     *           The number of characters, if any, already entered
+     *           during an active line input request.
+     * @see see GLK spec Section 4.2, Line Input Events
+     */
+    public int cancelLineEvent() {
+    	MaybeLogUsage("cancelLineEvent");
+    	return 0;
+    }
+    /**
+     * Requests a mouse event for the window. This will not be called
+     * if there is already a request for mouse input in the window.
+     * <p>
+     * Applies to: text, graphics
+     * @see See GLK spec Section 4.3, Mouse Input Events
+     */
+    public void requestMouseEvent() {
+    	MaybeLogUsage("requestMouseEvent");	
+    }
+    
+    /**
+     * Cancels mouse events for the window. This method may be called
+     * when there is no pending request for a mouse event.
+     * <p>
+     * Applies to: text, graphics
+     * @see See GLK spec Section 4.3, Mouse Input Events
+     */
+    public void cancelMouseEvent() {
+    	MaybeLogUsage("cancelMouseEvent");
+    }
+    
+    /**
+     * Returns the current value of a style attribute in the window.
+     * <p>
+     * Applies to: text
+     * 
+     * @param styl
+     *           One of the constants in {@link GlkStyle}.<p>
+     * @param hint
+     *           One of the constants in {@link GlkStyleHint}.<p>
+     * @throws RuntimeException
+     *           if the style attribute cannot be measured.
+     * @return
+     *           The current value of the style attribute.
+     * TODO(gmadrid): change the name of this to conform with standard
+     * TODO(gmadrid): allow for possibility that it returns NULL
+     * @see See GLK spec Section 5.5.2, Testing the Appearance of Styles
+     */
+    public int measureStyle(int styl, int hint) throws RuntimeException {
+    	MaybeLogUsage("measureStyle");
+    	throw new RuntimeException();
+    }
+
+    /**
+     * Checks if two styles are visually distinguishable in the window.
+     * <p>
+     * Applies to: text
+     * 
+     * @param styl1
+     *           One of the constants in {@link GlkStyle}.<p>
+     * @param styl2
+     *           One of the constants in {@link GlkStyle}.<p>
+     * @return
+     *           True if the styles are visually distinguishable.
+     * TODO(gmadrid): change name to conform with standard
+     * @see See GLK spec Section 5.5.2, Testing the Appearance of Styles
+     */
+    public boolean distinguishStyles(int styl1, int styl2) {
+    	MaybeLogUsage("distinguishStyles");
+    	return false;
+    }
+
+    /**
+     * Requests hyperlink input in the text window. This method will not
+     * be called when there is a pending request for hyperlink input.
+     * <p>
+     * Applies to: text
+     * TODO(gmadrid): change the name to match the standard
+     * @see See GLK spec Section 9.2, Accepting Hyperlink Events
+     */
+    public void requestLinkEvent() {
+    	MaybeLogUsage("requestLinkEvent");
+    }
+
+    /**
+     * Cancels hyperlink input for the text window. This method may be
+     * called when there is no pending request for hyperlink input.
+     * <p>
+     * Applies to: text
+     * TODO(gmadrid): change the name to match the standard
+     * @see See GLK spec Section 9.2, Accepting Hyperlink Events
+     */
+    public void cancelLinkEvent() {
+    	MaybeLogUsage("cancelLinkEvent");
+    }
+
+    /**
+     * Prints a string in the window. It is possible for this method
+     * to be called twice in immediate succession, and since the
+     * underlying C library does not manage scrolling/pausing, this
+     * method may be called while the Java frontend has paused output.
+     * <p>
+     * Applies to: text
+     * <p>
+     * <b>Note:</b> GlkJNI buffers text output until the next call to
+     * {@code glk_select}, {@code glk_poll}, {@code glk_set_style},
+     * {@code glk_set_hyperlink}, {@code glk_request_line_input},
+     * {@code glk_window_move_cursor}, or {@code glk_exit}.
+     * 
+     * @param str
+     *           The string to print.<p>
+     * TODO(gmadrid): figure out what this does and where it is used.
+     * 				  This function is not in the spec that I can find.
+     */
+    public void print(String str) {
+    	MaybeLogUsage("print");
+    }
 
     /**
      * Sets the link value for the current text position in the window.
@@ -199,67 +325,10 @@ public interface GlkWindow {
      * @param val
      *           The link value.<p>
      */
-    void setLinkValue(int val);
-
-    /**
-     * Requests hyperlink input in the text window. This method will not
-     * be called when there is a pending request for hyperlink input.
-     * <p>
-     * Applies to: text
-     */
-    void requestLinkEvent();
-
-    /**
-     * Cancels hyperlink input for the text window. This method may be
-     * called when there is no pending request for hyperlink input.
-     * <p>
-     * Applies to: text
-     */
-    void cancelLinkEvent();
-
-    /**
-     * Cancels line input for the text window. This method may be called
-     * when there is no pending request for line input.
-     * <p>
-     * Applies to: text
-     *  
-     * @return
-     *           The number of characters, if any, already entered
-     *           during an active line input request.
-     */
-    int cancelLineEvent();
-
-    /**
-     * Positions the cursor in the window.
-     * <p>
-     * Applies to: text grid
-     * 
-     * @param xpos
-     *           The x position of the cursor. If this is past the end of
-     *           a line, the cursor moves to the beginning of the next
-     *           line.<p>
-     * @param ypos
-     *           The y position of the cursor. If this is greater than the
-     *           height of the window, the cursor goes "off screen" and
-     *           further printing has no effect.
-     */
-    void moveCursor(int xpos, int ypos);
-
-    /**
-     * Rearranges the children of the window.
-     * <p>
-     * Applies to: pair
-     * 
-     * @param method
-     *           The new split method.<p>
-     * @param size
-     *           The new size constraint.<p>
-     * @param key
-     *           The new key window.<p>
-     */
-    void setArrangement(int method, int size,
-            GlkWindow key);
-
+    public void setLinkValue(int val) {
+    	MaybeLogUsage("setLinkStyle");	
+    }
+    
     /**
      * Draws an image in the window.
      * <p>
@@ -272,7 +341,10 @@ public interface GlkWindow {
      * @return
      *           True if the image was drawn.
      */
-    boolean drawInlineImage(BlorbResource bres, int alignment);
+    public boolean drawInlineImage(BlorbResource bres, int alignment) {
+    	MaybeLogUsage("drawInlineImage");
+    	return false;
+    }
 
     /**
      * Draws a scaled image in the text buffer window.
@@ -290,15 +362,20 @@ public interface GlkWindow {
      * @return
      *           True if the image was drawn.
      */
-    boolean drawInlineImage(BlorbResource bres, int alignment, int width,
-            int height);
+    public boolean drawInlineImage(BlorbResource bres, int alignment, int width,
+            int height) {
+    	MaybeLogUsage("drawInlineImage");
+    	return false;
+    }
 
     /**
      * Breaks the text in the window below a margin image.
      * <p>
      * Applies to: text buffer
      */
-    void flowBreak();
+    public void flowBreak() {
+    	MaybeLogUsage("flowBreak");
+    }
 
     /**
      * Draws an image in the window.
@@ -314,7 +391,10 @@ public interface GlkWindow {
      * @return
      *           True if the image was drawn.
      */
-    boolean drawImage(BlorbResource bres, int x, int y);
+    public boolean drawImage(BlorbResource bres, int x, int y) {
+    	MaybeLogUsage("drawImage");
+    	return false;
+    }
 
     /**
      * Draws an image in the window, scaled to a certain size. The x and
@@ -336,8 +416,11 @@ public interface GlkWindow {
      * @return
      *           True if the image was drawn.
      */
-    boolean drawImage(BlorbResource bres, int x, int y, int width,
-            int height);
+    public boolean drawImage(BlorbResource bres, int x, int y, int width,
+            int height) {
+    	MaybeLogUsage("drawImage");
+    	return false;
+    }
 
     /**
      * Sets the background color of the window. This does not take effect
@@ -348,7 +431,9 @@ public interface GlkWindow {
      * @param color
      *           The background color.<p>
      */
-    void setBackgroundColor(int color);
+    public void setBackgroundColor(int color) {
+    	MaybeLogUsage("setBackgroundColor");
+    }
 
     /**
      * Clears a rectangle with the window's background color. The
@@ -366,8 +451,9 @@ public interface GlkWindow {
      * @param height
      *           The height of the rectangle.<p>
      */
-    void eraseRect(int left, int top, int width,
-            int height);
+    public void eraseRect(int left, int top, int width, int height) {
+    	MaybeLogUsage("eraseRect");
+    }
 
     /**
      * Fills a rectangle with a certain color.  The dimensions of the
@@ -387,8 +473,9 @@ public interface GlkWindow {
      * @param height
      *           The height of the rectangle.<p>
      */
-    void fillRect(int color, int left, int top, int width,
-            int height);
+    public void fillRect(int color, int left, int top, int width, int height) {
+    	MaybeLogUsage("fillRect");
+    }
     
     /**
      * Returns the window id of the window. This is the value of the {@code id}
@@ -396,7 +483,10 @@ public interface GlkWindow {
      * {@link Glk#windowOpen(GlkWindow, int, int, int, int, GlkWindow[])}.
      * @return the window id of the window.
      */
-    int getId();
+    public int getId() { 
+    	MaybeLogUsage("getId");
+    	return 0; 
+    }
     
     /**
      * Returns the pixel size of the given fixed constraint
@@ -406,5 +496,20 @@ public interface GlkWindow {
      *     {@link Glk#windowOpen(GlkWindow, int, int, int, int, GlkWindow[])}
      * @return the pixel size of the constraint
      */
-    int getSizeFromConstraint(int constraint, boolean vertical, int maxSize);
+    public int getSizeFromConstraint(int constraint, boolean vertical, int maxSize) {
+    	MaybeLogUsage("getSizeFromConstraint");
+    	return 0;
+    }
+    
+    /**
+     * Changes the current output style of the window.
+     * <p>
+     * Applies to: text
+     * 
+     * @param val
+     *           One of the constants in {@link GlkStyle}.<p>
+     */
+    public void setStyle(int val) {
+    	MaybeLogUsage("setStyle");
+    }
 }

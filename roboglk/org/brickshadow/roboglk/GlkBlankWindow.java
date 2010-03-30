@@ -26,9 +26,4 @@ package org.brickshadow.roboglk;
  * size will be returned as zero, it still takes up screen space.
  */
 public abstract class GlkBlankWindow extends GlkInvisibleWindow {
-    
-	@Override
-    /** Does nothing. */
-    public final void setArrangement(int method, int size,
-            GlkWindow key) {}
 }
