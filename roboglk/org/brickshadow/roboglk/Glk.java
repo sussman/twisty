@@ -153,13 +153,13 @@ public interface Glk {
      *           <li>For {@code GlkWinMethod.Proportional}, the size is
      *               a percentage</li>
      *           <li>For {@code GlkWinMethod.Fixed}, the size is a value in
-     *               the measurement system of the split window (lines of
+     *               the measurement system of the new window (lines of
      *               text for text windows, pixels for graphics windows). It
      *               may be greater than the split window's actual size.
      *           </ul>
     *           In any case, {@code size} will never be negative.<p>
     * @param wintype
-    *           The type of the window. It will be one of the constants
+    *           The type of the new window. It will be one of the constants
     *           {@code GlkWinType.TextBuffer}, {@code GlkWinType.TextGrid},
     *           {@code GlkWinType.Graphics}, or {@code GlkWinType.Blank}.<p>
     * @param id

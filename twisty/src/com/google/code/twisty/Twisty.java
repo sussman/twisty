@@ -384,7 +384,7 @@ public class Twisty extends Activity {
 		
 		// Make a GLK object which encapsulates I/O between Android UI and our C library
 		glk = new TwistyGlk(this, glkLayout, dialog_handler);
-		glk.setStyleHint(GlkWinType.AllTypes, GlkStyle.Normal, GlkStyleHint.Size, -2);
+		glk.setStyleHint(GlkWinType.all.getNumericValue(), GlkStyle.Normal, GlkStyleHint.Size, -2);
 		terpThread = new Thread(new Runnable() {
 	           @Override
 	            public void run() {
