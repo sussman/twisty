@@ -1,0 +1,82 @@
+GlkJNI 0.6
+(c) 2009 Edward McCardell <edward.mccardell@gmail.com>
+
+GlkJNI is an implementation of the Glk API (version 0.7.0)
+which allows Glk programs written in C to use a Java frontend for I/O.
+
+* Building
+
+You will need to edit the Makefile to supply the location of the Java
+include files and headers on your machine. GlkJNI requires JDK 1.4 or
+newer. I have built it successfully using GCC on OS X Tiger, Linux, and
+Windows Vista (with MinGW/MSYS). Apart from the Java JNI functions,
+GlkJNI uses only ANSI C.
+
+* Linking
+
+Linking a Glk program with GlkJNI works in the same way as linking with
+the Unix Glk implementations--point your program's Makefile at
+"libglkjni.a" and arrange for it to include "Make.glkjni". 
+
+GlkJNI is designed to call Unix-style Glk startup code; programs that
+link to it should be built using their Unix Makefile, possibly with
+some modification. The "patches" directory of the GlkJNI distribution
+has patches for building glulxe 0.4.4.
+
+* Running
+
+First, you will need a GlkJNI-compatible Java frontend. Right now that
+means JDemoGlk, which lives at the same place as the GlkJNI source.
+It consists of a single JAR file, which you can put wherever you want.
+(JDemoGlk is a bare-bones, console I/O frontend--I know a Java port of
+CheapGlk is not very exciting, but I had to start somewhere.)
+
+Next, you may have to make sure that the Java runtime libraries are
+visible to your program. JDemoGlk requires a JRE 1.5 or newer.
+
+- Windows Vista: the JRE "bin" directory should be on your PATH, if
+  it isn't already.
+- Linux: the location of libjvm.so (e.g., /path/to/jre/lib/i386/client)
+  should be on your library search path.
+- OS X: it should Just Work.
+
+Finally, you have to pass the location of the desired Java frontend as
+a command-line argument to your program, like so:
+
+    glulxe -Djava.class.path=/path/to/jdemoglk.jar foo.gblorb
+
+(This is somewhat cumbersome and something I hope to improve on.)
+
+* Other GlkJNI Options
+
+GlkJNI also attempts to process a subset of the options recognized by the
+standard "java" command:
+
+- all that begin with "-X"
+- those of the form "-Dproperty=value" for setting Java system properties
+- the various "-verbose" options
+
+These options will be passed directly to the Java VM, but will be hidden
+from the Glk program.
+
+* Glk Extensions
+
+GlkJNI defines the following extensions to the Glk API:
+
+- void glkjni_set_story_path(char *storypath)
+
+  Should be called from startup code. storypath should be the filename
+  of the story file as read from the command-line. GlkJNI will pass the
+  the absolute path to this file to the Java frontend; this is intended
+  for frontends which need to know not only the base name of the story
+  file, but also its full path.
+  
+* License
+
+GlkJNI is copyright (c) 2009 Edward McCardell. It is released under the
+terms of the GNU General Public License, version 3.
+
+* Acknowledgements
+
+Glk designed by Andrew Plotkin <erkyrath@eblong.com>
+http://www.eblong.com/zarf/glk/index.html

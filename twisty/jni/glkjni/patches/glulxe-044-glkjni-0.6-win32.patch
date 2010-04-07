@@ -1,0 +1,55 @@
+diff -u glulxe-orig/Makefile glulxe/Makefile
+--- glulxe-orig/Makefile	2009-07-08 11:29:26.000000000 -0400
++++ glulxe/Makefile	2009-07-08 11:30:43.000000000 -0400
+@@ -7,9 +7,13 @@
+ # sets of values appear below; uncomment one of them and change the
+ # directories appropriately.
+ 
+-GLKINCLUDEDIR = ../cheapglk
+-GLKLIBDIR = ../cheapglk
+-GLKMAKEFILE = Make.cheapglk
++GLKINCLUDEDIR = ../glkjni
++GLKLIBDIR = ../glkjni
++GLKMAKEFILE = Make.glkjni
++
++#GLKINCLUDEDIR = ../cheapglk
++#GLKLIBDIR = ../cheapglk
++#GLKMAKEFILE = Make.cheapglk
+ 
+ #GLKINCLUDEDIR = ../glkterm
+ #GLKLIBDIR = ../glkterm
+@@ -23,7 +27,7 @@
+ #CC = cc
+ CC = gcc
+ 
+-OPTIONS = -g -Wall -Wmissing-prototypes -Wstrict-prototypes -Wno-unused -DOS_UNIX
++OPTIONS = -g -Wall -Wmissing-prototypes -Wstrict-prototypes -Wno-unused -DWIN32 -DGLKJNI
+ 
+ include $(GLKINCLUDEDIR)/$(GLKMAKEFILE)
+ 
+diff -u glulxe-orig/glulxe.h glulxe/glulxe.h
+--- glulxe-orig/glulxe.h	2009-07-08 11:29:26.000000000 -0400
++++ glulxe/glulxe.h	2009-07-08 11:31:14.000000000 -0400
+@@ -268,4 +268,8 @@
+ extern void accel_set_func(glui32 index, glui32 addr);
+ extern void accel_set_param(glui32 index, glui32 val);
+ 
++#ifdef GLKJNI
++extern void glkjni_set_story_path(char *storypath);
++#endif
++
+ #endif /* _GLULXE_H */
+diff -u glulxe-orig/unixstrt.c glulxe/unixstrt.c
+--- glulxe-orig/unixstrt.c	2009-07-08 11:29:26.000000000 -0400
++++ glulxe/unixstrt.c	2009-07-08 11:31:36.000000000 -0400
+@@ -34,6 +34,10 @@
+     return TRUE;
+   }
+ 
++#ifdef GLKJNI
++  glkjni_set_story_path(cx);
++#endif
++
+   /* Now we have to check to see if it's a Blorb file. */
+ 
+   glk_stream_set_position(gamefile, 0, seekmode_Start);

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    	android:layout_width="fill_parent"
+    	android:layout_height="wrap_content">  
+
+  <LinearLayout 
+    android:orientation="vertical"
+    android:layout_width="fill_parent" 
+    android:layout_height="fill_parent">
+    	
+    <TextView android:id="@+id/zgame_label" 
+              android:layout_width="fill_parent" 
+              android:layout_height="wrap_content" 
+              android:text="Games found on external media:"/>
+    	
+    <RadioGroup
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:checkedButton="@+id/lunch"
+        android:id="@+id/zgame_radiomenu">
+    <!-- no radio buttons here, they're dynamically generated -->
+    </RadioGroup>
+    
+   </LinearLayout>
+</ScrollView> 

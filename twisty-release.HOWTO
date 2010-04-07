@@ -1,0 +1,54 @@
+TWISTY RELEASE PROCESS
+======================
+
+1. Bump the version number
+
+  In AndroidManifest.xml, bump the versionCode and versionName
+  attributes.
+
+  - versionCode is the one which really matters:  you MUST increase
+    the integer monotonically.  This is what android Market looks at
+    to notice that the new .apk is an 'upgrade' from the prior one.
+
+  - versionName can be whatever we want (i.e. 1.2.6), and it's what we
+    display to the user on startup.  In other words, this is 'public'
+    release name.
+
+
+2. Export an *unsigned* .apk from Eclipse.
+
+  Right-click the project folder, then choose 'Android Tools->Export
+  Unsigned Application Package".
+
+  (Eclipse normally builds a 'debug' .apk which is signed by a
+  standard lame debug-key.  Market will not accept this key signature;
+  it requires a signature from key we generate ourselves.)
+
+
+3. Sign the .apk with our own key
+
+  Make sure you have the shared twisty key (and password) available,
+  then run:
+
+  $ jarsigner -verbose -keystore twisty-release-key.keystore \
+     ~/Desktop/Twisty-0.6.apk twistykey
+
+  After signing, you can verify the sig:
+
+  $ jarsigner -verify -verbose ~/Desktop/Twisty-0.6.apk 
+
+
+4. Upload the new .apk to Google Code
+
+  Use the 'Downloads' tab to upload the package.  Be sure to label the
+  package as 'Featured' so it shows up on the front page, and label
+  the old package as 'Deprecated' so it's not listed to the public
+  anymore.
+
+
+5. Upload the new .apk to Market
+
+  Log into the 'twistyteam@gmail.com" GAIA account at
+  market.android.com.  Upload the new .apk and 'publish' it.
+
+
