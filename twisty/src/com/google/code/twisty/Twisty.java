@@ -29,6 +29,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -221,13 +224,12 @@ public class Twisty extends Activity {
 		
 		Uri dataSource = this.getIntent().getData();
 		if (dataSource != null) {
-			mainWin.doPrint("I appear to have been invoked on " + dataSource.toString());
+			/* Suck down the URI we received to sdcard, launch terp on it. */
+			startTerp(dataSource);
 		}
 		else {
-			mainWin.doPrint("I was not invoked via some Intent with Data.");
+			printWelcomeMessage();
 		}
-		
-		printWelcomeMessage();
 	}
 	
 
@@ -416,7 +418,9 @@ public class Twisty extends Activity {
 		gameIsRunning = true;
 	}
 	
-	/* Starts one of the 'built in' games from an android raw resource. */
+	
+	/* Starts one of the 'built in' games from an android raw resource.
+	   It does this by dumping the resource into a file within Twisty's private storage area. */
     void startTerp(int resource) {
     	Integer gamenum = new Integer(resource);
     	String opaqueFilename = gamenum.toString();
@@ -450,8 +454,60 @@ public class Twisty extends Activity {
 		Log.i(TAG, "Starting gamefile located at " + gamefile.getAbsolutePath());
 		startTerp(gamefile.getAbsolutePath());
     }
+    
+    
+    /* Starts a game located at a URI (usually http://) by downloading the game to sdcard first.
+       This is the method invoked by our IntentFilter to handle *.z* files coming from the web browser. */
+    void startTerp(Uri gameURI) {
+    	
+    	/* Set up output file in same directory as saved-games. */
+    	String dir = ensureSavedGamesDir(true);
+		if (dir == null) {
+			showDialog(DIALOG_CANT_SAVE);
+			return;
+		}
+		String uriString = gameURI.toString();
+		String gameFilename = uriString.substring(uriString.lastIndexOf("/") + 1);
+		File outputFile = new File(dir, gameFilename);
+		FileOutputStream gameOutputStream = null;
+		try {
+			outputFile.createNewFile();
+			gameOutputStream = new FileOutputStream(outputFile);
+		} catch (IOException e) {
+			Log.i(TAG, "Failed to create file called " + gameFilename);
+			return;
+		}
+			
+		/* Set up input from URL */
+		InputStream gameInputStream = null;
+		try {
+			URL gameURL = new URL(uriString);
+		    URLConnection connection = gameURL.openConnection();
+	        connection.connect();
+	        gameInputStream = connection.getInputStream();
+		} catch (MalformedURLException e) {
+			Log.i(TAG, "Received malformed URI: "+ uriString);
+			return;
+		} catch (IOException e) {
+			Log.i(TAG, "Failed to open connection to URI: " + uriString);
+			return;
+		}
+		
+		try {
+			Log.i(TAG, "About to spew raw data to disk...");
+			suckstream(gameInputStream, gameOutputStream);
+		} catch (IOException e) {
+			Log.i(TAG, "Failed to copy URL contents to local file: " + uriString);
+			return;
+		}
+		Log.i(TAG, "Completed dump of raw data to disk."); 
+        
+		Log.i(TAG, "Starting gamefile located at " + outputFile.getAbsolutePath());
+		startTerp(outputFile.getAbsolutePath());
+    }
 	
-    /* Helper to suck all data from an InputStream and push to an OutputStream */
+    
+    /* Helper for methods above:  suck all data from an InputStream and push to an OutputStream */
     void suckstream(InputStream instream, OutputStream outstream) throws IOException {
     	int got = 0, buffersize = 65536;
     	byte buffer[] = new byte[buffersize];
