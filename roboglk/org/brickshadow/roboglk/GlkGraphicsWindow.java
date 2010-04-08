@@ -22,5 +22,5 @@ package org.brickshadow.roboglk;
  * The base class for graphics windows. It provides do-nothing
  * implementations of window methods not applicable to graphics windows.
  */
-public abstract class GlkGraphicsWindow extends GlkWindow {
+public class GlkGraphicsWindow extends GlkWindow {
 }

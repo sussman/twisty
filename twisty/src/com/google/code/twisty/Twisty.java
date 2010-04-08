@@ -85,6 +85,8 @@ import android.widget.TextView;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 
 public class Twisty extends Activity {
+	private static String TAG = "Twisty";
+
 	private static final int MENU_PICK_FILE = 101;
 	private static final int MENU_STOP = 102;
 	private static final int MENU_RESTART = 103;
@@ -94,24 +96,25 @@ public class Twisty extends Activity {
 	private static final int MENU_SHOW_HELP = 107;
 	private static final int MENU_PICK_SETTINGS = 108;
 	
-	private static String TAG = "Twisty";
 	private static final String FIXED_FONT_NAME = "Courier";
 	private static final String ROMAN_FONT_NAME = "Helvetica";
 	private static final String RUNNING_FILE = "running_file";
 	private static final String RUNNING_RESOURCE = "running_rsrc";
 	private static final String FROZEN_GAME = "frozen_game";
 	private static final int FONT_SIZE = 12;
+	
 	private String savegame_dir = "";
 	private String savefile_path = "";
 
-	// Dialog boxes we manage
+	// Dialog boxes we manage. Passed to showDialog().
+	// Processed in onDialogCreate().
 	private static final int DIALOG_ENTER_WRITEFILE = 1;
 	private static final int DIALOG_ENTER_READFILE = 2;
 	private static final int DIALOG_CHOOSE_ZGAME = 3;
 	private static final int DIALOG_CANT_SAVE = 4;
 	private static final int DIALOG_NO_SDCARD = 5;
 
-	// Messages we receive from external threads, via our Handler
+	// Messages we receive from external threads, via the dialog_handler.
 	public static final int PROMPT_FOR_WRITEFILE = 1;
 	public static final int PROMPT_FOR_READFILE = 2;
 	public static final int PROMPT_FOR_ZGAME = 3;
@@ -390,7 +393,7 @@ public class Twisty extends Activity {
 		
 		// Make a GLK object which encapsulates I/O between Android UI and our C library
 		glk = new TwistyGlk(this, glkLayout, dialog_handler);
-		glk.setStyleHint(GlkWinType.AllTypes, GlkStyle.Normal, GlkStyleHint.Size, -2);
+		glk.setStyleHint(GlkWinType.all.getNumericValue(), GlkStyle.Normal, GlkStyleHint.Size, -2);
 		terpThread = new Thread(new Runnable() {
 	           @Override
 	            public void run() {
