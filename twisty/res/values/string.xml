@@ -2,4 +2,7 @@
   <string name="app_name">Twisty</string>  
   <string name="open_game_file">Open game file: (*.z3;*.z5;*.z8)</string>
   <string name="more_prompt">-=MORE=-</string>  
+  <string name="unzip_title">Twisty: Unzipping game file - please wait...</string>  
+  <string name="unzip_success">Games added!</string>  
+  <string name="unzip_fail">Error: No games found in zip file</string>
 </resources>

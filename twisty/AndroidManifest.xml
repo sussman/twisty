@@ -22,8 +22,6 @@
             <category android:name="android.intent.category.DEFAULT"/>
             <category android:name="android.intent.category.BROWSABLE"/>
             <data android:mimeType="application/x-zmachine"
-                  android:scheme="http"
-                  android:host="*"
                   android:pathPattern=".*\\.z.*"/>
           </intent-filter>
 
@@ -34,7 +32,22 @@
             <data android:mimeType="application/octet-stream"
                   android:pathPattern=".*\\.z.*"/>
           </intent-filter>
-
+        </activity>
+        
+        <activity 
+          android:name="Unzipper"
+          android:label="@string/unzip_title"
+          android:configChanges="keyboard|keyboardHidden|orientation"
+          android:imeOptions="actionNone"
+          android:singleLine="false"
+          android:windowSoftInputMode="stateAlwaysVisible|adjustResize">
+          <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT"/>
+            <category android:name="android.intent.category.BROWSABLE"/>
+            <data android:mimeType="application/zip"
+                  android:pathPattern=".*\\.zip"/>
+          </intent-filter>
         </activity>
     </application>
     
