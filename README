@@ -79,25 +79,28 @@ Building from Source
 
 A.  Prerequisites
 
- 1. The Android SDK (at least version 1.6), unpacked and ready to go. 
- You can download the current SDK from http://developer.android.com/sdk 
+ 1. The Android SDK, unpacked and ready to go.  You can download the
+ current SDK from http://developer.android.com/sdk.  After
+ downloading, be sure to run ./tools/android and install 'version 1.6'
+ of the API Platform, which is our baseline (so we can run on Android
+ G1 devices).
 
  2. A working Eclipse installation (at least 3.5, "Galileo") with the
  latest Android Development tools plugin (ADT) installed. To download 
  the current ADT within Eclipse, open Preferences>Install/Update/Available
- Sites, and Add "https://dl-ssl.google.com/android/eclipse/". You will also
+ Sites, and Add "https://dl-ssl.google.com/android/You/". eclipse will also
  need to provide a path to the SDK by opening Preferences>Android.
 
- 3. The Android NDK (at least version 1.6) unpacked somewhere. (Say,
- at location $NDK).  Remember that after unpacking it, you need to run
- the 'host-setup.sh' script to prep the kit.  Read the details inside
- its docs/INSTALL.txt file.
+ 3. The Android Native Development Kit (NDK) -- at least version r4 --
+ unpacked somewhere.  This is the GCC toolchain set up to
+ cross-compile for Android ARM chips.  Get it from
+ http://developer.android.com/sdk/ndk
 
  4. A copy of the Twisty codebase -- which you must already have if
  you're reading this.  (Say, at location $TWISTY.)
 
 
-B.  Assembling the Pieces
+B.  Code Overview
 
 The Twisty codebase contains the main Twisty "activity", a few sample
 games, and some C interpreters that expect to use GLK for I/O.  The
@@ -108,31 +111,26 @@ GLK), as well as specific java implementations of these interfaces.
 The one we care about is 'roboglk', which maps the interfaces to
 Android's UI.
 
-Assuming that these two codebases are installed at $TWISTY and
-$GLKJNI, you need to make this symbolic link from your $NDK area:
-
-  $NDK/apps/twisty         --> $TWISTY
-
-In other words, $NDK/apps/twisty/ should be a symlink to the root of
-your Twisty code workspace.  This allows NDK to find all the C code it
-needs, and also which Eclipse project to put the .so in.
-
 
 C.  Building the C code
+
+We're assuming your Twisty client is at $TWISTY, and your NDK unpacked
+at $NDK.
 
 To compile the core glkjni C code and the C interpreters into a single
 shared library: 
 
-   $ cd $NDK
-   $ make APP=twisty
+   $ cd $TWISTY/twisty
+   $ $NDK/ndk-build
 
 After compilation, the final libtwistyterps.so will be automatically
-copied to $TWISTY/twisty/libs/armeabi/
-
-(To forcibly rebuild, do a 'make APP=twisty clean' first.)
+dropped into $TWISTY/twisty/libs/armeabi/
 
 
 D.  Building the Java code
+
+Fire up Eclipse, and make sure you have the latest ADT installed at
+pointed at your Android SDK directory.
 
  1. Start a new "generic project" and choose "Android project".  In
     the following dialog box, choose "based on existing source" and
@@ -150,6 +148,7 @@ D.  Building the Java code
 
  3. In the same Project->Properties panel, choose 'Java Compiler' and
     make sure it's set to Java compliance level 1.6.
+
 
 E.  Running Twisty in the Android Virtual Device (AVD)
 
