@@ -48,6 +48,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.BatteryManager;
 import android.os.Bundle;
@@ -65,6 +66,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
@@ -80,6 +82,7 @@ public class Twisty extends Activity {
 	private static final int DEBUG_ZM_DUMP = 105;
 	private static final int DEBUG_PAUSE_RESUME = 106;
 	private static final int MENU_SHOW_HELP = 107;
+	private static final int MENU_TOGGLE_KEYBOARD = 108;
 	
 	private static String TAG = "Twisty";
 	private static final String FIXED_FONT_NAME = "Courier";
@@ -169,6 +172,35 @@ public class Twisty extends Activity {
 		} catch (Exception e) {
 			fatal("Oops, an error occurred preparing to play");
 			Log.e(TAG, "Failed to get prepare to play", e);
+		}
+	}
+
+	InputMethodManager getInputMethodManager() {
+		Object immObj = getSystemService(INPUT_METHOD_SERVICE);
+		if (!(immObj instanceof InputMethodManager)) {
+			fatal("Can't get InputMethodManager!");
+			return null;
+		}
+		return (InputMethodManager) immObj;
+	}
+
+	/**
+	 * Examines the current configuration and determines whether to
+	 * do anything about it, such as showing or hiding a keyboard.
+	 * @param configuration
+	 */
+	private void handleConfigChange(Configuration config) {
+		switch (config.hardKeyboardHidden) {
+		case Configuration.HARDKEYBOARDHIDDEN_YES:
+			Log.i(TAG, "Showing soft keyboard now");
+			getInputMethodManager().showSoftInput(findViewById(R.id.all), 0);
+			break;
+		case Configuration.HARDKEYBOARDHIDDEN_NO:
+			// I bet it does the right thing already :)
+			break;
+		default:
+			Log.e(TAG, "Your chances of using a keyboard are at the whim of the OS.");
+			break;
 		}
 	}
 
@@ -507,6 +539,7 @@ public class Twisty extends Activity {
 				zm.start();
 			}
 		}
+		handleConfigChange(getResources().getConfiguration());
 	}
 
 	private void prepareToStartZM() {
@@ -592,9 +625,10 @@ public class Twisty extends Activity {
 			menu.add(Menu.NONE, MENU_SHOW_HELP, 4, "Help!?").setShortcut('6', 'h');
 		} else {
 			menu.add(Menu.NONE, MENU_RESTART, 0, "Restart").setShortcut('7', 'r');
-			menu.add(Menu.NONE, MENU_STOP, 1, "Stop").setShortcut('9', 's');
-			// menu.add(Menu.NONE, DEBUG_ZM_DUMP, 2, "Dump");
-			// menu.add(Menu.NONE, DEBUG_PAUSE_RESUME, 3, "Pause/Resume");
+			menu.add(Menu.NONE, MENU_TOGGLE_KEYBOARD, 1, "Toggle keyboard").setShortcut('8', ':');
+			menu.add(Menu.NONE, MENU_STOP, 2, "Stop").setShortcut('9', 's');
+			// menu.add(Menu.NONE, DEBUG_ZM_DUMP, 3, "Dump");
+			// menu.add(Menu.NONE, DEBUG_PAUSE_RESUME, 4, "Pause/Resume");
 		}
 		return true;
 	}
@@ -616,6 +650,9 @@ public class Twisty extends Activity {
 			break;
 		case MENU_SHOW_HELP:
 			printHelpMessage();
+			break;
+		case MENU_TOGGLE_KEYBOARD:
+			toggleKeyboard();
 			break;
 		case DEBUG_PAUSE_RESUME:
 			if (zm.pauseZM()) {
@@ -640,6 +677,16 @@ public class Twisty extends Activity {
 		break;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+	
+	private void toggleKeyboard() {
+		getInputMethodManager().toggleSoftInput(0, 0);
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		handleConfigChange(newConfig);
 	}
 
 	/** Launch UI to pick a file to load and execute */
