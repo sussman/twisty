@@ -90,7 +90,12 @@ public class Twisty extends Activity {
 	private static final String RUNNING_FILE = "running_file";
 	private static final String RUNNING_RESOURCE = "running_rsrc";
 	private static final String FROZEN_GAME = "frozen_game";
-	private static final int FONT_SIZE = 12;
+	/**
+	 * This font size is in unscaled pixels. Since this ends up going to a
+	 * {@link android.text.style.TextAppearanceSpan} we use -1 to mean
+	 * "unspecified"
+	 */
+	private static final int FONT_SIZE = -1;
 	private String savegame_dir = "";
 	private String savefile_path = "";
 
