@@ -254,8 +254,8 @@ public class Twisty extends Activity {
 		w.newline();
 		StringBuffer phoneBlurb = new StringBuffer();
 		// TODO: make this change depending on device features
-		phoneBlurb.append("You are holding a modern-looking phone with a "
-				+ "QWERTY keypad. ");
+		phoneBlurb.append("You are holding a modern-looking smartphone which "
+				+ "can be typed upon. ");
 		appendBatteryState(phoneBlurb);
 		phoneBlurb.append("You feel an inexplicable urge to "
 				+ "press the phone's \"menu\" key. ");
@@ -618,9 +618,10 @@ public class Twisty extends Activity {
 		super.onPrepareOptionsMenu(menu);
 		menu.clear();
 		if (!zmIsRunning()) {
-			menu.add(Menu.NONE, R.raw.advent, 0, "Adventure").setShortcut('0', 'a');
+			menu.add(Menu.NONE, R.raw.violet, 0, "Violet").setShortcut('0', 'a');
 			menu.add(Menu.NONE, R.raw.anchor, 1, "Anchorhead").setShortcut('1', 'b');
 			menu.add(Menu.NONE, R.raw.curses, 2, "Curses").setShortcut('2', 'c');
+			menu.add(Menu.NONE, R.raw.advent, 3, "Adventure").setShortcut('3', 'd');
 			menu.add(Menu.NONE, MENU_PICK_FILE, 3, "Open file...").setShortcut('5', 'o');
 			menu.add(Menu.NONE, MENU_SHOW_HELP, 4, "Help!?").setShortcut('6', 'h');
 		} else {

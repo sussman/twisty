@@ -16,7 +16,6 @@ package com.google.code.twisty;
 
 import android.view.KeyEvent;
 import android.view.View;
-import android.util.Log;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.InputConnection;
 
