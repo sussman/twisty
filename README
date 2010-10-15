@@ -21,18 +21,13 @@ http://www.ifwiki.org for general information on Interactive Fiction.
 History
 -------
 
- *** The code in this directory is currently undergoing a rewrite ***
+*** NOTE THAT THIS VERSION OF TWISTY IS UNDER "MAINTENANCE MODE" ONLY.
+*** A REWRITE IS IN PROCESS TO USE NATIVE C CODE, ON A DIFFERENT
+*** MERCURIAL BRANCH CALLED "REWRITE".
 
-*  We are attempting to use Android's Native Development Kit (NDK) to
-*  make JNI calls to various VM-interpreters running as C libraries.
-*  This should give us a 7x speed improvement, and also allow us to
-*  support a wider range of z-machines (via 'nitfol'), glulx games
-*  (via 'glulxe') and perhaps even TADS or other interpreters.
-
-
-This code originally began as a heavily-hacked port of 'zplet', an
-early lightweight z-machine interpreter written for Java 1.0.  It was
-then connected to Android's various UI elements.
+This code began as a heavily-hacked port of 'zplet', an early
+lightweight z-machine interpreter written for Java 1.0.  It was then
+connected to Android's various UI elements.
 
 The original zplet source code is avaliable at
 
