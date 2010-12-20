@@ -82,8 +82,8 @@ A.  Prerequisites
  1. The Android SDK, unpacked and ready to go.  You can download the
  current SDK from http://developer.android.com/sdk.  After
  downloading, be sure to run ./tools/android and install 'version 1.6'
- of the API Platform, which is our baseline (so we can run on Android
- G1 devices).
+ of the API Platform, which is our baseline (so we can run on even the
+ oldest, simplest devices).
 
  2. A working Eclipse installation (at least 3.5, "Galileo") with the
  latest Android Development tools plugin (ADT) installed. To download 
@@ -142,7 +142,7 @@ pointed at your Android SDK directory.
     'roboglk' directory at the top of twisty tree and and select that.
     It should now appear in the list with $TWISTY/src and
     $TWISTY/gen. Now select the 'Order and Export' tab and arrange the
-    build class order from top to bottom as Twisty/glkjni/roboglk,
+    build class order from top to bottom as Twisty/roboglk,
     Twisty/src, Twisty/gen, and Android 1.6.  The box next to Android
     1.6 should be checked.
 

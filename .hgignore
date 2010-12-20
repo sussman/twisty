@@ -3,3 +3,4 @@ twisty/libs/armeabi/lib.*
 twisty/gen/com/google/code/twisty/R\.java
 twisty/\.project
 twisty/bin/.*
+twisty/obj/.*

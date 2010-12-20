@@ -553,7 +553,7 @@ public class Twisty extends Activity {
 		super.onPrepareOptionsMenu(menu);
 		menu.clear();
 		if (!terpIsRunning()) {
-			menu.add(Menu.NONE, R.raw.advent, 0, "Adventure").setShortcut('0', 'a');
+			menu.add(Menu.NONE, R.raw.violet, 0, "Violet").setShortcut('0', 'a');
 			menu.add(Menu.NONE, R.raw.anchor, 1, "Anchorhead").setShortcut('1', 'b');
 			menu.add(Menu.NONE, R.raw.curses, 2, "Curses").setShortcut('2', 'c');
 			menu.add(Menu.NONE, MENU_PICK_FILE, 3, "Open Game...").setShortcut('3', 'o');
