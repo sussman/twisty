@@ -24,7 +24,6 @@ package com.google.code.twisty;
 // explanation of how to build both the C and java code in this project.
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -94,17 +93,8 @@ public class Twisty extends Activity {
 	private static final int MENU_STOP = 102;
 	private static final int MENU_RESTART = 103;
 	private static final int FILE_PICKED = 104;
-	private static final int DEBUG_ZM_DUMP = 105;
-	private static final int DEBUG_PAUSE_RESUME = 106;
 	private static final int MENU_SHOW_HELP = 107;
 	private static final int MENU_PICK_SETTINGS = 108;
-	
-	private static final String FIXED_FONT_NAME = "Courier";
-	private static final String ROMAN_FONT_NAME = "Helvetica";
-	private static final String RUNNING_FILE = "running_file";
-	private static final String RUNNING_RESOURCE = "running_rsrc";
-	private static final String FROZEN_GAME = "frozen_game";
-	private static final int FONT_SIZE = 12;
 	
 	private String savegame_dir = "";
 	private String savefile_path = "";
@@ -143,6 +133,7 @@ public class Twisty extends Activity {
 	private String[] discovered_zgames;
 	// A persistent map of button-ids to zgames found on the sdcard (absolute paths)
 	private HashMap<Integer, String> zgame_paths = new HashMap<Integer, String>();
+	private HashMap<Integer, String> builtinGames = new HashMap<Integer, String>();
 
 
 	/** The native C library which contains the interpreter making Glk calls. 
@@ -156,6 +147,12 @@ public class Twisty extends Activity {
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		
+		// Map our built-in game resources to real filenames
+		builtinGames.clear();
+		builtinGames.put(R.raw.violet, "violet.z8");
+		builtinGames.put(R.raw.anchor, "anchorhead.z5");
+		builtinGames.put(R.raw.curses, "curses.z5");
 		
 		UISync.setInstance(this);
 
@@ -420,39 +417,51 @@ public class Twisty extends Activity {
 	
 	
 	/* Starts one of the 'built in' games from an android raw resource.
-	   It does this by dumping the resource into a file within Twisty's private storage area. */
+	   It does this by dumping the resource into /sdcard/Twisty/ (if not already there.) */
     void startTerp(int resource) {
-    	Integer gamenum = new Integer(resource);
-    	String opaqueFilename = gamenum.toString();
-    	Log.i(TAG, "Loading game resource: " + opaqueFilename);
+    	
+    	String gameName = builtinGames.get(resource);  // go-go-autoboxing
+    	if (gameName == null) {
+    		Log.i(TAG, "Failed to find built-in game resource" + resource);
+    		return;
+    	}
+    	Log.i(TAG, "Loading game resource: " + gameName);
+    	
+    	String savedGamesDir = ensureSavedGamesDir(true);
+		if (savedGamesDir == null) {
+			showDialog(DIALOG_CANT_SAVE);
+			return;
+		}
     	
     	// The absolute disk path to the privately-stored gamefile:
-    	File gamefile = getFileStreamPath(opaqueFilename);
-    	Log.i(TAG, "Looking for gamefile at " + gamefile.getAbsolutePath());
+    	File gameFile = new File(savedGamesDir + "/" + gameName);
+    	String gamePath = gameFile.getAbsolutePath();
+    	Log.i(TAG, "Looking for gamefile at " + gamePath);
     	
-		if (! gamefile.exists()) {
+		if (! gameFile.exists()) {
 			// Do a one-time dump from raw resource to disk.
 			FileOutputStream foutstream;
 			Resources r = new Resources(getAssets(), new DisplayMetrics(), null);
 			InputStream gamestream = r.openRawResource(resource);
 			try {
-				foutstream = openFileOutput(opaqueFilename, MODE_PRIVATE);
-			} catch (FileNotFoundException e) {
-				Log.i(TAG, "Failed to open outputstream for filename " + opaqueFilename);
+				foutstream = new FileOutputStream(gameFile);
+			} catch (IOException e) {
+				Log.i(TAG, "Failed to open outputstream for filename " + gamePath);
+				Log.i(TAG, e.getMessage());
 				return;
 			}
 			try {
 				Log.i(TAG, "About to spew raw data to disk...");
 				suckstream(gamestream, foutstream);
 			} catch (IOException e) {
-				Log.i(TAG, "Failed to copy raw game to file." + opaqueFilename);
+				Log.i(TAG, "Failed to copy raw game to file." + gamePath);
 				return;
 			}
 			Log.i(TAG, "Completed dump of raw data to disk.");
 		}
     	
-		Log.i(TAG, "Starting gamefile located at " + gamefile.getAbsolutePath());
-		startTerp(gamefile.getAbsolutePath());
+		Log.i(TAG, "Starting gamefile located at " + gamePath);
+		startTerp(gamePath);
     }
     
     
@@ -625,8 +634,8 @@ public class Twisty extends Activity {
 	}
 
 
-	// Return the path to the saved-games directory.
-	// If SDcard not present, or if /sdcard/twisty is a file, return null.
+	// Return the path to the saved-games directory (typically "/sdcard/Twisty/")
+	// If sdcard not present, or if /sdcard/Twisty is a file, return null.
 	private String ensureSavedGamesDir(boolean write) {
 		String storagestate = Environment.getExternalStorageState();
 		if (!storagestate.equals(Environment.MEDIA_MOUNTED) &&
@@ -634,7 +643,7 @@ public class Twisty extends Activity {
 			return null;
 		}
 		String sdpath = Environment.getExternalStorageDirectory().getPath();
-		File savedir = new File(sdpath + "/twisty");
+		File savedir = new File(sdpath + "/" + TAG);
 		if (! savedir.exists()) {
 			savedir.mkdirs();
 		}
@@ -644,7 +653,8 @@ public class Twisty extends Activity {
 		return savedir.getPath();
 	}
 
-	// Walk DIR recursively, adding any file matching *.z[1-8] to LIST.
+	// Helper for scanForZGames():
+	//   Walk DIR recursively, adding any file matching *.z[1-8] to LIST.
 	private void scanDir(File dir, ArrayList<String> list) {
 		File[] children = dir.listFiles();
 		if (children == null)
@@ -658,17 +668,17 @@ public class Twisty extends Activity {
 		}
 	}
 
-	// Recursively can the sdcard for z-games.  Return an array of absolute paths,
-	// or null if no sdcard is available.
+	// Search the twisty directory (on sdcard) for any z-games.  
+	// Return an array of absolute paths, or null on failure.
 	private String[] scanForZGames() {
-		String storagestate = Environment.getExternalStorageState();
-		if (!storagestate.equals(Environment.MEDIA_MOUNTED) &&
-				!storagestate.equals(Environment.MEDIA_MOUNTED_READ_ONLY)) {
+		String gamesDirPath = ensureSavedGamesDir(false);
+		if (gamesDirPath == null) {
+			showDialog(DIALOG_CANT_SAVE);
 			return null;
 		}
-		File sdroot = Environment.getExternalStorageDirectory();
+		File gameDirRoot = new File(gamesDirPath);
 		ArrayList<String> zgamelist = new ArrayList<String>();
-		scanDir(sdroot, zgamelist);
+		scanDir(gameDirRoot, zgamelist);
 		String[] files = zgamelist.toArray(new String[zgamelist.size()]);
 		Arrays.sort(files);
 		return files;
@@ -820,8 +830,8 @@ public class Twisty extends Activity {
 
 		case DIALOG_CANT_SAVE:
 			return new AlertDialog.Builder(Twisty.this)
-			.setTitle("Cannot Access Saved Games")
-			.setMessage("Saved-games folder is not available on external media.")
+			.setTitle("Cannot Access Games")
+			.setMessage("Twisty Games folder is not available on external media.")
 			.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
 					// A path of "" makes op_save() fail.
@@ -883,11 +893,14 @@ public class Twisty extends Activity {
 		// Hopefully this will save all the view states:
 		super.onSaveInstanceState(bundle);
 	}
-
+	
+/*
 	private boolean unfreezeZM(Bundle icicle) {
 		if (icicle == null)
 			return false;
 		Log.i(TAG, "unfreeze: finished");
 		return true;
 	}
+*/
+	
 }
