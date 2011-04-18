@@ -50,6 +50,12 @@
                   android:pathPattern=".*\\.zip"/>
           </intent-filter>
         </activity>
+        
+        <activity
+        	android:name="TwistyPreferenceActivity"
+        	android:label="Twisty Preferences">
+        </activity>
+        
     </application>
     
     <uses-permission android:name="android.permission.INTERNET"/>

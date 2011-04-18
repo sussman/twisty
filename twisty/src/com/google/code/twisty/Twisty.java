@@ -34,6 +34,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.prefs.Preferences;
 
 import com.google.code.twisty.TwistyMessage;
 import com.google.code.twisty.R;
@@ -58,6 +59,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -68,6 +70,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -229,7 +232,13 @@ public class Twisty extends Activity {
 		}
 	}
 	
-
+	/** Called whenever activity comes (or returns) to foreground. */
+	@Override
+	public void onStart() {
+		super.onStart();
+		getSettings();  // make sure user prefs are applied
+	}
+	
 	private void printWelcomeMessage() {
 		// What version of Twisty is running?
 		PackageInfo pkginfo = null;
@@ -386,6 +395,13 @@ public class Twisty extends Activity {
 	 * @param path Path to the gamefile to execute
 	 */
 	void startTerp(String path) {
+		
+		// Notice user preferences
+		//Context context = getApplicationContext();
+		//SharedPreferences prefs = 
+		//	PreferenceManager.getDefaultSharedPreferences(context);
+		//Log.i(TAG, "Spies tell me that ");
+		
 		setContentView(glkLayout);
 		glkLayout.requestFocus();
 		gamePath = path;
@@ -566,11 +582,12 @@ public class Twisty extends Activity {
 			menu.add(Menu.NONE, R.raw.anchor, 1, "Anchorhead").setShortcut('1', 'b');
 			menu.add(Menu.NONE, R.raw.curses, 2, "Curses").setShortcut('2', 'c');
 			menu.add(Menu.NONE, MENU_PICK_FILE, 3, "Open Game...").setShortcut('3', 'o');
-			menu.add(Menu.NONE, MENU_PICK_SETTINGS, 4, "Settings").setShortcut('4', 's');
-			menu.add(Menu.NONE, MENU_SHOW_HELP, 5, "Help!?").setShortcut('5', 'h');
+			menu.add(Menu.NONE, MENU_SHOW_HELP, 5, "Help!?").setShortcut('4', 'h');
+			menu.add(Menu.NONE, MENU_PICK_SETTINGS, 5, "Settings").setShortcut('5', 's');
 		} else {
 			menu.add(Menu.NONE, MENU_RESTART, 0, "Restart").setShortcut('7', 'r');
 			menu.add(Menu.NONE, MENU_STOP, 1, "Stop").setShortcut('9', 's');
+			menu.add(Menu.NONE, MENU_PICK_SETTINGS, 2, "Settings").setShortcut('4', 's');
 		}
 		return true;
 	}
@@ -606,9 +623,22 @@ public class Twisty extends Activity {
 	
 	/** Launch UI to adjust application settings **/
 	private void pickSettings() {
-		
+		 Intent settingsActivity = new Intent(
+				 getBaseContext(), TwistyPreferenceActivity.class);
+		 startActivity(settingsActivity);
 	}
 	
+	/** Called by onStart(), to make sure prefs are loaded whenever we return
+	 *  to the main Twisty activity (e.g. after backing out of the 
+	 *  Preferences activity)
+	 */
+	private void getSettings() {
+		 SharedPreferences prefs = 
+			 PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+		 String textSizePreference = prefs.getString("PREF_TEXT_SIZE", "14");
+		 float textsize = Float.valueOf(textSizePreference).floatValue();
+		 tv.setTextSize(textsize);
+	}
 
 	/** Launch UI to pick a file to load and execute */
 	private void pickFile() {
