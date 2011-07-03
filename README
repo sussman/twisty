@@ -80,9 +80,8 @@ A.  Prerequisites
 
  1. The Android SDK, unpacked and ready to go.  You can download the
  current SDK from http://developer.android.com/sdk.  After
- downloading, be sure to run ./tools/android and install 'version 1.6'
- of the API Platform, which is our baseline (so we can run on even the
- oldest, simplest devices).
+ downloading, be sure to run ./tools/android and install 'version 2.1'
+ of the API Platform, which is our baseline.
 
  2. A working Eclipse installation (at least 3.5, "Galileo") with the
  latest Android Development tools plugin (ADT) installed. To download 
@@ -90,7 +89,7 @@ A.  Prerequisites
  Sites, and Add "https://dl-ssl.google.com/android/You/". eclipse will also
  need to provide a path to the SDK by opening Preferences>Android.
 
- 3. The Android Native Development Kit (NDK) -- at least version r4 --
+ 3. The Android Native Development Kit (NDK) -- at least version r5 --
  unpacked somewhere.  This is the GCC toolchain set up to
  cross-compile for Android ARM chips.  Get it from
  http://developer.android.com/sdk/ndk
@@ -144,8 +143,8 @@ pointed at your Android SDK directory.
     It should now appear in the list with $TWISTY/src and
     $TWISTY/gen. Now select the 'Order and Export' tab and arrange the
     build class order from top to bottom as Twisty/roboglk,
-    Twisty/src, Twisty/gen, and Android 1.6.  The box next to Android
-    1.6 should be checked.
+    Twisty/src, Twisty/gen, and Android 2.1.  The box next to Android
+    2.1 should be checked.
 
  3. In the same Project->Properties panel, choose 'Java Compiler' and
     make sure it's set to Java compliance level 1.6.
@@ -157,7 +156,7 @@ E.  Running Twisty in the Android Virtual Device (AVD)
     configure an AVD. This can be done through the menu Window->Android SDK
     and AVD manager. Select 'Virtual devices' on the left, then press the
     'New' button to create a new entry. Add a name and specify the target as 
-    'Android 1.6 - API level 4'. For SD card, you can make a new, blank card
+    'Android 2.1 - API level 7'. For SD card, you can make a new, blank card
     by just indicating the size, e.g., 64M. Finally, choose a skin. You may
     make more than one AVD. 
 
