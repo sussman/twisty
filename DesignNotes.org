@@ -1,0 +1,122 @@
+
+This is a bunch of philosophical notes on blue sky ideas, examining
+competition, and so on.  It ends with .org because it's a collapsible
+outline meant for Emacs' org-mode.
+
+
+* An Analysis of Frotz for iOS
+
+This interpreter really is the Gold Standard for IF terps on mobile
+devices, in my opinion.  I want to imitate a whole bunch of their
+design decisions!
+
+** Local story browser
+
+Twisty shows 3-built-in games on a menu key, and presents an 'open'
+menu choice which eventually lists every game it can find in a folder,
+as a long pop-up list to poke.
+
+Frotz, however, has story-browsing as a whole separate *activity.*
+Assuming someone has dozens of stories, this makes for a much more
+elegant scrolling list.
+
+*** AI: create a real story-browser activity activated from 'open' menu. 
+*** AI: stop referring to them as 'games' and call each work a 'story'
+*** AI: only use the word 'game' to refer to a quetzal-format-savegame.
+
+
+** IFDB browser
+
+Frotz opens a web page to the IFDB searchbox, and allows you to browse
+IFDB's website directly.  When you click on a story-file link, it
+uncompresses the story from the internal bundle.
+
+Obviously, this is a hack, since iOS terms-of-service disallows apps
+to fetch executables off the network.  If the storyfile you want isn't
+in the internal bundle already, Frotz's only workaround is to run an
+FTP server and allow you to 'push' the story to your device from a big
+computer.  Laaaaaaaame, but a sensible workaround.
+
+For Twisty, clicking a *.z* link in the browser should trigger Twisty
+as the 'handler'; most of this work is already done.  Before executing
+teh story, we need to make sure the file is first copied into the
+stories folder, so it will show up in all futer local-story-browser
+listing.
+
+*** AI: finish *.z handling as described above
+*** AI: in local-story-browser, create an item/escape hatch over to IFDB.
+
+
+** Smart handling of savegames
+
+During a game-in-progress, switching to any new activity causes Frotz
+to auto-save.  Returning to Frotz resumes the auto-saved game.  It
+appears that each game in the local-story-browser has its own latest
+auto-save game that's automatically resumed when the story is
+re-selected.  Very slick.
+
+It also keeps each story's set of savegames seperate from each other.
+In other words, when I enter 'restore', I only see savegames for the
+current story.
+
+Even cooler is the acknowledgement that you'll want to continue
+playing the story as you switch between different devices, much the
+way my Kindle book always goes to the latest page when I switch
+between e-reader, phone, laptop.  
+
+Frotz handles this by auto-syncing the local story folder with a
+DropBox folder.  For Twisty, we know the user already has a Google
+account (it's Android), so we'd just push/pull savegames to a folder
+in their Google Docs service.  The question is whether this can be an
+effortless auto-sync, or whether the user needs to initiate specific
+push/pulls.  (Does Google Docs have a 'sync' concept at all?)
+
+*** AI: don't show 'foreign' savegames when restoring a game.
+*** AI: track an auto-save/auto-resume game for each local story.
+*** AI: 'sync' savegames to Google Docs when user commands
+
+
+** Docs within the uber-Settings activity
+
+Frotz buries pages of introductory instructions within settings menus,
+which is pretty nice:
+
+ - About Frotz => describes what the app can do, how to use it in
+   general
+ - Getting Started => tutorial for IF commands
+ - What's New
+ 
+*** AI:  totally do this in Twisty.
+
+
+** Good preferences
+
+  Frotz's settings lets you set the default:
+
+  - Text color  ==> color wheel activity
+  - Background color
+  - Font face ==> opens a visual list of fonts
+  - Font size (as a SLIDER, duh)
+
+*** AI:  copy these same settings.
+
+
+** Word completion
+
+Frotz pops up word suggestions right above your half-typed word, and
+when you hit space, it finishes typing the word for you.  Standard iOS
+stuff.
+
+Does Twisty need to do this?  The software keyboard (IME) may already
+be creating word suggestions anyway; the trick is to make it suggest
+completions of *standard IF verbs*.
+
+Frotz also imitates an old IF terp I used to run on my Apple Newton:
+double-tap *any* word already on the screen, and it copies that word
+to the command prompt.  Killer.
+
+
+*** AI:  research whether we can control auto-completion of IME
+*** AI:  implement double-tap word copying.
+
+

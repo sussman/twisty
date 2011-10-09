@@ -1,6 +1,15 @@
 TWISTY RELEASE PROCESS
 ======================
 
+This process is the official way to push a new release of Twisty to
+Android Market; it's mostly concerned with signing the release with
+the proper release-keys, which are required for publishing.
+
+For experimental test releases (alphas, etc), no key-signing is
+required.  Testers simply need to have their Android configured to
+accept unsigned packages from 'unknown sources'.
+
+
 1. Bump the version number
 
   In AndroidManifest.xml, bump the versionCode and versionName
