@@ -119,4 +119,3 @@ to the command prompt.  Killer.
 *** AI:  research whether we can control auto-completion of IME
 *** AI:  implement double-tap word copying.
 
-
