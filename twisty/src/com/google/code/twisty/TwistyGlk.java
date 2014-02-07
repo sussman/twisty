@@ -20,6 +20,7 @@ import java.io.File;
 import org.brickshadow.roboglk.BlorbResource;
 import org.brickshadow.roboglk.Glk;
 import org.brickshadow.roboglk.GlkFileMode;
+import org.brickshadow.roboglk.GlkGestalt;
 import org.brickshadow.roboglk.GlkLayout;
 import org.brickshadow.roboglk.GlkSChannel;
 import org.brickshadow.roboglk.GlkWinDirection;
@@ -69,7 +70,13 @@ public class TwistyGlk implements Glk {
 
     @Override
     public int gestalt(int sel, int val, int[] arr) {
-        return 0;
+    	switch (sel) {
+    	case GlkGestalt.Unicode:
+    		// a lot of modern I7 games check this by default, so string indexing works
+    		return 1; 
+    	default:
+    		return 0;
+    	}
     }
 
     @Override
