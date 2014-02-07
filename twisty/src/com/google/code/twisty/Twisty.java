@@ -142,8 +142,7 @@ public class Twisty extends Activity {
 	/** The native C library which contains the interpreter making Glk calls. 
 	    To build this library, see the README file. */
 	 static {
-	        //System.loadLibrary("twistyterps");
-	        System.loadLibrary("gitterp");
+	        System.loadLibrary("twistyterps");
 	 }
 	
 	/** Called when activity is first created. */
