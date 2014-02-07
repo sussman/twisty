@@ -136,6 +136,7 @@ pointed at your Android SDK directory.
     the following dialog box, choose "based on existing source" and
     then select $TWISTY/twisty/.
 
+
  2. Now open the project's properties (Project->Properties) and choose
     "Java Build Path" from the list on the left.  Then choose the
     'Source' tab and press the 'Link Source' button.  Navigate to the

@@ -142,7 +142,8 @@ public class Twisty extends Activity {
 	/** The native C library which contains the interpreter making Glk calls. 
 	    To build this library, see the README file. */
 	 static {
-	        System.loadLibrary("twistyterps");
+	        //System.loadLibrary("twistyterps");
+	        System.loadLibrary("gitterp");
 	 }
 	
 	/** Called when activity is first created. */
@@ -154,7 +155,7 @@ public class Twisty extends Activity {
 		// Map our built-in game resources to real filenames
 		builtinGames.clear();
 		builtinGames.put(R.raw.violet, "violet.z8");
-		builtinGames.put(R.raw.anchor, "anchorhead.z5");
+		builtinGames.put(R.raw.rover, "rover.gblorb");
 		builtinGames.put(R.raw.curses, "curses.z5");
 		
 		UISync.setInstance(this);
@@ -415,8 +416,9 @@ public class Twisty extends Activity {
 	        	   // TODO: When twistyterps supports multiple interpreters,
 	        	   // it will be important that the first arg to startup
 	        	   // be the correct interpreter name.
-	               String[] args = new String[] {"nitfol", gamePath};
+	               //String[] args = new String[] {"nitfol", gamePath};
 	            		   // cursesFile.getAbsolutePath()};
+	        	   String[] args = new String[] {"git", gamePath};
 	               int res = -1;
 	               if (GlkFactory.startup(glk, args)) {
 	                   res = GlkFactory.run();
@@ -579,7 +581,7 @@ public class Twisty extends Activity {
 		menu.clear();
 		if (!terpIsRunning()) {
 			menu.add(Menu.NONE, R.raw.violet, 0, "Violet").setShortcut('0', 'a');
-			menu.add(Menu.NONE, R.raw.anchor, 1, "Anchorhead").setShortcut('1', 'b');
+			menu.add(Menu.NONE, R.raw.rover, 1, "Rover").setShortcut('1', 'b');
 			menu.add(Menu.NONE, R.raw.curses, 2, "Curses").setShortcut('2', 'c');
 			menu.add(Menu.NONE, MENU_PICK_FILE, 3, "Open Game...").setShortcut('3', 'o');
 			menu.add(Menu.NONE, MENU_SHOW_HELP, 5, "Help!?").setShortcut('4', 'h');
