@@ -685,14 +685,17 @@ public class Twisty extends Activity {
 	}
 
 	// Helper for scanForZGames():
-	//   Walk DIR recursively, adding any file matching *.z[1-8] to LIST.
+	//   Walk DIR recursively, adding any file matching *.z[1-8] or *.gblorb to LIST.
 	private void scanDir(File dir, ArrayList<String> list) {
 		File[] children = dir.listFiles();
 		if (children == null)
 			return;
 		for (int count = 0; count < children.length; count++) {
 			File child = children[count];
-			if (child.isFile() && child.getName().matches("[^.].*\\.[Zz][1-8]"))
+			if (child.isFile() &&
+					(child.getName().matches("[^.].*\\.[Zz][1-8]") ||
+					 child.getName().endsWith(".gblorb") ||
+					 child.getName().endsWith(".ulx")))
 				list.add(child.getPath());
 			else
 				scanDir(child, list);
