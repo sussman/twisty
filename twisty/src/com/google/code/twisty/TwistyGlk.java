@@ -55,7 +55,9 @@ public class TwistyGlk implements Glk {
     }
     
     @Override
-    public void cancelTimer() {}
+    public void cancelTimer() {
+    	eventQueue.cancelTimer();
+    }
 
     @Override
     public void clearStyleHint(int wintype, int styl, int hint) {}
@@ -71,6 +73,8 @@ public class TwistyGlk implements Glk {
     @Override
     public int gestalt(int sel, int val, int[] arr) {
     	switch (sel) {
+    	case GlkGestalt.Timer:
+    		return 1;
     	case GlkGestalt.Unicode:
     		// a lot of modern I7 games check this by default, so string indexing works
     		return 1; 
@@ -104,7 +108,7 @@ public class TwistyGlk implements Glk {
         msg.path = "";
 
         // Ask Twisty to prompt the user, then block until we're notify()'d.
-        // (We're blocking on the glkLayout just because it's a sharde object.)
+        // (We're blocking on the glkLayout just because it's a shared object.)
         if ((fmode & GlkFileMode.Read) == GlkFileMode.Read) {
         	 synchronized (glkLayout) {
              	try {
@@ -137,7 +141,9 @@ public class TwistyGlk implements Glk {
     }
 
     @Override
-    public void requestTimer(int millisecs) {}
+    public void requestTimer(int millisecs) {
+    	eventQueue.requestTimer(millisecs);
+    }
 
     @Override
     public void select(int[] event) {

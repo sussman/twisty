@@ -19,6 +19,8 @@ package org.brickshadow.roboglk.util;
 
 
 import java.util.LinkedList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.brickshadow.roboglk.Glk;
 import org.brickshadow.roboglk.GlkEventType;
@@ -47,7 +49,9 @@ import android.os.Message;
 public class GlkEventQueue {
     private LinkedList<Message> selectQueue = new LinkedList<Message>();
     private LinkedList<Message> pollQueue = new LinkedList<Message>();
-    private boolean hasTimerEvent = false;
+    private final Timer timer = new Timer();
+    private long timerMillisecs = 0;
+    private volatile boolean hasTimerEvent = false;
     private UISync uiWait = UISync.getInstance();
     
     /**
@@ -207,6 +211,7 @@ public class GlkEventQueue {
     		Message msg = pollQueue.poll();
     		if (msg != null && msg.what == GlkEventType.Timer) {
     			hasTimerEvent = false;
+    			scheduleNextTimer();
     		}
     		return msg;
     	}
@@ -235,6 +240,7 @@ public class GlkEventQueue {
 
     			if (msg != null && (msg.what == GlkEventType.Timer)) {
     				hasTimerEvent = false;
+        			scheduleNextTimer();
     			}
             
     			return msg;
@@ -277,5 +283,27 @@ public class GlkEventQueue {
     			uiWait.notify();
     		}
     	}
+    }
+    
+    public void cancelTimer() {
+    	timer.cancel();
+    	timerMillisecs = 0;
+    }
+    
+    public void requestTimer(int millisecs) {
+    	timerMillisecs = millisecs;
+    	scheduleNextTimer();
+    }
+    
+    private void scheduleNextTimer() {
+    	if (timerMillisecs == 0) {
+    		return;
+    	}
+    	timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				GlkEventQueue.this.putEvent(GlkEventQueue.newTimerEvent());
+			}
+		}, timerMillisecs);
     }
 }
