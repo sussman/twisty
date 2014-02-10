@@ -18,14 +18,18 @@
 package org.brickshadow.roboglk.io;
 
 
+import org.brickshadow.roboglk.GlkJustification;
 import org.brickshadow.roboglk.GlkStyle;
 import org.brickshadow.roboglk.GlkStyleHint;
 
 import android.graphics.Typeface;
+import android.text.Layout;
 import android.text.Spannable;
+import android.text.style.AlignmentSpan;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.CharacterStyle;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.LeadingMarginSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.TextAppearanceSpan;
 
@@ -41,13 +45,31 @@ public class StyleManager {
 	private static final int FGC_TYPE = 1;
 	private static final int BGC_TYPE = 2;
 	private static final int RS_TYPE = 3;
+	private static final int INDENT_TYPE = 4;
+	private static final int JUSTIFY_TYPE = 5;
+	private static final int NUM_SPAN_TYPES = 6;
 	
 	public static Style[] newDefaultStyles() {
 		Style[] styles = new Style[NUM_STYLES];
 		for (int s = 0; s < NUM_STYLES; s++) {
 			styles[s] = new Style();
 		}
+		// Nothing for Normal.
+		styles[GlkStyle.Emphasized].setHint(GlkStyleHint.Oblique, 1);
 		styles[GlkStyle.Preformatted].setHint(GlkStyleHint.Proportional, 0);
+		styles[GlkStyle.Header].setHint(GlkStyleHint.Justification, GlkJustification.Centered);
+		styles[GlkStyle.Header].setHint(GlkStyleHint.Size, 3);
+		styles[GlkStyle.Subheader].setHint(GlkStyleHint.Size, 1);
+		styles[GlkStyle.Subheader].setHint(GlkStyleHint.Weight, 1);
+		styles[GlkStyle.Alert].setHint(GlkStyleHint.Size, 1);
+		styles[GlkStyle.Alert].setHint(GlkStyleHint.Oblique, 1);
+		styles[GlkStyle.Alert].setHint(GlkStyleHint.Weight, 1);
+		// Nothing for Note.
+		styles[GlkStyle.BlockQuote].setHint(GlkStyleHint.Weight, 1);
+		styles[GlkStyle.BlockQuote].setHint(GlkStyleHint.Indentation, 2);
+		styles[GlkStyle.Input].setHint(GlkStyleHint.Weight, 1);
+		// Nothing for User1.
+		// Nothing for User2.
 		return styles;
 	}
 	
@@ -58,6 +80,8 @@ public class StyleManager {
 		int backColor = WHITE;	// TODO: coordinate with prefs
 		boolean reverse = false;
 		int face = Typeface.NORMAL;
+		Layout.Alignment align = Layout.Alignment.ALIGN_NORMAL;
+		int indentation = 0;
 		
 		@Override
 		public boolean equals(Object o) {
@@ -73,7 +97,9 @@ public class StyleManager {
 					&& this.face == that.face
 					&& this.foreColor == that.foreColor
 					&& this.backColor == that.backColor
-					&& this.reverse == that.reverse);
+					&& this.reverse == that.reverse
+					&& this.align == that.align
+					&& this.indentation == that.indentation);
 		}
 		
 		final boolean isDifferent(Style other, int type, boolean fakeReverse) {
@@ -90,12 +116,16 @@ public class StyleManager {
 						|| this.reverse != otherReverse);
 			case RS_TYPE:
 				return (this.size != other.size);
+			case INDENT_TYPE:
+				return (this.indentation != other.indentation);
+			case JUSTIFY_TYPE:
+				return (this.align != other.align);
 			default:
 				throw new IllegalArgumentException();
 			}
 		}
 		
-		final CharacterStyle getSpan(int type, boolean fakeReverse) {
+		final Object getSpan(int type, boolean fakeReverse) {
 			switch (type) {
 			case TAP_TYPE:
 				if (proportional && face == Typeface.NORMAL) {
@@ -125,20 +155,48 @@ public class StyleManager {
 					return null;
 				}
 				return new RelativeSizeSpan(convertedSize());
+			case INDENT_TYPE:
+			    if (indentation == 0) {
+			    	return null;
+			    }
+			    // TODO: Should this be based on baseline font size?
+			    return new LeadingMarginSpan.Standard(indentation * 14);
+			case JUSTIFY_TYPE:
+			    if (align == Layout.Alignment.ALIGN_NORMAL) {
+			    	return null;
+			    }
+				return new AlignmentSpan.Standard(align);
 			default:
 				throw new IllegalArgumentException();
 			}
 		}
 		
 		final float convertedSize() {
-			// TODO: convert to relative scale
-			return 1.0f;
+			// TODO: choose a "good" relative scale
+			return 1.0f + (size / 8.0f);
 		}
 		
 		public final void setHint(int hint, int val) {
 			switch (hint) {
 			case GlkStyleHint.BackColor:
 				backColor = 0xFF000000 | val;
+				break;
+			case GlkStyleHint.Indentation:
+				indentation = val;
+				break;
+			case GlkStyleHint.Justification:
+				switch (val) {
+				case GlkJustification.Centered:
+					align = Layout.Alignment.ALIGN_CENTER;
+					break;
+				case GlkJustification.RightFlush:
+					align = Layout.Alignment.ALIGN_OPPOSITE;
+					break;
+				case GlkJustification.LeftFlush:
+				case GlkJustification.LeftRight:  // TODO: support LeftRight.
+					align = Layout.Alignment.ALIGN_NORMAL;
+					break;
+				}
 				break;
 			case GlkStyleHint.Oblique:
 				switch (face) {
@@ -170,7 +228,6 @@ public class StyleManager {
 				reverse = (val == 1);
 				break;
 			case GlkStyleHint.Size:
-				// TODO: convert -4/4 to correct scale factors
 				size = val;
 				break;
 			case GlkStyleHint.TextColor:
@@ -206,6 +263,19 @@ public class StyleManager {
 			switch (hint) {
 			case GlkStyleHint.BackColor:
 				return backColor & 0x00FFFFFF;
+			case GlkStyleHint.Indentation:
+				return indentation;
+			case GlkStyleHint.Justification:
+				switch (align) {
+				case ALIGN_NORMAL:
+					return GlkJustification.LeftFlush;
+				case ALIGN_OPPOSITE:
+					return GlkJustification.RightFlush;
+				case ALIGN_CENTER:
+					return GlkJustification.Centered;
+				default:
+					throw new StyleMeasurementException();
+				}
 			case GlkStyleHint.Oblique:
 				if (face == Typeface.BOLD_ITALIC
 						|| face == Typeface.ITALIC) {
@@ -237,15 +307,11 @@ public class StyleManager {
 	private Style[] styles;
 	private int currentStyleNum = -1;
 	private boolean currentReverse = false;
-	private CharacterStyle[] oldSpans = new CharacterStyle[4];
-	private int[] oldStarts = new int[4];
+	private Object[] oldSpans = new Object[NUM_SPAN_TYPES];
+	private int[] oldStarts = new int[NUM_SPAN_TYPES];
 	
 	public StyleManager() {
-		styles = new Style[NUM_STYLES];
-		for (int s = 0; s < NUM_STYLES; s++) {
-			styles[s] = new Style();
-		}
-		styles[GlkStyle.Preformatted].setHint(GlkStyleHint.Proportional, 0);
+		this.styles = newDefaultStyles();
 	}
 	
 	public StyleManager(Style[] styles) {
@@ -277,12 +343,12 @@ public class StyleManager {
 		}
 		
 		int textLen = text.length();
-		CharacterStyle newSpan = null;
+		Object newSpan = null;
 		boolean changeSpan = false;
 		Style currentStyle =
 			(currentStyleNum == -1 ? null : styles[currentStyleNum]);
 		Style newStyle = styles[newStyleNum];
-		for (int s = 0; s < 4; s++) {
+		for (int s = 0; s < NUM_SPAN_TYPES; s++) {
 			changeSpan = (currentStyle == null
 					|| currentStyle.isDifferent(newStyle, s, fakeReverse));
 			if (!changeSpan && (s == 1 || s == 2)) {
