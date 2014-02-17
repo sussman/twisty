@@ -27,11 +27,11 @@ import android.text.Layout;
 import android.text.Spannable;
 import android.text.style.AlignmentSpan;
 import android.text.style.BackgroundColorSpan;
-import android.text.style.CharacterStyle;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.TextAppearanceSpan;
+import android.text.style.URLSpan;
 
 
 public class StyleManager {
@@ -309,6 +309,10 @@ public class StyleManager {
 	private boolean currentReverse = false;
 	private Object[] oldSpans = new Object[NUM_SPAN_TYPES];
 	private int[] oldStarts = new int[NUM_SPAN_TYPES];
+
+	private Object oldLinkSpan = null;
+	private int oldLinkStart = 0;
+	private int currentLinkVal = 0;
 	
 	public StyleManager() {
 		this.styles = newDefaultStyles();
@@ -325,6 +329,31 @@ public class StyleManager {
 	public int measureStyle(int styleNum, int hint) {
 		Style style = styles[styleNum];
 		return style.measureStyle(hint);
+	}
+
+	// TODO(jmegq): Consider merging hyperlink handling into applyStyle; they
+	// share a lot of structure. Merge the hyperlink fields into the
+	// oldSpans[] and oldStarts[] arrays as well.
+	public void applyHyperlink(int newLinkVal, Spannable text) {
+		if (newLinkVal == currentLinkVal) {
+			return;
+		}
+
+		final int textLen = text.length();
+		Object newSpan = null;
+		
+		if (oldLinkSpan != null) {
+			text.setSpan(oldLinkSpan, oldLinkStart, textLen,
+					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		}
+		if (newLinkVal != 0) {
+			newSpan = new URLSpan(Integer.toString(newLinkVal));
+			text.setSpan(newSpan, textLen, textLen,
+					Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+		}
+		oldLinkSpan = newSpan;
+		oldLinkStart = textLen;
+		currentLinkVal = newLinkVal;
 	}
 	
 	public void applyStyle(int newStyleNum, Spannable text) {
@@ -351,7 +380,7 @@ public class StyleManager {
 		for (int s = 0; s < NUM_SPAN_TYPES; s++) {
 			changeSpan = (currentStyle == null
 					|| currentStyle.isDifferent(newStyle, s, fakeReverse));
-			if (!changeSpan && (s == 1 || s == 2)) {
+			if (!changeSpan && (s == FGC_TYPE || s == BGC_TYPE)) {
 				changeSpan = fakeReverse != currentReverse;
 			}
 			if (changeSpan) {

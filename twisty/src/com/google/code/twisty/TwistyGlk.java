@@ -70,18 +70,17 @@ public class TwistyGlk implements Glk {
     @Override
     public void destroyChannel(GlkSChannel schan) {}
 
-    @Override
-    public int gestalt(int sel, int val, int[] arr) {
-    	switch (sel) {
-    	case GlkGestalt.Timer:
-    		return 1;
-    	case GlkGestalt.Unicode:
-    		// a lot of modern I7 games check this by default, so string indexing works
-    		return 1; 
-    	default:
-    		return 0;
-    	}
-    }
+	@Override
+	public int gestalt(int sel, int val, int[] arr) {
+		switch (sel) {
+		case GlkGestalt.Timer:
+		case GlkGestalt.Hyperlinks:
+		case GlkGestalt.Unicode:
+			return 1;
+		default:
+			return 0;
+		}
+	}
 
     @Override
     public boolean getImageInfo(BlorbResource bres, int[] dim) {

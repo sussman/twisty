@@ -352,8 +352,13 @@ public abstract class GlkTextWindow extends GlkWindow {
 	}
 
 	@Override
-	public void setLinkValue(int val) {
-		// TODO: hyperlink support
+	public void setLinkValue(final int linkval) {
+		activity.runOnUiThread(new Runnable() {
+        	@Override
+        	public void run() {
+        		io.doHyperlink(linkval);
+        	}
+        });
 	}
 
 	@Override

@@ -53,6 +53,9 @@ public class TextGridIO extends TextIO {
 
 	@Override
 	public void doStyle(int style) {}
+	
+	@Override
+	public void doHyperlink(int linkval) {}
 
 	/**
 	 * Does nothing. History is not supported in text grid windows.

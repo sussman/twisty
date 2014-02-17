@@ -41,7 +41,7 @@ public abstract class TextIO {
     
     /**
      * During line input, the characters entered so far. It is the
-     * resposibility of concrete subclasses to initialize this upon a
+     * responsibility of concrete subclasses to initialize this upon a
      * request for line input.
      */
     protected char[] inputChars;
@@ -259,6 +259,15 @@ public abstract class TextIO {
      * @param style one of the {@link GlkStyle} constants
      */
     public abstract void doStyle(int style);
+    
+	/**
+	 * Sets the hyperlink value for newly-printed text.
+	 * 
+	 * @param linkval
+	 *            an integer representing the target of the link, or 0 meaning
+	 *            no link.
+	 */
+    public abstract void doHyperlink(int linkval);
     
     protected boolean onViewKey(View v, int keyCode, KeyEvent event) {
     	if (!charInput && !lineInput) {

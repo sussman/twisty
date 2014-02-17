@@ -53,6 +53,11 @@ public class TextBufferIO extends TextIO {
 	public void doStyle(int style) {
     	styleMan.applyStyle(style, tv.getEditableText());
     }
+
+    @Override
+	public void doHyperlink(int linkval) {
+    	styleMan.applyHyperlink(linkval, tv.getEditableText());
+    }
     
     public void doReverseVideo(boolean reverse) {
 		styleMan.applyStyle(reverse, tv.getEditableText());
