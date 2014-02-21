@@ -5,7 +5,7 @@ import org.brickshadow.roboglk.io.StyleManager;
 import org.brickshadow.roboglk.util.GlkEventQueue;
 import org.brickshadow.roboglk.util.UISync;
 
-import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
 import android.widget.LinearLayout;
 
@@ -25,10 +25,10 @@ public class GlkLayout extends LinearLayout {
 	 * Create a new GlkLayout view. It is not usable until you call initialize.
 	 * <br>
 	 * This <em>must</em> be called from the UI thread.
-	 * @param activity
+	 * @param context
 	 */
-	public GlkLayout(Activity activity) {
-		super(activity);
+	public GlkLayout(Context context) {
+		super(context);
 		setFocusableInTouchMode(true);
 		uiSync = UISync.getInstance();
 	}
@@ -121,7 +121,7 @@ public class GlkLayout extends LinearLayout {
 	protected LayoutParams generateDefaultLayoutParams() {
 		// We should always have exactly one child, and it should fill the 
 		// entire view.
-		return new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+		return new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 	}
 	
 	public GlkEventQueue getQueue() { return queue; }

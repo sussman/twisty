@@ -225,7 +225,11 @@ public class Twisty extends Activity {
 		Uri dataSource = this.getIntent().getData();
 		if (dataSource != null) {
 			/* Suck down the URI we received to sdcard, launch terp on it. */
-			startTerp(dataSource);
+			try {
+				startTerp(dataSource);
+			} catch (Exception e) {
+				Log.e(TAG, e.getMessage(), e);
+			}
 		}
 		else {
 			printWelcomeMessage();
@@ -484,7 +488,7 @@ public class Twisty extends Activity {
     
     /* Starts a game located at a URI (usually http://) by downloading the game to sdcard first.
        This is the method invoked by our IntentFilter to handle *.z* files coming from the web browser. */
-    void startTerp(Uri gameURI) {
+    void startTerp(Uri gameURI) throws IOException, MalformedURLException {
     	
     	/* Set up output file in same directory as saved-games. */
     	String dir = ensureSavedGamesDir(true);

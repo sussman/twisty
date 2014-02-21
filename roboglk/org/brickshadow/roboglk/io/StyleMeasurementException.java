@@ -18,4 +18,5 @@
 package org.brickshadow.roboglk.io;
 
 
+@SuppressWarnings("serial")
 public class StyleMeasurementException extends RuntimeException {}

@@ -55,9 +55,9 @@ public class Unzipper extends Activity {
             Runnable showMessage = new Runnable() {
                 public void run() {
                     if (unzipOk) {
-                        Toast.makeText(self, R.string.unzip_success, 1).show();
+                        Toast.makeText(self, R.string.unzip_success, Toast.LENGTH_LONG).show();
                     } else {
-                        Toast.makeText(self, R.string.unzip_fail, 1).show();
+                        Toast.makeText(self, R.string.unzip_fail, Toast.LENGTH_LONG).show();
                     }
                 }
             };
@@ -70,8 +70,9 @@ public class Unzipper extends Activity {
 
     public static boolean unzip(String filename) {
         boolean wasValid = false;
+        ZipFile zip = null;
         try {
-            ZipFile zip = new ZipFile(filename);
+            zip = new ZipFile(filename);
             Enumeration<? extends ZipEntry> zippedFiles = zip.entries();
             while (zippedFiles.hasMoreElements()) {
                 ZipEntry entry = zippedFiles.nextElement();
@@ -111,6 +112,12 @@ public class Unzipper extends Activity {
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        } finally {
+        	if (zip != null) {
+        	  try {
+				zip.close();
+        	  } catch (IOException e2) {}
+        	}
         }
         return wasValid;
     }
