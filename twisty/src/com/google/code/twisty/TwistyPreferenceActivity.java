@@ -15,11 +15,7 @@
 
 package com.google.code.twisty;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
-import android.preference.Preference;
 import android.preference.PreferenceActivity;
 
 public class TwistyPreferenceActivity extends PreferenceActivity {

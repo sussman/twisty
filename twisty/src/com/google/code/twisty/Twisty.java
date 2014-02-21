@@ -28,13 +28,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.prefs.Preferences;
 
 import com.google.code.twisty.TwistyMessage;
 import com.google.code.twisty.R;
@@ -47,7 +46,6 @@ import org.brickshadow.roboglk.GlkStyleHint;
 import org.brickshadow.roboglk.GlkWinType;
 import org.brickshadow.roboglk.io.StyleManager;
 import org.brickshadow.roboglk.io.TextBufferIO;
-import org.brickshadow.roboglk.util.GlkEventQueue;
 import org.brickshadow.roboglk.util.UISync;
 import org.brickshadow.roboglk.view.TextBufferView;
 
@@ -73,6 +71,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -99,8 +98,8 @@ public class Twisty extends Activity {
 	private static final int MENU_SHOW_HELP = 107;
 	private static final int MENU_PICK_SETTINGS = 108;
 	
-	private String savegame_dir = "";
-	private String savefile_path = "";
+	String savegame_dir = "";
+	String savefile_path = "";
 
 	// Dialog boxes we manage. Passed to showDialog().
 	// Processed in onDialogCreate().
@@ -116,14 +115,14 @@ public class Twisty extends Activity {
 	public static final int PROMPT_FOR_ZGAME = 3;
 	
 	// The main GLK UI machinery.
-	private Glk glk;
-	private GlkLayout glkLayout;
-	private TextBufferIO mainWin;
-	private TextBufferView tv;
-	private LinearLayout ll;
-	private Thread terpThread = null;
-	private String gamePath;
-	private Boolean gameIsRunning = false;
+	Glk glk;
+	GlkLayout glkLayout;
+	TextBufferIO mainWin;
+	TextBufferView tv;
+	LinearLayout ll;
+	Thread terpThread = null;
+	String gamePath;
+	Boolean gameIsRunning = false;
 	
 	// Passed down to TwistyGlk object, so terp thread can send Messages back to this thread
 	private Handler dialog_handler;
@@ -135,16 +134,67 @@ public class Twisty extends Activity {
 	// All z-games discovered when we last scanned the sdcard
 	private String[] discovered_zgames;
 	// A persistent map of button-ids to zgames found on the sdcard (absolute paths)
-	private HashMap<Integer, String> zgame_paths = new HashMap<Integer, String>();
-	private HashMap<Integer, String> builtinGames = new HashMap<Integer, String>();
+	private SparseArray<String> zgame_paths = new SparseArray<String>();
+	private SparseArray<String> builtinGames = new SparseArray<String>();
 
 
 	/** The native C library which contains the interpreter making Glk calls. 
 	    To build this library, see the README file. */
-	 static {
-	        System.loadLibrary("twistyterps");
-	 }
+	static {
+	       System.loadLibrary("twistyterps");
+	}
 	
+	static class DialogHandler extends Handler {
+		final WeakReference<Twisty> twisty;
+		
+		DialogHandler(Twisty twisty) {
+			this.twisty = new WeakReference<Twisty>(twisty);
+		}
+
+		public void handleMessage(Message m) {
+			twisty.get().savegame_dir = "";
+			twisty.get().savefile_path = "";
+			if (m.what == PROMPT_FOR_WRITEFILE) {
+				twisty.get().dialog_message = (TwistyMessage) m.obj;
+				twisty.get().promptForWritefile();
+			}
+			else if (m.what == PROMPT_FOR_READFILE) {
+				twisty.get().dialog_message = (TwistyMessage) m.obj;
+				twisty.get().promptForReadfile();
+			}
+			else if (m.what == PROMPT_FOR_ZGAME) {
+				twisty.get().showDialog(DIALOG_CHOOSE_ZGAME);
+			}
+		} 
+	};
+	
+	static class TerpHandler extends Handler {
+		final WeakReference<Twisty> twisty;
+		
+		TerpHandler(Twisty twisty) {
+			this.twisty = new WeakReference<Twisty>(twisty);
+		}
+		
+		public void handleMessage(Message m) {
+            switch (m.arg1) {
+            case -1:
+         	   Log.i("twistyterp", "The interpreter did not start");
+         	   break;
+            case 0:
+         	   Log.i("twistyterp", "The interpreter exited normally");
+         	   break;
+            case 1:
+         	   Log.i("twistyterp", "The interpreter exited abnormally");
+         	   break;
+            case 2:
+         	   Log.i("twistyterp", "The interpreter was interrupted");
+         	   break;
+            }
+            twisty.get().setContentView(twisty.get().ll);
+            twisty.get().gameIsRunning = false;
+			}
+		};
+
 	/** Called when activity is first created. */
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -170,7 +220,7 @@ public class Twisty extends Activity {
 		// The main 'welcome screen' window from which games are launched.
 		tv = new TextBufferView(this);
 		mainWin = new TextBufferIO(tv, new StyleManager());
-		final GlkEventQueue eventQueue = null;
+		//final GlkEventQueue eventQueue = null;
 		tv.setFocusableInTouchMode(true);
 		
 		// The Glk window layout manager
@@ -184,43 +234,8 @@ public class Twisty extends Activity {
 		ll.addView(tv);
 		setContentView(ll);
 		
-		dialog_handler = new Handler() { 
-			public void handleMessage(Message m) {
-				savegame_dir = "";
-				savefile_path = "";
-				if (m.what == PROMPT_FOR_WRITEFILE) {
-					dialog_message = (TwistyMessage) m.obj;
-					promptForWritefile();
-				}
-				else if (m.what == PROMPT_FOR_READFILE) {
-					dialog_message = (TwistyMessage) m.obj;
-					promptForReadfile();
-				}
-				else if (m.what == PROMPT_FOR_ZGAME) {
-					showDialog(DIALOG_CHOOSE_ZGAME);
-				}
-			} 
-		};
-		terp_handler = new Handler() {
-			public void handleMessage(Message m) {
-               switch (m.arg1) {
-               case -1:
-            	   Log.i("twistyterp", "The interpreter did not start");
-            	   break;
-               case 0:
-            	   Log.i("twistyterp", "The interpreter exited normally");
-            	   break;
-               case 1:
-            	   Log.i("twistyterp", "The interpreter exited abnormally");
-            	   break;
-               case 2:
-            	   Log.i("twistyterp", "The interpreter was interrupted");
-            	   break;
-               }
-               setContentView(ll);
-               gameIsRunning = false;
-			}
-		};
+		dialog_handler = new DialogHandler(this);
+		terp_handler = new TerpHandler(this);
 		
 		Uri dataSource = this.getIntent().getData();
 		if (dataSource != null) {
@@ -517,9 +532,11 @@ public class Twisty extends Activity {
 	        gameInputStream = connection.getInputStream();
 		} catch (MalformedURLException e) {
 			Log.i(TAG, "Received malformed URI: "+ uriString);
+			gameOutputStream.close();
 			return;
 		} catch (IOException e) {
 			Log.i(TAG, "Failed to open connection to URI: " + uriString);
+			gameOutputStream.close();
 			return;
 		}
 		
