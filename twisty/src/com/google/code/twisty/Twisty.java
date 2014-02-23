@@ -49,7 +49,7 @@ import org.brickshadow.roboglk.io.TextBufferIO;
 import org.brickshadow.roboglk.util.UISync;
 import org.brickshadow.roboglk.view.TextBufferView;
 
-
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -199,7 +199,8 @@ public class Twisty extends Activity {
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		// requestWindowFeature(Window.FEATURE_NO_TITLE);
+		requestWindowFeature(Window.FEATURE_ACTION_BAR);
 		
 		// Map our built-in game resources to real filenames
 		builtinGames.clear();
