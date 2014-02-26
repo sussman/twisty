@@ -49,7 +49,6 @@ import org.brickshadow.roboglk.io.TextBufferIO;
 import org.brickshadow.roboglk.util.UISync;
 import org.brickshadow.roboglk.view.TextBufferView;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -97,6 +96,9 @@ public class Twisty extends Activity {
 	private static final int FILE_PICKED = 104;
 	private static final int MENU_SHOW_HELP = 107;
 	private static final int MENU_PICK_SETTINGS = 108;
+	
+	private static final int MENUGROUP_SELECT = 101;
+	private static final int MENUGROUP_RUNNING = 102;
 	
 	String savegame_dir = "";
 	String savefile_path = "";
@@ -591,28 +593,26 @@ public class Twisty extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		super.onCreateOptionsMenu(menu);
-		return true;
+		menu.add(MENUGROUP_SELECT, R.raw.violet, 0, "Violet").setShortcut('0', 'a');
+		menu.add(MENUGROUP_SELECT, R.raw.rover, 1, "Rover").setShortcut('1', 'b');
+		menu.add(MENUGROUP_SELECT, R.raw.glulxercise, 2, "glulxercise").setShortcut('2', 'c');
+		menu.add(MENUGROUP_SELECT, MENU_PICK_FILE, 3, "Open Game...").setShortcut('3', 'o');
+		menu.add(MENUGROUP_SELECT, MENU_SHOW_HELP, 5, "Help!?").setShortcut('4', 'h');
+		menu.add(MENUGROUP_SELECT, MENU_PICK_SETTINGS, 5, "Settings").setShortcut('5', 's');
+
+		menu.add(MENUGROUP_RUNNING, MENU_RESTART, 0, "Restart").setShortcut('7', 'r');
+		menu.add(MENUGROUP_RUNNING, MENU_STOP, 1, "Stop").setShortcut('9', 's');
+		menu.add(MENUGROUP_RUNNING, MENU_PICK_SETTINGS, 2, "Settings").setShortcut('4', 's');
+		
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu)
 	{
-		super.onPrepareOptionsMenu(menu);
-		menu.clear();
-		if (!terpIsRunning()) {
-			menu.add(Menu.NONE, R.raw.violet, 0, "Violet").setShortcut('0', 'a');
-			menu.add(Menu.NONE, R.raw.rover, 1, "Rover").setShortcut('1', 'b');
-			menu.add(Menu.NONE, R.raw.glulxercise, 2, "glulxercise").setShortcut('2', 'c');
-			menu.add(Menu.NONE, MENU_PICK_FILE, 3, "Open Game...").setShortcut('3', 'o');
-			menu.add(Menu.NONE, MENU_SHOW_HELP, 5, "Help!?").setShortcut('4', 'h');
-			menu.add(Menu.NONE, MENU_PICK_SETTINGS, 5, "Settings").setShortcut('5', 's');
-		} else {
-			menu.add(Menu.NONE, MENU_RESTART, 0, "Restart").setShortcut('7', 'r');
-			menu.add(Menu.NONE, MENU_STOP, 1, "Stop").setShortcut('9', 's');
-			menu.add(Menu.NONE, MENU_PICK_SETTINGS, 2, "Settings").setShortcut('4', 's');
-		}
-		return true;
+		menu.setGroupVisible(MENUGROUP_SELECT, !terpIsRunning());
+		menu.setGroupVisible(MENUGROUP_RUNNING, terpIsRunning());
+		return super.onPrepareOptionsMenu(menu);
 	}
 
 	@Override
@@ -638,7 +638,7 @@ public class Twisty extends Activity {
 			break;
 		default:
 			startTerp(item.getItemId());
-		break;
+			break;
 		}
 		return super.onOptionsItemSelected(item);
 	}
