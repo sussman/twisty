@@ -276,12 +276,11 @@ public class Twisty extends Activity {
 		mainWin.doStyle(GlkStyle.Normal);
 		
 		mainWin.doReverseVideo(true);
-		mainWin.doPrint("Twisty " + pkginfo.versionName + ", (C) Google Inc.");
+		mainWin.doPrint("Twisty " + pkginfo.versionName + "\nOpen-source software (C) Google Inc.\n\n\n");
 		mainWin.doReverseVideo(false);
-		mainWin.doPrint("\n\n(This is open source software;\nsee http://code.google.com/p/twisty)\n\n\n");
-		mainWin.doPrint("You are holding a modern-looking phone which can be typed upon. ");
-		mainWin.doPrint(battstate.toString() + "  ");
-		mainWin.doPrint("You feel an inexplicable urge to press the phone's \"menu\" key.\n\n");
+		mainWin.doPrint("You are holding a modern-looking mobile device which can be typed upon. ");
+		mainWin.doPrint(battstate.toString() + " ");
+		mainWin.doPrint("You feel an inexplicable urge to press the \"menu\" button.\n\n");
 	}
 	
 	/* TODO:  rewrite this someday
@@ -347,7 +346,7 @@ public class Twisty extends Activity {
 		if (rawlevel >= 0 && scale > 0) {
 			level = (rawlevel * 100) / scale;
 		}
-		sb.append("The phone");
+		sb.append("The device");
 		if (BatteryManager.BATTERY_HEALTH_OVERHEAT == health) {
 			sb.append("'s battery feels very hot!");
 		} else {
