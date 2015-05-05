@@ -271,7 +271,7 @@ public abstract class TextIO {
     
     protected boolean onViewKey(View v, int keyCode, KeyEvent event) {
     	if (!charInput && !lineInput) {
-            return false;
+            return true;
         }
         
         if (tb.length() != 1) {
