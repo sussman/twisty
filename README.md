@@ -1,5 +1,5 @@
-         Twisty, a text-adventure interpreter for Android.
-         =================================================
+Twisty, a text-adventure interpreter for Android.
+-------------------------------------------------
 
 Twisty is a game interpreter for the Android operating system.  It
 allaws you to play both classic and modern "text adventures" on your
