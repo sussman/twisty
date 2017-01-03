@@ -91,5 +91,5 @@ of this Bitbucket project:
 Building from Source
 --------------------
 
-For developers contributing:  see the BUILD file.
+For developers contributing:  see the BUILD.md file.
 
