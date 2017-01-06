@@ -100,7 +100,7 @@ schanid_t glk_schannel_create(glui32 rock)
         return NULL;
     }
 
-    jchan = jni_new_global(jchan);
+    jchan = jni_replace_with_global(jchan);
 
     schan = (schannel_t *)gli_malloc(sizeof(schannel_t));
 

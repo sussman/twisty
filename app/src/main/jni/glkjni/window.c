@@ -244,11 +244,7 @@ static window_t *gli_register_window(glui32 type, glui32 rock,
         win->next->prev = win;
     }
 
-    win->jwin = (*jni_env)->NewGlobalRef(jni_env, jwin);
-    if (!win->jwin) {
-        jni_no_mem();
-    }
-    DELETE_LOCAL(jwin);
+    win->jwin = jni_replace_with_global(jwin);
 
     win->mouse_request = FALSE;
     win->text = NULL;
