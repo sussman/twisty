@@ -161,7 +161,7 @@ frefid_t glk_fileref_create_temp(glui32 usage, glui32 rock)
             goto done;
         }
 
-        tempPrefix = jni_new_global(localref);
+        tempPrefix = jni_replace_with_global(localref);
     }
 
     file = (*jni_env)->CallStaticObjectMethod(STATIC_M(FILE, CREATETEMP),

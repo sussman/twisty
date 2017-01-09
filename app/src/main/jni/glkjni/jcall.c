@@ -178,10 +178,23 @@ void jni_no_mem()
 }
 
 /*
+ * Creates a new global reference from another reference. Never returns NULL.
+ */
+jobject jni_new_global(jobject ref)
+{
+    jobject globalref = (*jni_env)->NewGlobalRef(jni_env, ref);
+    if (!globalref) {
+        jni_no_mem();
+    }
+
+    return globalref;
+}
+
+/*
  * Creates a new global reference from a local reference, and deletes
  * the local reference. Never returns NULL.
  */
-jobject jni_new_global(jobject localref)
+jobject jni_replace_with_global(jobject localref)
 {
     jobject globalref = (*jni_env)->NewGlobalRef(jni_env, localref);
     DELETE_LOCAL(localref);
@@ -383,7 +396,7 @@ static void jni_init_classes(char *glkpackage)
             no_class_def(cname);
         }
 
-        jni_ccache[i].class = jni_new_global(localref);
+        jni_ccache[i].class = jni_replace_with_global(localref);
     }
 }
 
@@ -458,16 +471,7 @@ static jboolean JNICALL jni_glkstartup(JNIEnv *env, jclass class,
     }
 #endif
 
-    /*
-     * Calling jni_new_global would result in a warning,
-     * since it calls DeleteLocalRef on its argument,
-     * and objects passed in from Java (instead of created in C)
-     * are not passed in as local references.
-     */
-    glkobj = (*jni_env)->NewGlobalRef(jni_env, gobj);
-    if (!glkobj) {
-        jni_no_mem();
-    }
+    glkobj = jni_new_global(gobj);
 
     argv = (char **)gli_malloc((1 + jArgc) * sizeof(char **));
 

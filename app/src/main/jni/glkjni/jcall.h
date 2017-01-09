@@ -27,6 +27,7 @@ int jni_check_exc(void);
 int jni_check_for_exc(int class_id);
 void jni_no_mem(void);
 jobject jni_new_global(jobject localref);
+jobject jni_replace_with_global(jobject localref);
 jobject jni_newbytebuffer(void *buf, jlong len);
 jstring jni_jstrfromnative(char *str);
 char *jni_file_getpath(jobject file);
