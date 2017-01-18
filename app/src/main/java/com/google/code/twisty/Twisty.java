@@ -88,8 +88,6 @@ import android.widget.TextView;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 
 public class Twisty extends Activity {
-	private static String TAG = "Twisty";
-
 	private static final int MENU_PICK_FILE = 101;
 	private static final int MENU_STOP = 102;
 	private static final int MENU_RESTART = 103;
@@ -103,15 +101,14 @@ public class Twisty extends Activity {
 	String savegame_dir = "";
 	String savefile_path = "";
 
-	// Dialog boxes we manage. Passed to showDialog().
-	// Processed in onDialogCreate().
+	// Dialog boxes we manage
 	private static final int DIALOG_ENTER_WRITEFILE = 1;
 	private static final int DIALOG_ENTER_READFILE = 2;
 	private static final int DIALOG_CHOOSE_ZGAME = 3;
 	private static final int DIALOG_CANT_SAVE = 4;
 	private static final int DIALOG_NO_SDCARD = 5;
 
-	// Messages we receive from external threads, via the dialog_handler.
+	// Messages we receive from external threads, via our Handler
 	public static final int PROMPT_FOR_WRITEFILE = 1;
 	public static final int PROMPT_FOR_READFILE = 2;
 	public static final int PROMPT_FOR_ZGAME = 3;
