@@ -88,6 +88,7 @@ import android.widget.TextView;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 
 public class Twisty extends Activity {
+	private static String TAG = "Twisty";
 	private static final int MENU_PICK_FILE = 101;
 	private static final int MENU_STOP = 102;
 	private static final int MENU_RESTART = 103;

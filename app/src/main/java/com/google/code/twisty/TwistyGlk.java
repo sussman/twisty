@@ -35,7 +35,8 @@ import android.os.Handler;
 public class TwistyGlk implements Glk {
 
     private final GlkEventQueue eventQueue;
-    
+
+    private GlkWindow mainWin;
     private final Handler twistyHandler;
     
     private final GlkLayout glkLayout;
