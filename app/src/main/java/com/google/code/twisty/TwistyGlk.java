@@ -23,8 +23,6 @@ import org.brickshadow.roboglk.GlkFileMode;
 import org.brickshadow.roboglk.GlkGestalt;
 import org.brickshadow.roboglk.GlkLayout;
 import org.brickshadow.roboglk.GlkSChannel;
-import org.brickshadow.roboglk.GlkWinDirection;
-import org.brickshadow.roboglk.GlkWinDivision;
 import org.brickshadow.roboglk.GlkWinType;
 import org.brickshadow.roboglk.GlkWindow;
 import org.brickshadow.roboglk.util.GlkEventQueue;
@@ -153,7 +151,7 @@ public class TwistyGlk implements Glk {
 
     @Override
     public void setStyleHint(int wintype, int styl, int hint, int val) {
-    	glkLayout.setStyleHint(GlkWinType.getInstance(wintype), styl, hint, val);
+    	glkLayout.setStyleHint(wintype, styl, hint, val);
     }
 
     @Override
@@ -164,26 +162,21 @@ public class TwistyGlk implements Glk {
     @Override
     public void windowOpen(GlkWindow splitwin, int method, int size,
             int wintype, int id, GlkWindow[] wins) {
-    	
-    	// Convert all of those numbers into enums.
-    	GlkWinType winType = GlkWinType.getInstance(wintype);
-    	GlkWinDirection direction = GlkWinDirection.getInstance(method);
-    	GlkWinDivision sizeMethod = GlkWinDivision.getInstance(method);
     	 
-    	Log.d(TAG, "windowOpen: " + winType + ":" + size + ":" + direction + ":" + sizeMethod);
+    	Log.d(TAG, "windowOpen: " + wintype + ":" + size + ":" + method);
     	
-    	if (winType == GlkWinType.textGrid) {
+    	if (wintype == GlkWinType.TextGrid) {
     		Log.d(TAG, "converting grid win to buffer win.");
-    		winType = GlkWinType.textBuffer;
+    		wintype = GlkWinType.TextBuffer;
     	}
     	
     	// Right now, the only supported window type is TextBuffer.
-    	if (winType != GlkWinType.textBuffer) {
+    	if (wintype != GlkWinType.TextBuffer) {
     		return;
     	}
 
         GlkWindow[] newWins =
-        	glkLayout.addGlkWindow(splitwin, direction, sizeMethod, size, winType, id);
+        	glkLayout.addGlkWindow(splitwin, method, size, wintype, id);
         
         wins[0] = newWins[0];
         wins[1] = newWins[1];

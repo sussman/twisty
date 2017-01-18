@@ -22,7 +22,6 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 import android.util.Log;
-import android.view.View;
 
 
 /**
@@ -513,16 +512,4 @@ public class GlkWindow {
     public void setStyle(int val) {
     	MaybeLogUsage("setStyle");
     }
-    
-    // TODO(gmadrid-refactor): clean up this public access.
-	public  View view;
-	
-	/**
-	 * @return the view
-	 */
-	public View getView() {
-		return view;
-	}
-
-
 }

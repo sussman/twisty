@@ -21,4 +21,4 @@ package org.brickshadow.roboglk;
 /**
  * The base class for pair windows.
  */
-public class GlkPairWindow extends GlkInvisibleWindow {}
+public abstract class GlkPairWindow extends GlkInvisibleWindow {}
