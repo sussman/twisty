@@ -239,6 +239,14 @@ public class GlkLayout extends AbsoluteLayout {
 		}
 		styles[style].setHint(hint, val);
 	}
+
+	@Override
+	protected void onLayout(boolean changed, int l, int t, int r, int b)
+	{
+		super.onLayout(changed, l, t, r, b);
+		if(changed && root != null)
+			root.setLayoutRect(l, t, r, b);
+	}
 }
 
 class LayoutRect {
