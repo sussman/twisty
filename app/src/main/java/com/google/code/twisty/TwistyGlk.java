@@ -162,17 +162,19 @@ public class TwistyGlk implements Glk {
     public void windowOpen(GlkWindow splitwin, int method, int size,
             int wintype, int id, GlkWindow[] wins) {
     	
-    	if (splitwin != null || mainWin != null) {
-    		return;
-    	}
+//    	if (splitwin != null || mainWin != null) {
+//    		return;
+//    	}
     	if (wintype != GlkWinType.TextBuffer) {
     		return;
     	}
 
         GlkWindow[] newWins =
         	glkLayout.addGlkWindow(splitwin, method, size, wintype, id);
-        
+
+        // New window
         wins[0] = newWins[0];
+        // Pair window
         wins[1] = newWins[1];
     }
 
