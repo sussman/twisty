@@ -207,6 +207,7 @@ public class Twisty extends Activity {
 		builtinGames.put(R.raw.violet, "violet.z8");
 		builtinGames.put(R.raw.rover, "rover.gblorb");
 		builtinGames.put(R.raw.glulxercise, "glulxercise.ulx");
+		builtinGames.put(R.raw.windowtest, "windowtest.ulx");
 		
 		UISync.setInstance(this);
 
@@ -593,6 +594,7 @@ public class Twisty extends Activity {
 		menu.add(MENUGROUP_SELECT, R.raw.violet, 0, "Violet").setShortcut('0', 'a');
 		menu.add(MENUGROUP_SELECT, R.raw.rover, 1, "Rover").setShortcut('1', 'b');
 		menu.add(MENUGROUP_SELECT, R.raw.glulxercise, 2, "glulxercise").setShortcut('2', 'c');
+		menu.add(MENUGROUP_SELECT, R.raw.windowtest, 2, "windowtest").setShortcut('6', 'd');
 		menu.add(MENUGROUP_SELECT, MENU_PICK_FILE, 3, "Open Game...").setShortcut('3', 'o');
 		menu.add(MENUGROUP_SELECT, MENU_SHOW_HELP, 5, "Help!?").setShortcut('4', 'h');
 		menu.add(MENUGROUP_SELECT, MENU_PICK_SETTINGS, 5, "Settings").setShortcut('5', 's');
