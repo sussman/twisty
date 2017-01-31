@@ -381,29 +381,29 @@ class PairWin extends GlkPairWindow implements WindowNode {
 			/* NOTE: technically we should only set one dimension
 			 * to zero, based on the split method.
 			 */
-			keyNode.setLayoutRect(l, t, l, t);
-			otherNode.setLayoutRect(l, t, r, b);
+			firstChild.setLayoutRect(l, t, l, t);
+			secondChild.setLayoutRect(l, t, r, b);
 		} else {
 			switch (splitDir) {
 			case GlkWinMethod.Above:
 				int keyBottom = t + keySize;
-				keyNode.setLayoutRect(l, t, r, keyBottom);
-				otherNode.setLayoutRect(l, keyBottom + 1, r, b);
+				firstChild.setLayoutRect(l, t, r, keyBottom);
+				secondChild.setLayoutRect(l, keyBottom + 1, r, b);
 				break;
 			case GlkWinMethod.Below:
 				int keyTop = b - keySize;
-				otherNode.setLayoutRect(l, t, r, keyTop - 1);
-				keyNode.setLayoutRect(l, keyTop, r, b);
+				secondChild.setLayoutRect(l, t, r, keyTop - 1);
+				firstChild.setLayoutRect(l, keyTop, r, b);
 				break;
 			case GlkWinMethod.Left:
 				int keyRight = l + keySize;
-				keyNode.setLayoutRect(l, t, keyRight, b);
-				otherNode.setLayoutRect(keyRight + 1, t, r, b);
+				firstChild.setLayoutRect(l, t, keyRight, b);
+				secondChild.setLayoutRect(keyRight + 1, t, r, b);
 				break;
 			case GlkWinMethod.Right:
 				int keyLeft = r - keySize;
-				otherNode.setLayoutRect(l, t, keyLeft - 1, b);
-				keyNode.setLayoutRect(keyLeft, t, r, b);
+				secondChild.setLayoutRect(l, t, keyLeft - 1, b);
+				firstChild.setLayoutRect(keyLeft, t, r, b);
 				break;
 			}
 		}
