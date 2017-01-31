@@ -314,8 +314,10 @@ class PairWin extends GlkPairWindow implements WindowNode {
 	
 	@Override
 	public int getSizeFromConstraint(int constraint, boolean vertical, int maxSize) {
-		GlkLayout.Group keyGroup =
-			(GlkLayout.Group) keyNode.getNodeForWin(keyWin);
+		GlkLayout.Group keyGroup = null;
+		if (keyNode != null && keyWin != null) {
+			keyGroup = (GlkLayout.Group) keyNode.getNodeForWin(keyWin);
+		}
 
 		if (keyGroup != null) {
 			return keyWin.getSizeFromConstraint(constraint, vertical, maxSize);
@@ -342,8 +344,10 @@ class PairWin extends GlkPairWindow implements WindowNode {
 	@Override
 	public void setLayoutRect(int l, int t, int r, int b) {
 		// The key window node is always a group (non-pair) node. 
-		GlkLayout.Group keyGroup =
-			(GlkLayout.Group) keyNode.getNodeForWin(keyWin);
+		GlkLayout.Group keyGroup = null;
+		if (keyNode != null && keyWin != null) {
+			keyGroup = (GlkLayout.Group) keyNode.getNodeForWin(keyWin);
+		}
 		
 		myLayout.l = l;
 		myLayout.t = t;
@@ -408,7 +412,18 @@ class PairWin extends GlkPairWindow implements WindowNode {
 			}
 		}
 	}
-	
+
+	void removeKey(WindowNode node) {
+		if (keyNode == node) {
+			keyNode = null;
+			keyWin = null;
+			return;
+		}
+		if (parentNode != null) {
+			parentNode.removeKey(node);
+		}
+	}
+
 	void removeChild(WindowNode child) {
 		WindowNode preserveNode = null;
 		if (child == firstChild) {
@@ -418,12 +433,17 @@ class PairWin extends GlkPairWindow implements WindowNode {
 			preserveNode = firstChild;
 			secondChild = null;
 		}
-		if (parentNode != null) {
-			parentNode.replaceChild(this, preserveNode);
-		}
+
 		/* When parentNode == null (this node is root), we handle
 		 * replacement in GlkLayout#removeGlkWindow.
 		 */
+		if (parentNode != null) {
+			parentNode.replaceChild(this, preserveNode);
+		}
+
+		// Check up the hierarchy to see if the node is any pair window's key node, and delete
+		// the key node reference if so.
+		removeKey(child);
 	}
 	
 	@Override
