@@ -271,10 +271,7 @@ class PairWin extends GlkPairWindow implements WindowNode {
 	WindowNode firstChild, secondChild;
 	
 	private GlkWindow keyWin;
-	
-	// The node that contains the key, and the node that doesn't.
-	private WindowNode keyNode, otherNode;
-	
+
 	private int splitDir, splitDivision;
 	
 	private int size;
@@ -302,9 +299,7 @@ class PairWin extends GlkPairWindow implements WindowNode {
 		newNode.setParentNode(this);
 		splitNode.setParentNode(this);
 		firstChild = newNode;
-		keyNode = newNode;
 		secondChild = splitNode;
-		otherNode = splitNode;
 		myLayout = new LayoutRect();
 		
 		if (parentNode != null) {
@@ -314,19 +309,13 @@ class PairWin extends GlkPairWindow implements WindowNode {
 	
 	@Override
 	public int getSizeFromConstraint(int constraint, boolean vertical, int maxSize) {
-		GlkLayout.Group keyGroup = null;
-		if (keyNode != null && keyWin != null) {
-			keyGroup = (GlkLayout.Group) keyNode.getNodeForWin(keyWin);
-		}
-
-		if (keyGroup != null) {
+		if (keyWin != null) {
 			return keyWin.getSizeFromConstraint(constraint, vertical, maxSize);
 		} else {
 			return 0;
 		}
 	}
 
-	// NOTE: this method doesn't and shouldn't mess with keyNode/otherNode
 	void replaceChild(WindowNode oldNode, WindowNode newNode) {
 		if (firstChild == oldNode) {
 			firstChild = newNode;
@@ -343,12 +332,6 @@ class PairWin extends GlkPairWindow implements WindowNode {
 	
 	@Override
 	public void setLayoutRect(int l, int t, int r, int b) {
-		// The key window node is always a group (non-pair) node. 
-		GlkLayout.Group keyGroup = null;
-		if (keyNode != null && keyWin != null) {
-			keyGroup = (GlkLayout.Group) keyNode.getNodeForWin(keyWin);
-		}
-		
 		myLayout.l = l;
 		myLayout.t = t;
 		myLayout.r = r;
@@ -356,7 +339,7 @@ class PairWin extends GlkPairWindow implements WindowNode {
 		
 		int keySize = 0;
 		
-		if (keyGroup != null) {
+		if (keyWin != null) {
 			int maxSize = 0;
 			boolean vertical = false;
 			switch (splitDir) {
@@ -377,8 +360,6 @@ class PairWin extends GlkPairWindow implements WindowNode {
 			} else {
 				keySize = (int) ((size * maxSize) / 100.0);
 			}
-		} else {
-			keyWin = null;
 		}
 		
 		if (keySize == 0) {
@@ -414,12 +395,10 @@ class PairWin extends GlkPairWindow implements WindowNode {
 	}
 
 	void removeKey(WindowNode node) {
-		if (keyNode == node) {
-			keyNode = null;
+		if(node.getNodeForWin(keyWin) != null) {
 			keyWin = null;
-			return;
 		}
-		if (parentNode != null) {
+		else if (parentNode != null) {
 			parentNode.removeKey(node);
 		}
 	}
@@ -441,8 +420,8 @@ class PairWin extends GlkPairWindow implements WindowNode {
 			parentNode.replaceChild(this, preserveNode);
 		}
 
-		// Check up the hierarchy to see if the node is any pair window's key node, and delete
-		// the key node reference if so.
+		// Check up the hierarchy to see if the node has any pair window's key window, and delete
+		// the reference if so.
 		removeKey(child);
 	}
 	
@@ -458,8 +437,6 @@ class PairWin extends GlkPairWindow implements WindowNode {
 		keyWin = null;
 		firstChild = null;
 		secondChild = null;
-		keyNode = null;
-		otherNode = null;
 	}
 	
 	@Override
@@ -495,17 +472,8 @@ class PairWin extends GlkPairWindow implements WindowNode {
 	
 		activity.runOnUiThread(new Runnable() {
 			public void run() {
-				if (keyWin != key) {
-					keyWin = key;
-					if (firstChild.getNodeForWin(key) != null) {
-						keyNode = firstChild;
-						otherNode = secondChild;
-					} else {
-						keyNode = secondChild;
-						otherNode = firstChild;
-					}
-				}
-				
+				keyWin = key;
+
 				splitDir = GlkWinMethod.dir(method);
 				splitDivision = GlkWinMethod.division(method);
 				PairWin.this.size = size;
