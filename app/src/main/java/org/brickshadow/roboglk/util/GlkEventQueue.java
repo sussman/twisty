@@ -49,7 +49,7 @@ import android.os.Message;
 public class GlkEventQueue {
     private LinkedList<Message> selectQueue = new LinkedList<Message>();
     private LinkedList<Message> pollQueue = new LinkedList<Message>();
-    private final Timer timer = new Timer();
+    private Timer timer = new Timer();
     private long timerMillisecs = 0;
     private volatile boolean hasTimerEvent = false;
     private UISync uiWait = UISync.getInstance();
@@ -287,6 +287,7 @@ public class GlkEventQueue {
     
     public void cancelTimer() {
     	timer.cancel();
+        timer = new Timer();
     	timerMillisecs = 0;
     }
     
