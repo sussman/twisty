@@ -214,8 +214,8 @@ frefid_t glk_fileref_create_by_name(glui32 usage, char *name, glui32 rock)
 {
     jstring rawname;
     jobject file = NULL;
-    char *path;
-    fileref_t *fref;
+    char *path = NULL;
+    fileref_t *fref = NULL;
 
     rawname = jni_jstrfromnative(name);
     if (!rawname) {
