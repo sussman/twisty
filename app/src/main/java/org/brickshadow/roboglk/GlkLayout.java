@@ -117,7 +117,7 @@ public class GlkLayout extends AbsoluteLayout {
 	@Override
 	protected LayoutParams generateDefaultLayoutParams() {
 		return new LayoutParams(
-				LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT, 0, 0);
+				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 0, 0);
 	}
 
 	WindowNode root;
