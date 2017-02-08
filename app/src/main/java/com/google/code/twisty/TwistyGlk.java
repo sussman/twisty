@@ -84,7 +84,14 @@ public class TwistyGlk implements Glk {
 
     @Override
     public File namedFile(String filename, int usage) {
-        return null;
+        //TODO: more detailed verification of filename as recommended in section 6.1 of the glk spec
+        String savedGamesDir = Twisty.getSavedGamesDir(true);
+        if (savedGamesDir != null) {
+            return new File(savedGamesDir + "/" + filename);
+        }
+        else {
+            return null;
+        }
     }
 
     @Override

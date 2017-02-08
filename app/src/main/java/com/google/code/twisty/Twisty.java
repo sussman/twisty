@@ -464,7 +464,7 @@ public class Twisty extends Activity {
     	}
     	Log.i(TAG, "Loading game resource: " + gameName);
     	
-    	String savedGamesDir = ensureSavedGamesDir(true);
+    	String savedGamesDir = getSavedGamesDir(true);
 		if (savedGamesDir == null) {
 			showDialog(DIALOG_CANT_SAVE);
 			return;
@@ -507,7 +507,7 @@ public class Twisty extends Activity {
     void startTerp(Uri gameURI) throws IOException, MalformedURLException {
     	
     	/* Set up output file in same directory as saved-games. */
-    	String dir = ensureSavedGamesDir(true);
+    	String dir = getSavedGamesDir(true);
 		if (dir == null) {
 			showDialog(DIALOG_CANT_SAVE);
 			return;
@@ -688,7 +688,7 @@ public class Twisty extends Activity {
 
 	// Return the path to the saved-games directory (typically "/sdcard/Twisty/")
 	// If sdcard not present, or if /sdcard/Twisty is a file, return null.
-	private String ensureSavedGamesDir(boolean write) {
+	public static String getSavedGamesDir(boolean write) {
 		String storagestate = Environment.getExternalStorageState();
 		if (!storagestate.equals(Environment.MEDIA_MOUNTED) &&
 				(write || storagestate.equals(Environment.MEDIA_MOUNTED_READ_ONLY))) {
@@ -726,7 +726,7 @@ public class Twisty extends Activity {
 	// Search the twisty directory (on sdcard) for any z-games.  
 	// Return an array of absolute paths, or null on failure.
 	private String[] scanForZGames() {
-		String gamesDirPath = ensureSavedGamesDir(false);
+		String gamesDirPath = getSavedGamesDir(false);
 		if (gamesDirPath == null) {
 			showDialog(DIALOG_CANT_SAVE);
 			return null;
@@ -740,7 +740,7 @@ public class Twisty extends Activity {
 	}
 
 	public void promptForWritefile() {
-		String dir = ensureSavedGamesDir(true);
+		String dir = getSavedGamesDir(true);
 		if (dir == null) {
 			showDialog(DIALOG_CANT_SAVE);
 			return;
@@ -750,7 +750,7 @@ public class Twisty extends Activity {
 	}
 
 	private void promptForReadfile() {
-		String dir = ensureSavedGamesDir(false);
+		String dir = getSavedGamesDir(false);
 		if (dir == null) {
 			showDialog(DIALOG_CANT_SAVE);
 			return;
