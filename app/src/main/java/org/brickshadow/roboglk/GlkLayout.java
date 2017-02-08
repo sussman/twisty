@@ -3,9 +3,11 @@ package org.brickshadow.roboglk;
 
 import org.brickshadow.roboglk.io.StyleManager;
 import org.brickshadow.roboglk.io.TextBufferIO;
+import org.brickshadow.roboglk.io.TextGridIO;
 import org.brickshadow.roboglk.util.GlkEventQueue;
 import org.brickshadow.roboglk.util.UISync;
 import org.brickshadow.roboglk.view.TextBufferView;
+import org.brickshadow.roboglk.view.TextGridView;
 
 import android.app.Activity;
 import android.view.View;
@@ -204,6 +206,13 @@ public class GlkLayout extends AbsoluteLayout {
 					new TextBufferIO(tbview, new StyleManager(bufferStyles)),
 					id);
 			return new Group(tbwin, tbview);
+		case GlkWinType.TextGrid:
+			TextGridView tgview = new TextGridView(getContext());
+			GlkTextGridWindow tgwin = new GlkTextGridWindow(
+					activity, queue,
+					new TextGridIO(tgview, new StyleManager(bufferStyles)),
+					id);
+			return new Group(tgwin, tgview);
 		default:
 			// TODO: change when other window types added
 			return null;

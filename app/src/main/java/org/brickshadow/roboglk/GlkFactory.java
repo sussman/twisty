@@ -68,7 +68,7 @@ public class GlkFactory {
     public static native boolean startup(Glk glk, String[] args);
     
     /**
-     * Call ths method to start the interpreter. All Glk bridge methods
+     * Call this method to start the interpreter. All Glk bridge methods
      * will be called on the thread that this method is called from.
      * 
      * @return 0 if the interpreter exited normally; 1 for abnormal

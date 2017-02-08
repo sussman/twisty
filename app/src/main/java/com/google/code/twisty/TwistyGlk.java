@@ -168,11 +168,8 @@ public class TwistyGlk implements Glk {
     @Override
     public void windowOpen(GlkWindow splitwin, int method, int size,
             int wintype, int id, GlkWindow[] wins) {
-    	
-//    	if (splitwin != null || mainWin != null) {
-//    		return;
-//    	}
-    	if (wintype != GlkWinType.TextBuffer) {
+
+    	if (wintype != GlkWinType.TextBuffer && wintype != GlkWinType.TextGrid) {
     		return;
     	}
 
