@@ -89,7 +89,6 @@ import android.widget.RadioGroup.OnCheckedChangeListener;
 
 public class Twisty extends Activity {
 	private static String TAG = "Twisty";
-
 	private static final int MENU_PICK_FILE = 101;
 	private static final int MENU_STOP = 102;
 	private static final int MENU_RESTART = 103;
@@ -103,15 +102,14 @@ public class Twisty extends Activity {
 	String savegame_dir = "";
 	String savefile_path = "";
 
-	// Dialog boxes we manage. Passed to showDialog().
-	// Processed in onDialogCreate().
+	// Dialog boxes we manage
 	private static final int DIALOG_ENTER_WRITEFILE = 1;
 	private static final int DIALOG_ENTER_READFILE = 2;
 	private static final int DIALOG_CHOOSE_ZGAME = 3;
 	private static final int DIALOG_CANT_SAVE = 4;
 	private static final int DIALOG_NO_SDCARD = 5;
 
-	// Messages we receive from external threads, via the dialog_handler.
+	// Messages we receive from external threads, via our Handler
 	public static final int PROMPT_FOR_WRITEFILE = 1;
 	public static final int PROMPT_FOR_READFILE = 2;
 	public static final int PROMPT_FOR_ZGAME = 3;
@@ -209,6 +207,7 @@ public class Twisty extends Activity {
 		builtinGames.put(R.raw.violet, "violet.z8");
 		builtinGames.put(R.raw.rover, "rover.gblorb");
 		builtinGames.put(R.raw.glulxercise, "glulxercise.ulx");
+		builtinGames.put(R.raw.windowtest, "windowtest.ulx");
 		
 		UISync.setInstance(this);
 
@@ -429,7 +428,7 @@ public class Twisty extends Activity {
 		
 		// Make a GLK object which encapsulates I/O between Android UI and our C library
 		glk = new TwistyGlk(this, glkLayout, dialog_handler);
-		glk.setStyleHint(GlkWinType.all.getNumericValue(), GlkStyle.Normal, GlkStyleHint.Size, -2);
+		glk.setStyleHint(GlkWinType.AllTypes, GlkStyle.Normal, GlkStyleHint.Size, -2);
 		terpThread = new Thread(new Runnable() {
 	           @Override
 	            public void run() {
@@ -465,7 +464,7 @@ public class Twisty extends Activity {
     	}
     	Log.i(TAG, "Loading game resource: " + gameName);
     	
-    	String savedGamesDir = ensureSavedGamesDir(true);
+    	String savedGamesDir = getSavedGamesDir(true);
 		if (savedGamesDir == null) {
 			showDialog(DIALOG_CANT_SAVE);
 			return;
@@ -508,7 +507,7 @@ public class Twisty extends Activity {
     void startTerp(Uri gameURI) throws IOException, MalformedURLException {
     	
     	/* Set up output file in same directory as saved-games. */
-    	String dir = ensureSavedGamesDir(true);
+    	String dir = getSavedGamesDir(true);
 		if (dir == null) {
 			showDialog(DIALOG_CANT_SAVE);
 			return;
@@ -595,6 +594,7 @@ public class Twisty extends Activity {
 		menu.add(MENUGROUP_SELECT, R.raw.violet, 0, "Violet").setShortcut('0', 'a');
 		menu.add(MENUGROUP_SELECT, R.raw.rover, 1, "Rover").setShortcut('1', 'b');
 		menu.add(MENUGROUP_SELECT, R.raw.glulxercise, 2, "glulxercise").setShortcut('2', 'c');
+		menu.add(MENUGROUP_SELECT, R.raw.windowtest, 2, "windowtest").setShortcut('6', 'd');
 		menu.add(MENUGROUP_SELECT, MENU_PICK_FILE, 3, "Open Game...").setShortcut('3', 'o');
 		menu.add(MENUGROUP_SELECT, MENU_SHOW_HELP, 5, "Help!?").setShortcut('4', 'h');
 		menu.add(MENUGROUP_SELECT, MENU_PICK_SETTINGS, 5, "Settings").setShortcut('5', 's');
@@ -688,7 +688,7 @@ public class Twisty extends Activity {
 
 	// Return the path to the saved-games directory (typically "/sdcard/Twisty/")
 	// If sdcard not present, or if /sdcard/Twisty is a file, return null.
-	private String ensureSavedGamesDir(boolean write) {
+	public static String getSavedGamesDir(boolean write) {
 		String storagestate = Environment.getExternalStorageState();
 		if (!storagestate.equals(Environment.MEDIA_MOUNTED) &&
 				(write || storagestate.equals(Environment.MEDIA_MOUNTED_READ_ONLY))) {
@@ -726,7 +726,7 @@ public class Twisty extends Activity {
 	// Search the twisty directory (on sdcard) for any z-games.  
 	// Return an array of absolute paths, or null on failure.
 	private String[] scanForZGames() {
-		String gamesDirPath = ensureSavedGamesDir(false);
+		String gamesDirPath = getSavedGamesDir(false);
 		if (gamesDirPath == null) {
 			showDialog(DIALOG_CANT_SAVE);
 			return null;
@@ -740,7 +740,7 @@ public class Twisty extends Activity {
 	}
 
 	public void promptForWritefile() {
-		String dir = ensureSavedGamesDir(true);
+		String dir = getSavedGamesDir(true);
 		if (dir == null) {
 			showDialog(DIALOG_CANT_SAVE);
 			return;
@@ -750,7 +750,7 @@ public class Twisty extends Activity {
 	}
 
 	private void promptForReadfile() {
-		String dir = ensureSavedGamesDir(false);
+		String dir = getSavedGamesDir(false);
 		if (dir == null) {
 			showDialog(DIALOG_CANT_SAVE);
 			return;

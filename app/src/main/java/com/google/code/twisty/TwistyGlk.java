@@ -23,8 +23,6 @@ import org.brickshadow.roboglk.GlkFileMode;
 import org.brickshadow.roboglk.GlkGestalt;
 import org.brickshadow.roboglk.GlkLayout;
 import org.brickshadow.roboglk.GlkSChannel;
-import org.brickshadow.roboglk.GlkWinDirection;
-import org.brickshadow.roboglk.GlkWinDivision;
 import org.brickshadow.roboglk.GlkWinType;
 import org.brickshadow.roboglk.GlkWindow;
 import org.brickshadow.roboglk.util.GlkEventQueue;
@@ -32,14 +30,13 @@ import org.brickshadow.roboglk.util.GlkEventQueue;
 import android.app.Activity;
 import android.os.Message;
 import android.os.Handler;
-import android.util.Log;
 
 
 public class TwistyGlk implements Glk {
-	private final String TAG = "TwistyGlk";
 
     private final GlkEventQueue eventQueue;
-    
+
+    private GlkWindow mainWin;
     private final Handler twistyHandler;
     
     private final GlkLayout glkLayout;
@@ -87,7 +84,14 @@ public class TwistyGlk implements Glk {
 
     @Override
     public File namedFile(String filename, int usage) {
-        return null;
+        //TODO: more detailed verification of filename as recommended in section 6.1 of the glk spec
+        String savedGamesDir = Twisty.getSavedGamesDir(true);
+        if (savedGamesDir != null) {
+            return new File(savedGamesDir + "/" + filename);
+        }
+        else {
+            return null;
+        }
     }
 
     @Override
@@ -153,7 +157,7 @@ public class TwistyGlk implements Glk {
 
     @Override
     public void setStyleHint(int wintype, int styl, int hint, int val) {
-    	glkLayout.setStyleHint(GlkWinType.getInstance(wintype), styl, hint, val);
+    	glkLayout.setStyleHint(wintype, styl, hint, val);
     }
 
     @Override
@@ -164,28 +168,17 @@ public class TwistyGlk implements Glk {
     @Override
     public void windowOpen(GlkWindow splitwin, int method, int size,
             int wintype, int id, GlkWindow[] wins) {
-    	
-    	// Convert all of those numbers into enums.
-    	GlkWinType winType = GlkWinType.getInstance(wintype);
-    	GlkWinDirection direction = GlkWinDirection.getInstance(method);
-    	GlkWinDivision sizeMethod = GlkWinDivision.getInstance(method);
-    	 
-    	Log.d(TAG, "windowOpen: " + winType + ":" + size + ":" + direction + ":" + sizeMethod);
-    	
-    	if (winType == GlkWinType.textGrid) {
-    		Log.d(TAG, "converting grid win to buffer win.");
-    		winType = GlkWinType.textBuffer;
-    	}
-    	
-    	// Right now, the only supported window type is TextBuffer.
-    	if (winType != GlkWinType.textBuffer) {
+
+    	if (wintype != GlkWinType.TextBuffer && wintype != GlkWinType.TextGrid) {
     		return;
     	}
 
         GlkWindow[] newWins =
-        	glkLayout.addGlkWindow(splitwin, direction, sizeMethod, size, winType, id);
-        
+        	glkLayout.addGlkWindow(splitwin, method, size, wintype, id);
+
+        // New window
         wins[0] = newWins[0];
+        // Pair window
         wins[1] = newWins[1];
     }
 
