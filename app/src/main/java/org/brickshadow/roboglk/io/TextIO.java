@@ -415,8 +415,10 @@ public abstract class TextIO {
 	}
 
 	public int getCharsSize(int numChars, int maxSize) {
-		// TODO: figure this out for when left/right splits
-		//       are needed.
-		return 0;
+		int charWidth = (int) Math.ceil(tv.getPaint().measureText("0", 0, 1));
+        while ((numChars * charWidth) > maxSize) {
+            numChars -= 1;
+        }
+        return numChars * charWidth;
 	}
 }
