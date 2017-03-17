@@ -26,29 +26,29 @@ import android.app.Activity;
 public class GlkTextGridWindow extends GlkTextWindow {
     
     public GlkTextGridWindow(Activity activity, GlkEventQueue queue, TextIO io,
-			int id) {
-		super(activity, queue, io, id);
-	}
+            int id) {
+        super(activity, queue, io, id);
+    }
 
-	/** Does nothing. */
-	@Override
+    /** Does nothing. */
+    @Override
     public final boolean drawInlineImage(BlorbResource bres, int alignment) {
         return false;
     }
     
     /** Does nothing. */
-	@Override
+    @Override
     public final boolean drawInlineImage(BlorbResource bres, int alignment,
             int width, int height) {
         return false;
     }
     
     /** Does nothing. */
-	@Override
+    @Override
     public final void flowBreak() {}
 
-	@Override
-	public void moveCursor(int xpos, int ypos) {
-		// TODO Auto-generated method stub
-	}
+    @Override
+    public void moveCursor(int xpos, int ypos) {
+        // TODO Auto-generated method stub
+    }
 }

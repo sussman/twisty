@@ -31,11 +31,11 @@ import android.view.KeyEvent;
 
 public abstract class GlkTextWindow extends AbstractGlkTextWindow {
 
-	private final TextIO io;
-	private final GlkEventQueue queue;
+    private final TextIO io;
+    private final GlkEventQueue queue;
     private final Activity activity;
 
-	// Whether glk is expecting Unicode or Latin-1 input.
+    // Whether glk is expecting Unicode or Latin-1 input.
     private boolean inputIsUnicode;
     
     // The maximum input line length that glk is prepared to accept.
@@ -50,20 +50,20 @@ public abstract class GlkTextWindow extends AbstractGlkTextWindow {
 
     private final int id;
     
-	public GlkTextWindow(Activity activity, GlkEventQueue queue, TextIO io,
-			int id) {
+    public GlkTextWindow(Activity activity, GlkEventQueue queue, TextIO io,
+            int id) {
 
-		this.io = io;
-		this.queue = queue;
-		this.activity = activity;
-		this.id = id;
-		uiWait = UISync.getInstance();
-		io.setWindow(this);
-	}
-	
-	@Override
-	public void recordKey(char c) {
-		if (c == '\n') {
+        this.io = io;
+        this.queue = queue;
+        this.activity = activity;
+        this.id = id;
+        uiWait = UISync.getInstance();
+        io.setWindow(this);
+    }
+
+    @Override
+    public void recordKey(char c) {
+        if (c == '\n') {
             processKey(GlkKeycode.Return);
         } else {
             if (!inputIsUnicode && c > 0xFF) {
@@ -72,11 +72,11 @@ public abstract class GlkTextWindow extends AbstractGlkTextWindow {
                 processKey(c);
             }
         }
-	}
+    }
 
-	@Override
-	public void recordKey(int c) {
-		switch (c) {
+    @Override
+    public void recordKey(int c) {
+        switch (c) {
         case KeyEvent.KEYCODE_DEL:
             processKey(GlkKeycode.Delete);
             break;
@@ -134,15 +134,15 @@ public abstract class GlkTextWindow extends AbstractGlkTextWindow {
             processKey(GlkKeycode.Unknown);
             break;
         }
-	}
-	
-	private void processKey(int c) {
+    }
+
+    private void processKey(int c) {
         queue.putEvent(GlkEventQueue.newCharInputEvent(this, c));
     }
 
-	@Override
-	public void recordLine(char[] line, int len, boolean isEvent) {
-		int inputLen = (len > maxInputLength ?
+    @Override
+    public void recordLine(char[] line, int len, boolean isEvent) {
+        int inputLen = (len > maxInputLength ?
                 maxInputLength : len);
         if (inputIsUnicode) {
             for (int i = 0; i < inputLen; i++) {
@@ -157,21 +157,21 @@ public abstract class GlkTextWindow extends AbstractGlkTextWindow {
         if (isEvent) {
             queue.putEvent(GlkEventQueue.newLineInputEvent(this, inputLen));
         }
-	}
+    }
 
-	@Override
-	public void cancelCharEvent() {
-		activity.runOnUiThread(new Runnable() {
+    @Override
+    public void cancelCharEvent() {
+        activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 io.stopCharInput();
             }
         });
-	}
+    }
 
-	@Override
-	public int cancelLineEvent() {
-		uiWait.waitFor(new Runnable() {
+    @Override
+    public int cancelLineEvent() {
+        uiWait.waitFor(new Runnable() {
             @Override
             public void run() {
                 currInputLength = io.stopLineInputAndGetLength();
@@ -180,127 +180,127 @@ public abstract class GlkTextWindow extends AbstractGlkTextWindow {
         });
         
         return currInputLength;
-	}
+    }
 
-	@Override
-	public void cancelLinkEvent() {
-		// TODO: hyperlink support
-	}
+    @Override
+    public void cancelLinkEvent() {
+        // TODO: hyperlink support
+    }
 
-	@Override
-	public void cancelMouseEvent() {
-		// TODO: mouse/touch support
-	}
+    @Override
+    public void cancelMouseEvent() {
+        // TODO: mouse/touch support
+    }
 
-	@Override
-	public void clear() {
-		activity.runOnUiThread(new Runnable() {
-    		@Override
-    		public void run() {
-    			io.doClear();
-    		}
-    	});
-	}
+    @Override
+    public void clear() {
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                io.doClear();
+            }
+        });
+    }
 
-	@Override
-	public boolean distinguishStyles(int styl1, int styl2) {
-		return io.distinguishStyles(styl1, styl2);
-	}
+    @Override
+    public boolean distinguishStyles(int styl1, int styl2) {
+        return io.distinguishStyles(styl1, styl2);
+    }
 
-	@Override
-	public abstract boolean drawInlineImage(BlorbResource bres, int alignment);
+    @Override
+    public abstract boolean drawInlineImage(BlorbResource bres, int alignment);
 
-	@Override
-	public abstract boolean drawInlineImage(BlorbResource bres, int alignment,
-			int width, int height);
+    @Override
+    public abstract boolean drawInlineImage(BlorbResource bres, int alignment,
+            int width, int height);
 
-	@Override
-	public abstract void flowBreak();
+    @Override
+    public abstract void flowBreak();
 
-	@Override
-	public int getId() {
-		return id;
-	}
+    @Override
+    public int getId() {
+        return id;
+    }
 
-	@Override
-	public void getSize(int[] dim) {
-		int[] size = io.getWindowSize();
-		dim[0] = size[0];
-		dim[1] = size[1];
-	}
+    @Override
+    public void getSize(int[] dim) {
+        int[] size = io.getWindowSize();
+        dim[0] = size[0];
+        dim[1] = size[1];
+    }
 
-	@Override
-	public int getSizeFromConstraint(int constraint, boolean vertical,
-			int maxSize) {
+    @Override
+    public int getSizeFromConstraint(int constraint, boolean vertical,
+            int maxSize) {
 
-		if (vertical) {
-			return io.getLinesSize(constraint, maxSize);
-		} else {
-			return io.getCharsSize(constraint, maxSize);
-		}
-	}
+        if (vertical) {
+            return io.getLinesSize(constraint, maxSize);
+        } else {
+            return io.getCharsSize(constraint, maxSize);
+        }
+    }
 
-	@Override
-	public int measureStyle(int styl, int hint) {
-		return io.measureStyle(styl, hint);
-	}
+    @Override
+    public int measureStyle(int styl, int hint) {
+        return io.measureStyle(styl, hint);
+    }
 
-	@Override
-	public abstract void moveCursor(int xpos, int ypos);
+    @Override
+    public abstract void moveCursor(int xpos, int ypos);
 
-	@Override
-	public void print(final String str) {
-		activity.runOnUiThread(new Runnable() {
+    @Override
+    public void print(final String str) {
+        activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 io.doPrint(str);
             }
         });
-	}
+    }
 
-	@Override
-	public void requestCharEvent(final boolean unicode) {
-		activity.runOnUiThread(new Runnable() {
+    @Override
+    public void requestCharEvent(final boolean unicode) {
+        activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 inputIsUnicode = unicode;
                 io.doCharInput();
             } 
         });
-	}
+    }
 
-	@Override
-	public void requestLineEvent(ByteBuffer buf, int maxlen, int initlen) {
-		lineRequest(buf, null, maxlen, initlen);
-	}
+    @Override
+    public void requestLineEvent(ByteBuffer buf, int maxlen, int initlen) {
+        lineRequest(buf, null, maxlen, initlen);
+    }
 
-	@Override
-	public void requestLineEventUni(IntBuffer buf, int maxlen, int initlen) {
-		lineRequest(null, buf, maxlen, initlen);
-	}
-	
-	private void lineRequest(final ByteBuffer lbuf, final IntBuffer ubuf,
-			final int maxlen, final int initlen) {
-	        
-		final char[] iChars =
-			getInitialChars(lbuf, ubuf, maxlen, initlen);
-	        
-		activity.runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				latinBuffer = lbuf;
-				unicodeBuffer = ubuf;
-				maxInputLength = maxlen;
-				inputIsUnicode = (ubuf != null);
-				io.doLineInput(inputIsUnicode, maxlen, iChars);
-			}
-		});
-	}
-	
-	private char[] getInitialChars(ByteBuffer lbuf, IntBuffer ubuf, int maxlen,
-			int initlen) {
+    @Override
+    public void requestLineEventUni(IntBuffer buf, int maxlen, int initlen) {
+        lineRequest(null, buf, maxlen, initlen);
+    }
 
-		char[] initialChars = null;
+    private void lineRequest(final ByteBuffer lbuf, final IntBuffer ubuf,
+            final int maxlen, final int initlen) {
+
+        final char[] iChars =
+            getInitialChars(lbuf, ubuf, maxlen, initlen);
+
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                latinBuffer = lbuf;
+                unicodeBuffer = ubuf;
+                maxInputLength = maxlen;
+                inputIsUnicode = (ubuf != null);
+                io.doLineInput(inputIsUnicode, maxlen, iChars);
+            }
+        });
+    }
+
+    private char[] getInitialChars(ByteBuffer lbuf, IntBuffer ubuf, int maxlen,
+            int initlen) {
+
+        char[] initialChars = null;
         
         /*
          * I think that very few games make use of the "initial input"
@@ -342,36 +342,36 @@ public abstract class GlkTextWindow extends AbstractGlkTextWindow {
         }
         
         return initialChars;
-	}
+    }
 
-	@Override
-	public void requestLinkEvent() {
-		// TODO: hyperlink support
-	}
+    @Override
+    public void requestLinkEvent() {
+        // TODO: hyperlink support
+    }
 
-	@Override
-	public void requestMouseEvent() {
-		// TODO: mouse/touch support
-	}
+    @Override
+    public void requestMouseEvent() {
+        // TODO: mouse/touch support
+    }
 
-	@Override
-	public void setLinkValue(final int linkval) {
-		activity.runOnUiThread(new Runnable() {
-        	@Override
-        	public void run() {
-        		io.doHyperlink(linkval);
-        	}
+    @Override
+    public void setLinkValue(final int linkval) {
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                io.doHyperlink(linkval);
+            }
         });
-	}
+    }
 
-	@Override
-	public void setStyle(final int val) {
-		activity.runOnUiThread(new Runnable() {
-        	@Override
-        	public void run() {
-        		io.doStyle(val);
-        	}
+    @Override
+    public void setStyle(final int val) {
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                io.doStyle(val);
+            }
         });
-	}
+    }
 
 }

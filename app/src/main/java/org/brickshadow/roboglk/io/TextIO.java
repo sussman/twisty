@@ -32,7 +32,7 @@ import android.view.View;
 
 public abstract class TextIO {
 
-	/**
+    /**
      * The glk window wrapper associated with a view.
      */
     protected AbstractGlkTextWindow win;
@@ -62,11 +62,11 @@ public abstract class TextIO {
     protected final StyleManager styleMan;
     
     TextIO(TextWindowView tv, StyleManager styleMan) {
-    	this.tv = tv;
-    	this.styleMan = styleMan;
-    	currInputLength = 0;
-    	
-    	listener = TextKeyListener.getInstance(false, 
+        this.tv = tv;
+        this.styleMan = styleMan;
+        currInputLength = 0;
+
+        listener = TextKeyListener.getInstance(false,
                 TextKeyListener.Capitalize.NONE);
         tb = new SpannableStringBuilder(" ");
         
@@ -80,8 +80,8 @@ public abstract class TextIO {
         
         tv.setFocusableInTouchMode(true);
     }
-	
-	/**
+
+    /**
      * Must return the width and height of the view. The width should
      * be the number of "0" (zero) characters that would fit on a line;
      * the height should be the number of lines of text that fit in the view.
@@ -90,9 +90,9 @@ public abstract class TextIO {
      * @return a two-element array with the width and height of the window
      */
     public final int[] getWindowSize() {
-    	synchronized(tv) {
-    		return new int[] { tv.getNumLines(), tv.getCharsPerLine() };
-    	}
+        synchronized(tv) {
+            return new int[] { tv.getNumLines(), tv.getCharsPerLine() };
+        }
     }
     
     public void setWindow(AbstractGlkTextWindow win) {
@@ -105,7 +105,7 @@ public abstract class TextIO {
      * or {@link #sendKeyToGlk(int)}, without echoing the key to the screen.
      */
     public void doCharInput() {
-    	requestInputFocus();
+        requestInputFocus();
         charInput = true;
         lineInput = false;
     }
@@ -176,9 +176,9 @@ public abstract class TextIO {
      */
     public void doLineInput(boolean unicode, int maxlen,
             char[] initialChars) {
-    	
-    	requestInputFocus();
-    	
+
+        requestInputFocus();
+
         inputChars = new char[maxlen];
         
         if (initialChars != null) {
@@ -229,16 +229,16 @@ public abstract class TextIO {
     }
     
     private void requestInputFocus() {
-    	if (!tv.hasFocus()) {
-    		// TODO: remember which window does have focus
-    		tv.requestFocus();
-    	}
+        if (!tv.hasFocus()) {
+            // TODO: remember which window does have focus
+            tv.requestFocus();
+        }
     }
     
     private void relinquishInputFocus() {
-    	if (tv.hasFocus()) {
-    		// TODO: restore focus to previous win if any
-    	}
+        if (tv.hasFocus()) {
+            // TODO: restore focus to previous win if any
+        }
     }
     
     /**
@@ -260,17 +260,17 @@ public abstract class TextIO {
      */
     public abstract void doStyle(int style);
     
-	/**
-	 * Sets the hyperlink value for newly-printed text.
-	 * 
-	 * @param linkval
-	 *            an integer representing the target of the link, or 0 meaning
-	 *            no link.
-	 */
+    /**
+     * Sets the hyperlink value for newly-printed text.
+     *
+     * @param linkval
+     *            an integer representing the target of the link, or 0 meaning
+     *            no link.
+     */
     public abstract void doHyperlink(int linkval);
     
     protected boolean onViewKey(View v, int keyCode, KeyEvent event) {
-    	if (!charInput && !lineInput) {
+        if (!charInput && !lineInput) {
             return true;
         }
         
@@ -299,7 +299,7 @@ public abstract class TextIO {
     }
     
     private void endLineInput() {
-    	lineInput = false;
+        lineInput = false;
         textEchoNewline();
         sendLineToGlk();
         extendHistory();
@@ -312,12 +312,12 @@ public abstract class TextIO {
             sendKeyToGlk(KeyEvent.KEYCODE_DEL);
             return true;
         case 1: // special key
-        	if (keyCode == KeyEvent.KEYCODE_MENU) {
-        		return false;
-        	}
-        	if (keyCode == KeyEvent.KEYCODE_BACK) {
-        		return false;
-        	}
+            if (keyCode == KeyEvent.KEYCODE_MENU) {
+                return false;
+            }
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                return false;
+            }
             sendKeyToGlk(keyCode);
             return true;
         case 2: // normal char
@@ -342,23 +342,23 @@ public abstract class TextIO {
             }
             
         case 1: // special key
-        	switch (keyCode) {
-        	case KeyEvent.KEYCODE_MENU:
-        	case KeyEvent.KEYCODE_BACK:
-        		return false;
-        	case KeyEvent.KEYCODE_DPAD_UP:
-        		if (action == KeyEvent.ACTION_DOWN) {
-        			historyPrev();
-        		}
-        		break;
-        	case KeyEvent.KEYCODE_DPAD_DOWN:
-        		if (action == KeyEvent.ACTION_DOWN) {
-        			historyNext();
-        		}
-        		break;
-        	default:
-        		break;
-        	}
+            switch (keyCode) {
+            case KeyEvent.KEYCODE_MENU:
+            case KeyEvent.KEYCODE_BACK:
+                return false;
+            case KeyEvent.KEYCODE_DPAD_UP:
+                if (action == KeyEvent.ACTION_DOWN) {
+                    historyPrev();
+                }
+                break;
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                if (action == KeyEvent.ACTION_DOWN) {
+                    historyNext();
+                }
+                break;
+            default:
+                break;
+            }
             /* TODO: basic line editing/cursor movement */
             return true;
             
@@ -383,7 +383,7 @@ public abstract class TextIO {
             return false;
         }
     }
-    
+
     protected abstract void historyPrev();
     
     protected abstract void historyNext();
@@ -393,32 +393,32 @@ public abstract class TextIO {
     protected abstract void textEcho(CharSequence str);
     
     protected abstract void textEchoNewline();
-	
-	public final int measureStyle(int style, int hint) {
-		synchronized(styleMan) {
-			return styleMan.measureStyle(style, hint);
-		}
-	}
-	
-	public final boolean distinguishStyles(int style1, int style2) {
-		synchronized(styleMan) {
-			return styleMan.distinguishStyles(style1, style2);
-		}
-	}
 
-	public int getLinesSize(int numLines, int maxSize) {
-		int lineHeight = tv.getLineHeight();
-		while ((numLines * lineHeight) > maxSize) {
-			numLines -= 1;
-		}
-		return numLines * lineHeight;
-	}
+    public final int measureStyle(int style, int hint) {
+        synchronized(styleMan) {
+            return styleMan.measureStyle(style, hint);
+        }
+    }
 
-	public int getCharsSize(int numChars, int maxSize) {
-		int charWidth = (int) Math.ceil(tv.getPaint().measureText("0", 0, 1));
+    public final boolean distinguishStyles(int style1, int style2) {
+        synchronized(styleMan) {
+            return styleMan.distinguishStyles(style1, style2);
+        }
+    }
+
+    public int getLinesSize(int numLines, int maxSize) {
+        int lineHeight = tv.getLineHeight();
+        while ((numLines * lineHeight) > maxSize) {
+            numLines -= 1;
+        }
+        return numLines * lineHeight;
+    }
+
+    public int getCharsSize(int numChars, int maxSize) {
+        int charWidth = (int) Math.ceil(tv.getPaint().measureText("0", 0, 1));
         while ((numChars * charWidth) > maxSize) {
             numChars -= 1;
         }
         return numChars * charWidth;
-	}
+    }
 }

@@ -22,31 +22,31 @@ import android.app.Activity;
 
 
 public class UISync {
-	private static UISync INSTANCE;
-	
-	public static void setInstance(Activity activity) {
-		INSTANCE = new UISync(activity);
-	}
-	
-	public static UISync getInstance() {
-		return INSTANCE;
-	}
-	
-	private final Activity activity;
-	private volatile boolean isWaiting;
-	
-	private UISync(Activity activity) {
-		this.activity = activity;
-	}
-	
-	public void waitFor(Runnable r) {
-		synchronized(this) {
-			isWaiting = true;
-		
-			if (r != null) {
-				activity.runOnUiThread(r);
-			}
-		
+    private static UISync INSTANCE;
+
+    public static void setInstance(Activity activity) {
+        INSTANCE = new UISync(activity);
+    }
+
+    public static UISync getInstance() {
+        return INSTANCE;
+    }
+
+    private final Activity activity;
+    private volatile boolean isWaiting;
+
+    private UISync(Activity activity) {
+        this.activity = activity;
+    }
+
+    public void waitFor(Runnable r) {
+        synchronized(this) {
+            isWaiting = true;
+
+            if (r != null) {
+                activity.runOnUiThread(r);
+            }
+
             try {        
                 while (isWaiting) {
                     wait();
@@ -55,18 +55,18 @@ public class UISync {
                 Thread.currentThread().interrupt();
             }
         }
-	}
-	
-	public void stopWaiting(Runnable r) {
-		synchronized(this) {
-			boolean wasWaiting = isWaiting;
-			if (r != null) {
-				r.run();
-			}
-			isWaiting = false;
-			if (wasWaiting) {
-				notify();
-			}
-		}
-	}
+    }
+
+    public void stopWaiting(Runnable r) {
+        synchronized(this) {
+            boolean wasWaiting = isWaiting;
+            if (r != null) {
+                r.run();
+            }
+            isWaiting = false;
+            if (wasWaiting) {
+                notify();
+            }
+        }
+    }
 }

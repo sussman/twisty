@@ -43,25 +43,25 @@ public class TextBufferIO extends TextIO {
     private int historyEnd;
     
     public TextBufferIO(TextBufferView tv, StyleManager styleMan) {
-    	super(tv, styleMan);
-    	
-    	history = new char[HISTORYLEN][];
-    	historyPos = -1;
+        super(tv, styleMan);
+
+        history = new char[HISTORYLEN][];
+        historyPos = -1;
     }
     
     @Override
-	public void doStyle(int style) {
-    	styleMan.applyStyle(style, tv.getEditableText());
+    public void doStyle(int style) {
+        styleMan.applyStyle(style, tv.getEditableText());
     }
 
     @Override
-	public void doHyperlink(int linkval) {
-    	styleMan.applyHyperlink(linkval, tv.getEditableText());
+    public void doHyperlink(int linkval) {
+        styleMan.applyHyperlink(linkval, tv.getEditableText());
     }
     
     public void doReverseVideo(boolean reverse) {
-		styleMan.applyStyle(reverse, tv.getEditableText());
-	}
+        styleMan.applyStyle(reverse, tv.getEditableText());
+    }
     
     protected boolean onViewKey(View v, int keyCode, KeyEvent event) {
         if (morePrompt && (event.getAction() == KeyEvent.ACTION_DOWN)) {
@@ -87,18 +87,18 @@ public class TextBufferIO extends TextIO {
     }
     
     protected void cursorOff() {
-    	Spannable text = (Spannable) tv.getText();
-    	Selection.removeSelection(text);
+        Spannable text = (Spannable) tv.getText();
+        Selection.removeSelection(text);
     }
     
     protected void cursorToEnd() {
-    	cursorToEnd(0);
+        cursorToEnd(0);
     }
     
     protected void cursorToEnd(int back) {
-    	Spannable text = (Spannable) tv.getText();
-    	int len = text.length();
-    	Selection.setSelection(text, len + back);
+        Spannable text = (Spannable) tv.getText();
+        int len = text.length();
+        Selection.setSelection(text, len + back);
     }
     
     /* Prints text and decides if the MORE prompt is needed. */
@@ -160,12 +160,12 @@ public class TextBufferIO extends TextIO {
     
     @Override
     protected final void textEcho(CharSequence str) {
-    	textBufEcho(str);    	
+        textBufEcho(str);
     }
     
     @Override
     protected final void textEchoNewline() {
-    	textBufEcho("\n");
+        textBufEcho("\n");
     }
 
     @Override
@@ -178,7 +178,7 @@ public class TextBufferIO extends TextIO {
         inputLineStart = computeInputLineStart();
         
         if (historyTemp == null || historyTemp.length < maxlen) {
-        	historyTemp = new char[maxlen];
+            historyTemp = new char[maxlen];
         }
     }
     
@@ -199,100 +199,100 @@ public class TextBufferIO extends TextIO {
     }
 
     private boolean isLastHistory() {
-    	char[] last = history[historyEnd];
-    	if (last == null || last.length != currInputLength) {
-    		return false;
-    	}
-    	int i;
-    	for (i = 0; i < currInputLength; i++) {
-    		if (last[i] != inputChars[i]) {
-    			break;
-    		}
-    	}
-    	return (i == currInputLength);
+        char[] last = history[historyEnd];
+        if (last == null || last.length != currInputLength) {
+            return false;
+        }
+        int i;
+        for (i = 0; i < currInputLength; i++) {
+            if (last[i] != inputChars[i]) {
+                break;
+            }
+        }
+        return (i == currInputLength);
     }
     
     private void historyPull(char[] cmd) {
-    	int cmdlen = (cmd.length > inputChars.length) ?
-    			inputChars.length : cmd.length;
-    	
-    	Editable text = (Editable) tv.getText();
-    	int textlen = text.length();
-    	
-    	if (cmdlen == 0) {
-    		text.delete(textlen - currInputLength, textlen);
-    	} else {
-    		System.arraycopy(cmd, 0, inputChars, 0, cmdlen);
-    		text.replace(textlen - currInputLength, textlen,
-        			String.valueOf(inputChars), 0, cmdlen);
-    	}
-    	
-    	currInputLength = cmdlen;
+        int cmdlen = (cmd.length > inputChars.length) ?
+                inputChars.length : cmd.length;
+
+        Editable text = (Editable) tv.getText();
+        int textlen = text.length();
+
+        if (cmdlen == 0) {
+            text.delete(textlen - currInputLength, textlen);
+        } else {
+            System.arraycopy(cmd, 0, inputChars, 0, cmdlen);
+            text.replace(textlen - currInputLength, textlen,
+                    String.valueOf(inputChars), 0, cmdlen);
+        }
+
+        currInputLength = cmdlen;
     }
     
-	@Override
-	protected void extendHistory() {
-		historyPos = -1;
-		if (isLastHistory() || currInputLength == 0) {
-			return;
-		}
-		if (history[historyEnd] != null) {
-			historyEnd += 1;
-			if (historyEnd >= HISTORYLEN) {
-				historyEnd -= HISTORYLEN;
-			}
-			if (historyEnd == historyStart) {
-				historyStart += 1;
-				if (historyStart >= HISTORYLEN) {
-					historyStart -= HISTORYLEN;
-				}
-			}
-		}
-		history[historyEnd] = new char[currInputLength];
-		System.arraycopy(inputChars, 0, history[historyEnd], 0,
-				currInputLength);
-	}
+    @Override
+    protected void extendHistory() {
+        historyPos = -1;
+        if (isLastHistory() || currInputLength == 0) {
+            return;
+        }
+        if (history[historyEnd] != null) {
+            historyEnd += 1;
+            if (historyEnd >= HISTORYLEN) {
+                historyEnd -= HISTORYLEN;
+            }
+            if (historyEnd == historyStart) {
+                historyStart += 1;
+                if (historyStart >= HISTORYLEN) {
+                    historyStart -= HISTORYLEN;
+                }
+            }
+        }
+        history[historyEnd] = new char[currInputLength];
+        System.arraycopy(inputChars, 0, history[historyEnd], 0,
+                currInputLength);
+    }
 
-	@Override
-	protected void historyNext() {
-		if (historyPos == -1) {
-			return;
-		}
-		if (historyPos == historyEnd) {
-			historyPos = -1;
-			historyPull(historyTemp);
-		} else {
-			historyPos += 1;
-			if (historyPos >= HISTORYLEN) {
-				historyPos -= HISTORYLEN;
-			}
-			historyPull(history[historyPos]);
-		}
-	}
+    @Override
+    protected void historyNext() {
+        if (historyPos == -1) {
+            return;
+        }
+        if (historyPos == historyEnd) {
+            historyPos = -1;
+            historyPull(historyTemp);
+        } else {
+            historyPos += 1;
+            if (historyPos >= HISTORYLEN) {
+                historyPos -= HISTORYLEN;
+            }
+            historyPull(history[historyPos]);
+        }
+    }
 
-	@Override
-	protected void historyPrev() {
-		if (historyPos == historyStart) {
-			return;
-		}
-		if (historyPos == -1) {
-			if (history[historyEnd] == null) {
-				return;
-			}
-			historyTemp = new char[currInputLength];
-			System.arraycopy(inputChars, 0, historyTemp, 0, currInputLength);
-			historyPos = historyEnd;
-		} else {
-			historyPos -= 1;
-			if (historyPos < 0) {
-				historyPos = HISTORYLEN - 1;
-			}
-		}
+    @Override
+    protected void historyPrev() {
+        if (historyPos == historyStart) {
+            return;
+        }
+        if (historyPos == -1) {
+            if (history[historyEnd] == null) {
+                return;
+            }
+            historyTemp = new char[currInputLength];
+            System.arraycopy(inputChars, 0, historyTemp, 0, currInputLength);
+            historyPos = historyEnd;
+        } else {
+            historyPos -= 1;
+            if (historyPos < 0) {
+                historyPos = HISTORYLEN - 1;
+            }
+        }
 
-		historyPull(history[historyPos]);
-	}
-	
-	/*
+        historyPull(history[historyPos]);
+    }
+
+    /*
      * The following may become abstract or move up to TextIO?.
      */
 

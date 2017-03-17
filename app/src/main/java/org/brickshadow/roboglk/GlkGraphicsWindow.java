@@ -28,69 +28,69 @@ import java.nio.IntBuffer;
  * implementations of window methods not applicable to graphics windows.
  */
 public abstract class GlkGraphicsWindow implements GlkWindow {
-	
-	@Override
+
+    @Override
     public final void cancelCharEvent() {}
-	
-	@Override
+
+    @Override
     public final int cancelLineEvent() {
         return 0;
     }
-	
-	@Override
+
+    @Override
     public final void cancelLinkEvent() {}
-	
-	@Override
+
+    @Override
     public final boolean distinguishStyles(int styl1, int styl2) {
         return false;
     }
-	
-	@Override
+
+    @Override
     public final boolean drawInlineImage(BlorbResource bres, int alignment) {
         return false;
     }
-	
-	@Override
+
+    @Override
     public final boolean drawInlineImage(BlorbResource bres, int alignment,
             int width, int height) {
         return false;
     }
-	
-	@Override
+
+    @Override
     public final void flowBreak() {}
-	
-	@Override
+
+    @Override
     public final int measureStyle(int styl, int hint) {
         throw new RuntimeException();
     }
-	
-	@Override
+
+    @Override
     public final void moveCursor(int xpos, int ypos) {}
-	
-	@Override
+
+    @Override
     public final void print(String str) {}
-	
-	@Override
+
+    @Override
     public final void requestCharEvent(boolean unicode) {}
-	
-	@Override
+
+    @Override
     public final void requestLineEvent(ByteBuffer buf, int maxlen,
             int initlen) {}
-	
-	@Override
+
+    @Override
     public final void requestLineEventUni(IntBuffer buf, int maxlen,
             int initlen) {}
-	
-	@Override
+
+    @Override
     public final void requestLinkEvent() {}
-	
-	@Override
+
+    @Override
     public final void setArrangement(int method, int size,
             GlkWindow key) {}
-	
-	@Override
+
+    @Override
     public final void setLinkValue(int val) {}
-	
-	@Override
+
+    @Override
     public final void setStyle(int val) {}
 }

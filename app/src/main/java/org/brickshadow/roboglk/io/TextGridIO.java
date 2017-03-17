@@ -22,57 +22,57 @@ import org.brickshadow.roboglk.view.TextGridView;
 
 public class TextGridIO extends TextIO {
 
-	public TextGridIO(TextGridView tv, StyleManager styleMan) {
-		super(tv, styleMan);
-	}
+    public TextGridIO(TextGridView tv, StyleManager styleMan) {
+        super(tv, styleMan);
+    }
 
-	@Override
-	public void doClear() {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void doClear() {
+        // TODO Auto-generated method stub
 
-	@Override
-	public void doPrint(String str) {
-		// TODO Auto-generated method stub
-		
-	}
+    }
 
-	@Override
-	protected void textEcho(CharSequence str) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void doPrint(String str) {
+        // TODO Auto-generated method stub
 
-	/**
-	 * Does nothing. Newlines after input are not echoed into a text grid
-	 * window.
-	 */
-	@Override
-	protected final void textEchoNewline() {}
+    }
 
-	@Override
-	public void doStyle(int style) {}
-	
-	@Override
-	public void doHyperlink(int linkval) {}
+    @Override
+    protected void textEcho(CharSequence str) {
+        // TODO Auto-generated method stub
 
-	/**
-	 * Does nothing. History is not supported in text grid windows.
-	 */
-	@Override
-	protected void extendHistory() {}
+    }
 
-	/**
-	 * Does nothing. History is not supported in text grid windows.
-	 */
-	@Override
-	protected void historyNext() {}
+    /**
+     * Does nothing. Newlines after input are not echoed into a text grid
+     * window.
+     */
+    @Override
+    protected final void textEchoNewline() {}
 
-	/**
-	 * Does nothing. History is not supported in text grid windows.
-	 */
-	@Override
-	protected void historyPrev() {}
+    @Override
+    public void doStyle(int style) {}
+
+    @Override
+    public void doHyperlink(int linkval) {}
+
+    /**
+     * Does nothing. History is not supported in text grid windows.
+     */
+    @Override
+    protected void extendHistory() {}
+
+    /**
+     * Does nothing. History is not supported in text grid windows.
+     */
+    @Override
+    protected void historyNext() {}
+
+    /**
+     * Does nothing. History is not supported in text grid windows.
+     */
+    @Override
+    protected void historyPrev() {}
 
 }

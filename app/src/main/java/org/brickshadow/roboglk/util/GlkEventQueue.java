@@ -207,14 +207,14 @@ public class GlkEventQueue {
      * @return an event message or {@code null}
      */
     public Message poll() {
-    	synchronized(uiWait) {
-    		Message msg = pollQueue.poll();
-    		if (msg != null && msg.what == GlkEventType.Timer) {
-    			hasTimerEvent = false;
-    			scheduleNextTimer();
-    		}
-    		return msg;
-    	}
+        synchronized(uiWait) {
+            Message msg = pollQueue.poll();
+            if (msg != null && msg.what == GlkEventType.Timer) {
+                hasTimerEvent = false;
+                scheduleNextTimer();
+            }
+            return msg;
+        }
     }
     
     /**
@@ -224,31 +224,31 @@ public class GlkEventQueue {
      * @return an event message 
      */
     public Message select() {
-    	synchronized(uiWait) {
-    		try {
-    			while (selectQueue.isEmpty() && pollQueue.isEmpty()) {
-    				//Log.w("SELECT", "before wait");
-    				uiWait.wait();
-    				//Log.w("SELECT", "after wait");
-    			}
+        synchronized(uiWait) {
+            try {
+                while (selectQueue.isEmpty() && pollQueue.isEmpty()) {
+                    //Log.w("SELECT", "before wait");
+                    uiWait.wait();
+                    //Log.w("SELECT", "after wait");
+                }
 
-    			Message msg;
-    			msg = selectQueue.poll();
-    			if (msg == null) {
-    				msg = pollQueue.poll();
-    			}
+                Message msg;
+                msg = selectQueue.poll();
+                if (msg == null) {
+                    msg = pollQueue.poll();
+                }
 
-    			if (msg != null && (msg.what == GlkEventType.Timer)) {
-    				hasTimerEvent = false;
-        			scheduleNextTimer();
-    			}
+                if (msg != null && (msg.what == GlkEventType.Timer)) {
+                    hasTimerEvent = false;
+                    scheduleNextTimer();
+                }
             
-    			return msg;
-    		} catch (InterruptedException e) {
-    			Thread.currentThread().interrupt();
-    			return null;
-    		}
-    	}
+                return msg;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return null;
+            }
+        }
     }
     
     /**
@@ -257,54 +257,54 @@ public class GlkEventQueue {
      * @param msg an event message.
      */
     public void putEvent(Message msg) {
-    	synchronized(uiWait) {
-    		boolean wasEmpty = selectQueue.isEmpty() && pollQueue.isEmpty();
+        synchronized(uiWait) {
+            boolean wasEmpty = selectQueue.isEmpty() && pollQueue.isEmpty();
         
-    		switch (msg.what) {
-    		case GlkEventType.Arrange:
-    		case GlkEventType.Redraw:
-    		case GlkEventType.SoundNotify:
-    			pollQueue.add(msg);
-    			break;
-    		case GlkEventType.Timer:
-    			if (!hasTimerEvent) {
-    				pollQueue.add(msg);
-    				hasTimerEvent = true;
-    			} else {
-    				return;
-    			}
-    			break;
-    		default:
-    			selectQueue.add(msg);
-    			break;
-    		}
+            switch (msg.what) {
+            case GlkEventType.Arrange:
+            case GlkEventType.Redraw:
+            case GlkEventType.SoundNotify:
+                pollQueue.add(msg);
+                break;
+            case GlkEventType.Timer:
+                if (!hasTimerEvent) {
+                    pollQueue.add(msg);
+                    hasTimerEvent = true;
+                } else {
+                    return;
+                }
+                break;
+            default:
+                selectQueue.add(msg);
+                break;
+            }
         
-    		if (wasEmpty) {
-    			uiWait.notify();
-    		}
-    	}
+            if (wasEmpty) {
+                uiWait.notify();
+            }
+        }
     }
     
     public void cancelTimer() {
-    	timer.cancel();
+        timer.cancel();
         timer = new Timer();
-    	timerMillisecs = 0;
+        timerMillisecs = 0;
     }
     
     public void requestTimer(int millisecs) {
-    	timerMillisecs = millisecs;
-    	scheduleNextTimer();
+        timerMillisecs = millisecs;
+        scheduleNextTimer();
     }
     
     private void scheduleNextTimer() {
-    	if (timerMillisecs == 0) {
-    		return;
-    	}
-    	timer.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				GlkEventQueue.this.putEvent(GlkEventQueue.newTimerEvent());
-			}
-		}, timerMillisecs);
+        if (timerMillisecs == 0) {
+            return;
+        }
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                GlkEventQueue.this.putEvent(GlkEventQueue.newTimerEvent());
+            }
+        }, timerMillisecs);
     }
 }

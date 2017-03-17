@@ -29,16 +29,16 @@ import java.nio.IntBuffer;
  * methods.
  */
 abstract class GlkInvisibleWindow implements GlkWindow {
-	
-	@Override
+
+    @Override
     /** Does nothing. */
     public final void clear() {}
     
-	@Override
+    @Override
     /** Does nothing. */
     public final void getSize(int[] dim) {}
     
-	@Override
+    @Override
     /** Does nothing. */
     public final void print(String str) {}
     

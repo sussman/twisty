@@ -20,19 +20,19 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 
 public class TwistyPreferenceActivity extends PreferenceActivity {
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		getFragmentManager().beginTransaction().replace(
-				android.R.id.content, new TwistyPreferenceFragment()).commit();
-	}
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getFragmentManager().beginTransaction().replace(
+                android.R.id.content, new TwistyPreferenceFragment()).commit();
+    }
 
-	public static class TwistyPreferenceFragment extends PreferenceFragment {
+    public static class TwistyPreferenceFragment extends PreferenceFragment {
         @Override
         public void onCreate(final Bundle savedInstanceState)
         {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.preferences);
         }
-	}
+    }
 }

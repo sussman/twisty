@@ -25,55 +25,55 @@ package org.brickshadow.roboglk;
  */
 public abstract class AbstractGlkTextWindow implements GlkWindow {
     
-	@Override
+    @Override
     /** Does nothing. */
     public final void setArrangement(int method, int size,
             GlkWindow key) {}
 
-	@Override
+    @Override
     /** Does nothing. */
     public final boolean drawImage(BlorbResource bres, int x, int y) {
         return false;
     }
     
-	@Override
+    @Override
     /** Does nothing. */
     public final boolean drawImage(BlorbResource bres, int x, int y, int width,
             int height) {
         return false;
     }
     
-	@Override
+    @Override
     /** Does nothing. */
     public final void setBackgroundColor(int color) {}
     
-	@Override
+    @Override
     /** Does nothing. */
     public final void eraseRect(int left, int top, int width,
             int height) {}
     
-	@Override
+    @Override
     /** Does nothing. */
     public final void fillRect(int color, int left, int top, int width,
             int height) {}
-	
-	/**
+
+    /**
      * Handles normal characters during single-character input.
      * 
      * @param c a character.
      */
-	public abstract void recordKey(char c);
-	
-	/**
+    public abstract void recordKey(char c);
+
+    /**
      * Handles special keys during single-character input.
      * 
      * @param c a keycode
      */
-	public abstract void recordKey(int c);
-	
-	/**
+    public abstract void recordKey(int c);
+
+    /**
      * Handles line input.
      */
-	public abstract void recordLine(char[] line, int len, boolean isEvent);
-	
+    public abstract void recordLine(char[] line, int len, boolean isEvent);
+
 }

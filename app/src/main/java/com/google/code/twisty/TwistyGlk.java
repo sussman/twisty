@@ -51,7 +51,7 @@ public class TwistyGlk implements Glk {
     
     @Override
     public void cancelTimer() {
-    	eventQueue.cancelTimer();
+        eventQueue.cancelTimer();
     }
 
     @Override
@@ -65,21 +65,21 @@ public class TwistyGlk implements Glk {
     @Override
     public void destroyChannel(GlkSChannel schan) {}
 
-	@Override
-	public int gestalt(int sel, int val, int[] arr) {
-		switch (sel) {
-		case GlkGestalt.Timer:
-		case GlkGestalt.Hyperlinks:
-		case GlkGestalt.Unicode:
-			return 1;
-		default:
-			return 0;
-		}
-	}
+    @Override
+    public int gestalt(int sel, int val, int[] arr) {
+        switch (sel) {
+        case GlkGestalt.Timer:
+        case GlkGestalt.Hyperlinks:
+        case GlkGestalt.Unicode:
+            return 1;
+        default:
+            return 0;
+        }
+    }
 
     @Override
     public boolean getImageInfo(BlorbResource bres, int[] dim) {
-    	return false;
+        return false;
     }
 
     @Override
@@ -102,38 +102,38 @@ public class TwistyGlk implements Glk {
 
     @Override
     public File promptFile(int usage, int fmode) {
-    	// This "terp thread" isn't allowed to inflate dialogs directly;
-    	// only the main Twisty UI thread can do that.  So we use the twistyHandler
-    	// to send a TwistyMessage to Twisty, and let it do the prompting.
-    	TwistyMessage msg = new TwistyMessage();
+        // This "terp thread" isn't allowed to inflate dialogs directly;
+        // only the main Twisty UI thread can do that.  So we use the twistyHandler
+        // to send a TwistyMessage to Twisty, and let it do the prompting.
+        TwistyMessage msg = new TwistyMessage();
         msg.path = "";
 
         // Ask Twisty to prompt the user, then block until we're notify()'d.
         // (We're blocking on the glkLayout just because it's a shared object.)
         if ((fmode & GlkFileMode.Read) == GlkFileMode.Read) {
-        	 synchronized (glkLayout) {
-             	try {
-             		Message.obtain(twistyHandler, Twisty.PROMPT_FOR_READFILE, msg).sendToTarget();
-             		glkLayout.wait();
-             	}
-             	catch (Exception e) {
-             		return null; //  failure
-             	}
+             synchronized (glkLayout) {
+                try {
+                    Message.obtain(twistyHandler, Twisty.PROMPT_FOR_READFILE, msg).sendToTarget();
+                    glkLayout.wait();
+                }
+                catch (Exception e) {
+                    return null; //  failure
+                }
              }
         }
         else if ((fmode & GlkFileMode.Write) == GlkFileMode.Write) {
-       	 synchronized (glkLayout) {
-            	try {
-            		Message.obtain(twistyHandler, Twisty.PROMPT_FOR_WRITEFILE, msg).sendToTarget();
-            		glkLayout.wait();
-            	}
-            	catch (Exception e) {
-            		return null; //  failure
-            	}
+         synchronized (glkLayout) {
+                try {
+                    Message.obtain(twistyHandler, Twisty.PROMPT_FOR_WRITEFILE, msg).sendToTarget();
+                    glkLayout.wait();
+                }
+                catch (Exception e) {
+                    return null; //  failure
+                }
             }
         }
         else {
-        	return null;
+            return null;
         }
         
         // Twisty should have modified our TwistyMessage object, and
@@ -143,7 +143,7 @@ public class TwistyGlk implements Glk {
 
     @Override
     public void requestTimer(int millisecs) {
-    	eventQueue.requestTimer(millisecs);
+        eventQueue.requestTimer(millisecs);
     }
 
     @Override
@@ -157,7 +157,7 @@ public class TwistyGlk implements Glk {
 
     @Override
     public void setStyleHint(int wintype, int styl, int hint, int val) {
-    	glkLayout.setStyleHint(wintype, styl, hint, val);
+        glkLayout.setStyleHint(wintype, styl, hint, val);
     }
 
     @Override
@@ -169,12 +169,12 @@ public class TwistyGlk implements Glk {
     public void windowOpen(GlkWindow splitwin, int method, int size,
             int wintype, int id, GlkWindow[] wins) {
 
-    	if (wintype != GlkWinType.TextBuffer && wintype != GlkWinType.TextGrid) {
-    		return;
-    	}
+        if (wintype != GlkWinType.TextBuffer && wintype != GlkWinType.TextGrid) {
+            return;
+        }
 
         GlkWindow[] newWins =
-        	glkLayout.addGlkWindow(splitwin, method, size, wintype, id);
+            glkLayout.addGlkWindow(splitwin, method, size, wintype, id);
 
         // New window
         wins[0] = newWins[0];

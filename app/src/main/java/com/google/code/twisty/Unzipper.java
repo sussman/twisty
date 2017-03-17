@@ -113,11 +113,11 @@ public class Unzipper extends Activity {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } finally {
-        	if (zip != null) {
-        	  try {
-				zip.close();
-        	  } catch (IOException e2) {}
-        	}
+            if (zip != null) {
+              try {
+                zip.close();
+              } catch (IOException e2) {}
+            }
         }
         return wasValid;
     }

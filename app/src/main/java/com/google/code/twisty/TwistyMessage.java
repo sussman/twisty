@@ -16,8 +16,8 @@
 package com.google.code.twisty;
 
 public class TwistyMessage {
-	// a path specified by a user
-	public String path;
-	
-	// TODO:  add more fields here if we ever need them...
+    // a path specified by a user
+    public String path;
+
+    // TODO:  add more fields here if we ever need them...
 }

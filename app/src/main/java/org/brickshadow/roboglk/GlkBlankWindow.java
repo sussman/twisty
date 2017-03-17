@@ -27,7 +27,7 @@ package org.brickshadow.roboglk;
  */
 public abstract class GlkBlankWindow extends GlkInvisibleWindow {
     
-	@Override
+    @Override
     /** Does nothing. */
     public final void setArrangement(int method, int size,
             GlkWindow key) {}

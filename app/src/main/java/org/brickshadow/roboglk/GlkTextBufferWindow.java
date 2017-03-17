@@ -27,29 +27,29 @@ import android.app.Activity;
 public class GlkTextBufferWindow extends GlkTextWindow {
     
     public GlkTextBufferWindow(Activity activity, GlkEventQueue queue,
-			TextIO io, int id) {
-		super(activity, queue, io, id);
-	}
+            TextIO io, int id) {
+        super(activity, queue, io, id);
+    }
 
-	/** Does nothing. */
+    /** Does nothing. */
     public final void moveCursor(int xpos, int ypos) {}
 
-	@Override
-	public boolean drawInlineImage(BlorbResource bres, int alignment) {
-		// TODO: inline image support
-		return false;
-	}
+    @Override
+    public boolean drawInlineImage(BlorbResource bres, int alignment) {
+        // TODO: inline image support
+        return false;
+    }
 
-	@Override
-	public boolean drawInlineImage(BlorbResource bres, int alignment,
-			int width, int height) {
-		// TODO: inline image support
-		return false;
-	}
+    @Override
+    public boolean drawInlineImage(BlorbResource bres, int alignment,
+            int width, int height) {
+        // TODO: inline image support
+        return false;
+    }
 
-	@Override
-	public void flowBreak() {
-		// TODO: inline image support
-		
-	}
+    @Override
+    public void flowBreak() {
+        // TODO: inline image support
+
+    }
 }
