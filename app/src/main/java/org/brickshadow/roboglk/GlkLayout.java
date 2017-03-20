@@ -10,8 +10,13 @@ import org.brickshadow.roboglk.view.TextBufferView;
 import org.brickshadow.roboglk.view.TextGridView;
 
 import android.app.Activity;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.google.code.twisty.R;
 
 import java.util.HashMap;
 
@@ -32,6 +37,9 @@ public class GlkLayout extends ViewGroup {
         this.root = null;
         this.uiWait = UISync.getInstance();
         this.windows = new HashMap<>();
+
+        // Enables onDraw override
+        this.setWillNotDraw(false);
     }
 
     public void initialize(GlkEventQueue queue) {
@@ -223,6 +231,13 @@ public class GlkLayout extends ViewGroup {
     }
 
     @Override
+    protected void onDraw(Canvas canvas) {
+        if (root != null) {
+            root.drawDividers(canvas);
+        }
+    }
+
+    @Override
     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
         return p instanceof GlkLayout.LayoutParams;
     }
@@ -269,6 +284,7 @@ public class GlkLayout extends ViewGroup {
         void setParent(PairWindow parent);
         void setLayoutParams(GlkLayout.LayoutParams params);
         void close();
+        void drawDividers(Canvas canvas);
     }
 
     private class Window implements WindowNode {
@@ -319,6 +335,11 @@ public class GlkLayout extends ViewGroup {
             if(keyParent != null)
                 keyParent.removeKeyWindow();
         }
+
+        @Override
+        public void drawDividers(Canvas canvas) {
+            // A single window has no divider
+        }
     }
 
     private class PairWindow extends GlkPairWindow implements WindowNode {
@@ -326,9 +347,10 @@ public class GlkLayout extends ViewGroup {
         private WindowNode secondWindow;
         private Window keyWindow;
         private PairWindow parent;
-        private GlkLayout.LayoutParams layoutParams;
         private int method;
         private int size;
+        private Drawable divider;
+        private final int DIVIDER_SIZE;
 
         PairWindow(WindowNode splitWindow, Window keyWindow, int method, int size) {
             this.firstWindow = splitWindow;
@@ -340,10 +362,13 @@ public class GlkLayout extends ViewGroup {
             this.secondWindow.setParent(this);
 
             this.parent = null;
-            this.layoutParams = null;
 
             this.method = method;
             this.size = size;
+
+            // What to draw on the area separating both windows
+            this.divider = getResources().getDrawable(R.drawable.divider);
+            this.DIVIDER_SIZE = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, getResources().getDisplayMetrics()));
         }
 
         void replaceWindow(WindowNode oldWindow, WindowNode newWindow) {
@@ -423,8 +448,6 @@ public class GlkLayout extends ViewGroup {
 
         @Override
         public void setLayoutParams(GlkLayout.LayoutParams params) {
-            this.layoutParams = params;
-
             if(firstWindow != null && secondWindow == null) {
                 firstWindow.setLayoutParams(new GlkLayout.LayoutParams(params));
             }
@@ -442,32 +465,39 @@ public class GlkLayout extends ViewGroup {
                     secondParams.width = 0;
                 }
                 else {
-                    final int MARGIN = 1;
                     int splitDir = GlkWinMethod.dir(this.method);
                     switch (splitDir) {
                         case GlkWinMethod.Above:
                             secondParams.height = keySize;
 
-                            firstParams.y = params.y + keySize + MARGIN;
-                            firstParams.height = params.height - (keySize + MARGIN);
+                            firstParams.y = params.y + keySize + DIVIDER_SIZE;
+                            firstParams.height = params.height - (keySize + DIVIDER_SIZE);
+
+                            divider.setBounds(params.x, firstParams.y - DIVIDER_SIZE, params.x + params.width, firstParams.y);
                             break;
                         case GlkWinMethod.Below:
-                            firstParams.height = params.height - (keySize + MARGIN);
+                            firstParams.height = params.height - (keySize + DIVIDER_SIZE);
 
                             secondParams.y = (params.y + params.height) - keySize;
                             secondParams.height = keySize;
+
+                            divider.setBounds(params.x, secondParams.y - DIVIDER_SIZE, params.x + params.width, secondParams.y);
                             break;
                         case GlkWinMethod.Left:
                             secondParams.width = keySize;
 
-                            firstParams.x = params.x + keySize + MARGIN;
-                            firstParams.width = params.width - (keySize + MARGIN);
+                            firstParams.x = params.x + keySize + DIVIDER_SIZE;
+                            firstParams.width = params.width - (keySize + DIVIDER_SIZE);
+
+                            divider.setBounds(firstParams.x - DIVIDER_SIZE, params.y, firstParams.x, params.y + params.height);
                             break;
                         case GlkWinMethod.Right:
-                            firstParams.width = params.width - (keySize + MARGIN);
+                            firstParams.width = params.width - (keySize + DIVIDER_SIZE);
 
                             secondParams.x = (params.x + params.width) - keySize;
                             secondParams.width = keySize;
+
+                            divider.setBounds(secondParams.x - DIVIDER_SIZE, params.y, secondParams.x, params.y + params.height);
                             break;
                     }
                 }
@@ -513,6 +543,13 @@ public class GlkLayout extends ViewGroup {
 
             firstWindow.close();
             secondWindow.close();
+        }
+
+        @Override
+        public void drawDividers(Canvas canvas) {
+            divider.draw(canvas);
+            firstWindow.drawDividers(canvas);
+            secondWindow.drawDividers(canvas);
         }
     }
 }
