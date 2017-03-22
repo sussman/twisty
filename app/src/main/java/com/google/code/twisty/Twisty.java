@@ -35,9 +35,6 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import com.google.code.twisty.TwistyMessage;
-import com.google.code.twisty.R;
-
 import org.brickshadow.roboglk.Glk;
 import org.brickshadow.roboglk.GlkFactory;
 import org.brickshadow.roboglk.GlkLayout;
@@ -49,6 +46,7 @@ import org.brickshadow.roboglk.io.TextBufferIO;
 import org.brickshadow.roboglk.util.UISync;
 import org.brickshadow.roboglk.view.TextBufferView;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -68,6 +66,8 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
@@ -113,6 +113,9 @@ public class Twisty extends Activity {
     public static final int PROMPT_FOR_WRITEFILE = 1;
     public static final int PROMPT_FOR_READFILE = 2;
     public static final int PROMPT_FOR_ZGAME = 3;
+
+    // Permission request identifiers
+    private final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
     // The main GLK UI machinery.
     Glk glk;
@@ -251,6 +254,9 @@ public class Twisty extends Activity {
         else {
             printWelcomeMessage();
         }
+
+        // Ensure we can write story files and save games to external storage
+        checkWritePermission();
     }
 
     /** Called whenever activity comes (or returns) to foreground. */
@@ -958,4 +964,29 @@ public class Twisty extends Activity {
     }
 */
 
+    void checkWritePermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.i(TAG, "Write permission granted");
+                }
+                else {
+                    // TODO: do something more user-friendly here. Twisty will currently silently
+                    // fail on operations that require the permission when it isn't granted.
+                    Log.i(TAG, "User did not grant write permission");
+                }
+                break;
+            }
+        }
+    }
 }

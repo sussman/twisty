@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion '25.0.0'
+    compileSdkVersion 25
+    buildToolsVersion '25.0.2'
 
     defaultConfig {
         applicationId "com.google.code.twisty"
         minSdkVersion 15
-        targetSdkVersion 22
+        targetSdkVersion 25
     }
 
     buildTypes {
@@ -20,6 +20,10 @@ android {
         ndkBuild {
             path 'src/main/jni/Android.mk'
         }
+    }
+
+    dependencies {
+        compile "com.android.support:support-v4:25.3.0"
     }
 }
 
