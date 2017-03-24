@@ -91,7 +91,7 @@ public abstract class TextIO {
      */
     public final int[] getWindowSize() {
         synchronized(tv) {
-            return new int[] { tv.getNumLines(), tv.getCharsPerLine() };
+            return new int[] { tv.getCharsPerLine(), tv.getNumLines() };
         }
     }
     
