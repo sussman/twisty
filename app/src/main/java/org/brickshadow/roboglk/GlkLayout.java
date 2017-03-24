@@ -112,7 +112,7 @@ public class GlkLayout extends ViewGroup {
                 TextGridView tgview = new TextGridView(getContext());
                 GlkTextGridWindow tgwin = new GlkTextGridWindow(
                         activity, queue,
-                        new TextGridIO(tgview, new StyleManager(bufferStyles)),
+                        new TextGridIO(tgview, new StyleManager(gridStyles)),
                         id);
                 newWindow = new Window(tgwin, tgview);
                 addView(tgview);
