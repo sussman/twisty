@@ -110,10 +110,15 @@ public class GlkLayout extends ViewGroup {
                 break;
             case GlkWinType.TextGrid:
                 TextGridView tgview = new TextGridView(getContext());
-                GlkTextGridWindow tgwin = new GlkTextGridWindow(
-                        activity, queue,
-                        new TextGridIO(tgview, new StyleManager(gridStyles)),
-                        id);
+                TextGridIO tgio = new TextGridIO(tgview, new StyleManager(gridStyles));
+
+                // TextIO classes currently have a strong dependency on their corresponding TextView
+                // classes. When the layout manager decides TextGridView needs to resize, TextGridIO
+                // needs to update the contents of the grid by padding or removing values as defined
+                // in the Glk spec. Hence this circular dependency.
+                tgview.setIO(tgio);
+
+                GlkTextGridWindow tgwin = new GlkTextGridWindow(activity, queue, tgio, id);
                 newWindow = new Window(tgwin, tgview);
                 addView(tgview);
                 windows.put(tgwin, newWindow);
@@ -291,7 +296,8 @@ public class GlkLayout extends ViewGroup {
         private GlkWindow window;
         private View view;
         private PairWindow parent;
-        private PairWindow keyParent; // This window is the keyParent's key window
+        // If we're a pair window's key window, keyParent refers to that pair window
+        private PairWindow keyParent;
 
         Window(GlkWindow window, View view) {
             this.window = window;

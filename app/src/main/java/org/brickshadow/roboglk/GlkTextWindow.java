@@ -246,9 +246,6 @@ public abstract class GlkTextWindow extends AbstractGlkTextWindow {
     }
 
     @Override
-    public abstract void moveCursor(int xpos, int ypos);
-
-    @Override
     public void print(final String str) {
         activity.runOnUiThread(new Runnable() {
             @Override

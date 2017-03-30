@@ -20,13 +20,19 @@ package org.brickshadow.roboglk.view;
 
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
+
+import org.brickshadow.roboglk.io.TextGridIO;
 
 
 public class TextGridView extends TextWindowView {
+    private TextGridIO io;
 
     public TextGridView(Context context) {
         super(context);
+        setTypeface(Typeface.MONOSPACE);
+        this.io = null;
     }
 
     public TextGridView(Context context, AttributeSet attrs) {
@@ -37,4 +43,13 @@ public class TextGridView extends TextWindowView {
         super(context, attrs, defStyle);
     }
 
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        io.refresh();
+    }
+
+    public void setIO(TextGridIO io) {
+        this.io = io;
+    }
 }

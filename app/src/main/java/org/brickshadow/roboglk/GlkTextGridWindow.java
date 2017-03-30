@@ -17,17 +17,21 @@
 
 package org.brickshadow.roboglk;
 
-import org.brickshadow.roboglk.io.TextIO;
+import org.brickshadow.roboglk.io.TextGridIO;
 import org.brickshadow.roboglk.util.GlkEventQueue;
 
 import android.app.Activity;
 
 
 public class GlkTextGridWindow extends GlkTextWindow {
+    private Activity activity;
+    private TextGridIO io;
     
-    public GlkTextGridWindow(Activity activity, GlkEventQueue queue, TextIO io,
+    public GlkTextGridWindow(Activity activity, GlkEventQueue queue, TextGridIO io,
             int id) {
         super(activity, queue, io, id);
+        this.activity = activity;
+        this.io = io;
     }
 
     /** Does nothing. */
@@ -48,7 +52,12 @@ public class GlkTextGridWindow extends GlkTextWindow {
     public final void flowBreak() {}
 
     @Override
-    public void moveCursor(int xpos, int ypos) {
-        // TODO Auto-generated method stub
+    public void moveCursor(final int xpos, final int ypos) {
+        this.activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                GlkTextGridWindow.this.io.moveCursor(xpos, ypos);
+            }
+        });
     }
 }
