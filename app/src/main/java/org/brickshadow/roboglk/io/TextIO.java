@@ -20,6 +20,7 @@ package org.brickshadow.roboglk.io;
 
 import org.brickshadow.roboglk.GlkStyle;
 import org.brickshadow.roboglk.AbstractGlkTextWindow;
+import org.brickshadow.roboglk.util.UISync;
 import org.brickshadow.roboglk.view.TextWindowView;
 
 import android.text.Editable;
@@ -60,6 +61,13 @@ public abstract class TextIO {
      * The style manager.
      */
     protected final StyleManager styleMan;
+
+    /**
+     * Return values for UISync.waitFor call
+     */
+    private UISync uiWait = UISync.getInstance();
+    private volatile int width = 0;
+    private volatile int height = 0;
     
     TextIO(TextWindowView tv, StyleManager styleMan) {
         this.tv = tv;
@@ -90,9 +98,16 @@ public abstract class TextIO {
      * @return a two-element array with the width and height of the window
      */
     public final int[] getWindowSize() {
-        synchronized(tv) {
-            return new int[] { tv.getCharsPerLine(), tv.getNumLines() };
-        }
+        uiWait.waitFor(new Runnable() {
+            @Override
+            public void run() {
+                width = tv.getCharsPerLine();
+                height = tv.getNumLines();
+                uiWait.stopWaiting(null);
+            }
+        });
+
+        return new int[] { width, height };
     }
     
     public void setWindow(AbstractGlkTextWindow win) {
