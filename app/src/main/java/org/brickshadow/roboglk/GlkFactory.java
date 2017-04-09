@@ -47,6 +47,11 @@ package org.brickshadow.roboglk;
  * </pre>
  */
 public class GlkFactory {
+    /** The native C library which contains the interpreter making Glk calls.
+     To build this library, see the README file. */
+    static {
+        System.loadLibrary("twistyterps");
+    }
 
     /**
      * Call this method to initialize the interpreter. It is an error

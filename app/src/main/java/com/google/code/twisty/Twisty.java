@@ -87,6 +87,8 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 
+import com.jakewharton.processphoenix.ProcessPhoenix;
+
 public class Twisty extends Activity {
     private static String TAG = "Twisty";
     private static final int MENU_PICK_FILE = 101;
@@ -140,12 +142,6 @@ public class Twisty extends Activity {
     private SparseArray<String> zgame_paths = new SparseArray<String>();
     private SparseArray<String> builtinGames = new SparseArray<String>();
 
-
-    /** The native C library which contains the interpreter making Glk calls.
-        To build this library, see the README file. */
-    static {
-           System.loadLibrary("twistyterps");
-    }
 
     static class DialogHandler extends Handler {
         final WeakReference<Twisty> twisty;
@@ -452,6 +448,7 @@ public class Twisty extends Activity {
                    Message m = terp_handler.obtainMessage();
                    m.arg1 = res;
                    terp_handler.sendMessage(m);
+                   ProcessPhoenix.triggerRebirth(Twisty.this);
                 }
             });
         terpThread.start();

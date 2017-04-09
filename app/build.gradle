@@ -24,6 +24,7 @@ android {
 
     dependencies {
         compile "com.android.support:support-v4:25.3.0"
+        compile 'com.jakewharton:process-phoenix:2.0.0'
     }
 }
 
