@@ -448,6 +448,13 @@ public class Twisty extends Activity {
                    Message m = terp_handler.obtainMessage();
                    m.arg1 = res;
                    terp_handler.sendMessage(m);
+
+                   // Restarts the app. This ensures the interpreter libraries are reloaded. If we
+                   // don't do this, GlkFactory.shutdown needs to assure for every library we
+                   // integrate that its internal state is reset so that it behaves exactly the
+                   // same as if it were started fresh, preferable without leaking memory. Since
+                   // Glk doesn't specify this functionality, this means we'd need to modify each
+                   // library to accommodate this. Reloading the library avoids this issue.
                    ProcessPhoenix.triggerRebirth(Twisty.this);
                 }
             });

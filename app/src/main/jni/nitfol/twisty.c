@@ -16,6 +16,7 @@ void nitfol_io_c_shutdown(void);
  * assumed to have a default value) before written, I reset it here.
  */
 void glk_shutdown() {
+	// Obsoleted by reloading the library from the Twisty side
 	/* globals.c */
 	current_zfile = NULL;
 	zfile_offset = 0;

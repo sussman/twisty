@@ -66,6 +66,7 @@ void glk_main() {
 }
 
 void glk_shutdown() {
+  // Obsoleted by reloading the library from the Twisty side
   if (terp_to_use == GIT) {
     glk_shutdown_git();
   } else if (terp_to_use == NITFOL) {
