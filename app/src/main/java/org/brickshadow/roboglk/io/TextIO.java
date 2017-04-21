@@ -28,6 +28,7 @@ import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.method.TextKeyListener;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 
 
@@ -85,7 +86,16 @@ public abstract class TextIO {
                 return onViewKey(v, keyCode, event);
             }
         });
-        
+
+        // setOnScrollChangeListener is only available starting from API 23, so we use
+        // setOnTouchListener with the ACTION_MOVE MotionEvent instead.
+        tv.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return onViewTouch(v, event);
+            }
+        });
+
         tv.setFocusableInTouchMode(true);
     }
 
@@ -311,6 +321,10 @@ public abstract class TextIO {
         } else {
             return processLineKey(keyCode, event.getAction());
         }
+    }
+
+    protected boolean onViewTouch(View v, MotionEvent event) {
+        return false;
     }
     
     private void endLineInput() {

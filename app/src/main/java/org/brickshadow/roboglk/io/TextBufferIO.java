@@ -25,6 +25,7 @@ import android.text.Editable;
 import android.text.Selection;
 import android.text.Spannable;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 
 
@@ -62,7 +63,8 @@ public class TextBufferIO extends TextIO {
     public void doReverseVideo(boolean reverse) {
         styleMan.applyStyle(reverse, tv.getEditableText());
     }
-    
+
+    @Override
     protected boolean onViewKey(View v, int keyCode, KeyEvent event) {
         if (morePrompt && (event.getAction() == KeyEvent.ACTION_DOWN)) {
             int viewLines = tv.getNumLines();
@@ -80,6 +82,16 @@ public class TextBufferIO extends TextIO {
         }
         
         return super.onViewKey(v, keyCode, event);
+    }
+
+    @Override
+    protected boolean onViewTouch(View v, MotionEvent event) {
+        if(event.getAction() == MotionEvent.ACTION_MOVE) {
+            // Clear the more prompt when scrolling
+            morePrompt = false;
+        }
+
+        return super.onViewTouch(v, event);
     }
     
     public void setWindow(GlkTextBufferWindow win) {
