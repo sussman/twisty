@@ -24,6 +24,7 @@ package com.google.code.twisty;
 // explanation of how to build both the C and java code in this project.
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -534,21 +535,34 @@ public class Twisty extends Activity {
             return;
         }
 
-        /* Set up input from URL */
+
+        /* Set up input from URI */
         InputStream gameInputStream = null;
-        try {
-            URL gameURL = new URL(uriString);
-            URLConnection connection = gameURL.openConnection();
-            connection.connect();
-            gameInputStream = connection.getInputStream();
-        } catch (MalformedURLException e) {
-            Log.i(TAG, "Received malformed URI: "+ uriString);
-            gameOutputStream.close();
-            return;
-        } catch (IOException e) {
-            Log.i(TAG, "Failed to open connection to URI: " + uriString);
-            gameOutputStream.close();
-            return;
+
+        if(gameURI.getScheme().equals("content")) {
+            try {
+                gameInputStream = getContentResolver().openInputStream(gameURI);
+            } catch (FileNotFoundException e) {
+                Log.i(TAG, "Failed to open file: " + uriString);
+                gameOutputStream.close();
+                return;
+            }
+        }
+        else {
+            try {
+                URL gameURL = new URL(uriString);
+                URLConnection connection = gameURL.openConnection();
+                connection.connect();
+                gameInputStream = connection.getInputStream();
+            } catch (MalformedURLException e) {
+                Log.i(TAG, "Received malformed URI: "+ uriString);
+                gameOutputStream.close();
+                return;
+            } catch (IOException e) {
+                Log.i(TAG, "Failed to open connection to URI: " + uriString);
+                gameOutputStream.close();
+                return;
+            }
         }
 
         try {
