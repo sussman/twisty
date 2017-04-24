@@ -121,7 +121,7 @@ public class Twisty extends Activity {
     private final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
     // Regular expression that matches all the file extensions we support
-    public static final String EXTENSIONS = "(?i).+(\\.z[1-8]|zblorb|gblorb|ulx|blb|zlb|glb)$";
+    public static final String EXTENSIONS = "(?i).+(\\.z[1-8]|blorb|zblorb|gblorb|ulx|blb|zlb|glb)$";
 
     // The main GLK UI machinery.
     Glk glk;
@@ -242,6 +242,9 @@ public class Twisty extends Activity {
         dialog_handler = new DialogHandler(this);
         terp_handler = new TerpHandler(this);
 
+        // Ensure we can write story files and save games to external storage
+        checkWritePermission();
+
         Uri dataSource = this.getIntent().getData();
         if (dataSource != null) {
             /* Suck down the URI we received to sdcard, launch terp on it. */
@@ -254,9 +257,6 @@ public class Twisty extends Activity {
         else {
             printWelcomeMessage();
         }
-
-        // Ensure we can write story files and save games to external storage
-        checkWritePermission();
     }
 
     /** Called whenever activity comes (or returns) to foreground. */
@@ -516,8 +516,9 @@ public class Twisty extends Activity {
     }
     
     
-    /* Starts a game located at a URI (usually http://) by downloading the game to sdcard first.
-       This is the method invoked by our IntentFilter to handle *.z* files coming from the web browser. */
+    /* Starts a game located at a URI (usually http:// or content://) by downloading the game to sdcard first.
+       This is the method invoked by our IntentFilter to handle story files coming from the web browser
+       and other applications. */
     void startTerp(Uri gameURI) throws IOException, MalformedURLException {
 
         /* Set up output file in same directory as saved-games. */
@@ -526,59 +527,69 @@ public class Twisty extends Activity {
             showDialog(DIALOG_CANT_SAVE);
             return;
         }
+
         String uriString = gameURI.toString();
         String gameFilename = uriString.substring(uriString.lastIndexOf("/") + 1);
         File outputFile = new File(dir, gameFilename);
-        FileOutputStream gameOutputStream = null;
-        try {
-            outputFile.createNewFile();
-            gameOutputStream = new FileOutputStream(outputFile);
-        } catch (IOException e) {
-            Log.i(TAG, "Failed to create file called " + gameFilename);
-            return;
-        }
 
-
-        /* Set up input from URI */
-        InputStream gameInputStream = null;
-
-        if(gameURI.getScheme().equals("content")) {
+        // Copy the input file into our story directory, unless the input and output file
+        // would be the same. This check currently doesn't support uri's that don't contain
+        // the file path. In that case the file will be corrupted.
+        if (!((gameURI.getScheme().equals("content") || gameURI.getScheme().equals("file"))
+                && gameURI.toString().contains(outputFile.getCanonicalPath()))) {
+            FileOutputStream gameOutputStream = null;
             try {
-                gameInputStream = getContentResolver().openInputStream(gameURI);
-            } catch (FileNotFoundException e) {
-                Log.i(TAG, "Failed to open file: " + uriString);
-                gameOutputStream.close();
-                return;
-            }
-        }
-        else {
-            try {
-                URL gameURL = new URL(uriString);
-                URLConnection connection = gameURL.openConnection();
-                connection.connect();
-                gameInputStream = connection.getInputStream();
-            } catch (MalformedURLException e) {
-                Log.i(TAG, "Received malformed URI: "+ uriString);
-                gameOutputStream.close();
-                return;
+                outputFile.createNewFile();
+                gameOutputStream = new FileOutputStream(outputFile);
             } catch (IOException e) {
-                Log.i(TAG, "Failed to open connection to URI: " + uriString);
-                gameOutputStream.close();
+                Log.i(TAG, "Failed to create file called " + gameFilename);
                 return;
             }
-        }
 
-        try {
-            Log.i(TAG, "About to spew raw data to disk...");
-            suckstream(gameInputStream, gameOutputStream);
-        } catch (IOException e) {
-            Log.i(TAG, "Failed to copy URL contents to local file: " + uriString);
-            return;
+
+            /* Set up input from URI */
+            InputStream gameInputStream = null;
+
+            if(gameURI.getScheme().equals("content")) {
+                try {
+                    gameInputStream = getContentResolver().openInputStream(gameURI);
+                } catch (FileNotFoundException e) {
+                    Log.i(TAG, "Failed to open file: " + uriString);
+                    gameOutputStream.close();
+                    return;
+                }
+            }
+            else {
+                try {
+                    URL gameURL = new URL(uriString);
+                    URLConnection connection = gameURL.openConnection();
+                    connection.connect();
+                    gameInputStream = connection.getInputStream();
+                } catch (MalformedURLException e) {
+                    Log.i(TAG, "Received malformed URI: "+ uriString);
+                    gameOutputStream.close();
+                    return;
+                } catch (IOException e) {
+                    Log.i(TAG, "Failed to open connection to URI: " + uriString);
+                    gameOutputStream.close();
+                    return;
+                }
+            }
+
+            try {
+                Log.i(TAG, "About to spew raw data to disk...");
+                suckstream(gameInputStream, gameOutputStream);
+            } catch (IOException e) {
+                Log.i(TAG, "Failed to copy URL contents to local file: " + uriString);
+                return;
+            }
+            Log.i(TAG, "Completed dump of raw data to disk.");
         }
-        Log.i(TAG, "Completed dump of raw data to disk.");
-        
-        Log.i(TAG, "Starting gamefile located at " + outputFile.getAbsolutePath());
-        startTerp(outputFile.getAbsolutePath());
+        else
+            Log.i(TAG, "Input and output file are the same: " + outputFile.getCanonicalPath());
+
+        Log.i(TAG, "Starting gamefile located at " + outputFile.getCanonicalPath());
+        startTerp(outputFile.getCanonicalPath());
     }
 
     
@@ -733,7 +744,7 @@ public class Twisty extends Activity {
     }
 
     // Helper for scanForGames():
-    //   Walk DIR recursively, adding any file matching *.z[1-8] or *.gblorb to LIST.
+    // Walk DIR recursively, adding any file matching the expression in EXTENSIONS to LIST.
     private void scanDir(File dir, ArrayList<String> list) {
         File[] children = dir.listFiles();
         if (children == null)
