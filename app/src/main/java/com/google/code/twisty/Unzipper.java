@@ -19,16 +19,20 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.net.Uri;
+import android.util.Log;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 /**
  * Unzips .z* files to /sdcard/Twisty/ and then starts Twisty.
@@ -36,14 +40,16 @@ import java.util.zip.ZipFile;
  * @author clchen@google.com (Charles L. Chen)
  */
 public class Unzipper extends Activity {
-    private String dataSource;
+    private static String TAG = "Twisty Unzipper";
+
+    private Uri dataSource;
 
     private Unzipper self;
 
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        dataSource = this.getIntent().getData().toString().replaceFirst("file://", "");
+        dataSource = this.getIntent().getData();
         self = this;
         setContentView(new ProgressBar(this));
         (new Thread(new UnzipThread())).start();
@@ -68,58 +74,91 @@ public class Unzipper extends Activity {
         }
     }
 
-    public static boolean unzip(String filename) {
+    public boolean unzip(Uri zipUri) {
         boolean wasValid = false;
-        ZipFile zip = null;
-        try {
-            zip = new ZipFile(filename);
-            Enumeration<? extends ZipEntry> zippedFiles = zip.entries();
-            while (zippedFiles.hasMoreElements()) {
-                ZipEntry entry = zippedFiles.nextElement();
-                InputStream is = zip.getInputStream(entry);
-                String name = entry.getName();
-                String nameWithoutNum = name;
-                if (nameWithoutNum.length() > 3){
-                    nameWithoutNum = nameWithoutNum.substring(0, nameWithoutNum.length() - 1);
-                }
-                if (nameWithoutNum.endsWith(".z") || nameWithoutNum.endsWith(".Z")) {
-                    File outputFile = new File(Environment.getExternalStorageDirectory()
-                            + "/Twisty/" + name);
-                    String outputPath = outputFile.getCanonicalPath();
-                    name = outputPath.substring(outputPath.lastIndexOf("/") + 1);
-                    outputPath = outputPath.substring(0, outputPath.lastIndexOf("/"));
-                    File outputDir = new File(outputPath);
-                    outputDir.mkdirs();
-                    outputFile = new File(outputPath, name);
-                    outputFile.createNewFile();
-                    FileOutputStream out = new FileOutputStream(outputFile);
 
-                    byte buf[] = new byte[16384];
-                    do {
-                        int numread = is.read(buf);
-                        if (numread <= 0) {
-                            break;
-                        } else {
-                            out.write(buf, 0, numread);
-                        }
-                    } while (true);
-
-                    is.close();
-                    out.close();
-                    wasValid = true;
+        if(zipUri.getScheme().equals("content")) {
+            ZipInputStream zipStream = null;
+            try {
+                zipStream = new ZipInputStream(getContentResolver().openInputStream(zipUri));
+                while (zipStream.available() > 0) {
+                    ZipEntry entry = zipStream.getNextEntry();
+                    String name = entry.getName();
+                    wasValid |= unzip(zipStream, name);
                 }
             }
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } finally {
-            if (zip != null) {
-              try {
-                zip.close();
-              } catch (IOException e2) {}
+            catch (FileNotFoundException e) {
+                Log.i(TAG, "Failed to open zip file: " + zipUri.toString());
+            }
+            catch (IOException e) {
+                Log.i(TAG, "Error reading zip file: " + zipUri.toString());
+            }
+            finally {
+                try {
+                    if (zipStream != null)
+                        zipStream.close();
+                } catch (IOException e) {}
+
             }
         }
+        else {
+            ZipFile zip = null;
+            try {
+                String filename = zipUri.toString().replaceFirst("file://", "");
+                zip = new ZipFile(filename);
+                Enumeration<? extends ZipEntry> zippedFiles = zip.entries();
+                while (zippedFiles.hasMoreElements()) {
+                    ZipEntry entry = zippedFiles.nextElement();
+                    InputStream is = zip.getInputStream(entry);
+                    String name = entry.getName();
+                    wasValid |= unzip(is, name);
+                }
+            } catch (IOException e) {
+                Log.i(TAG, "Failed to read zip file: " + zipUri.toString());
+            } finally {
+                try {
+                    if (zip != null)
+                        zip.close();
+                } catch (IOException e) {}
+            }
+        }
+
         return wasValid;
+    }
+
+    private boolean unzip(InputStream is, String name) {
+        try {
+            if(name.matches(Twisty.EXTENSIONS)) {
+                File outputFile = new File(Environment.getExternalStorageDirectory()
+                        + "/Twisty/" + name);
+                String outputPath = outputFile.getCanonicalPath();
+                name = outputPath.substring(outputPath.lastIndexOf("/") + 1);
+                outputPath = outputPath.substring(0, outputPath.lastIndexOf("/"));
+                File outputDir = new File(outputPath);
+                outputDir.mkdirs();
+                outputFile = new File(outputPath, name);
+                outputFile.createNewFile();
+                FileOutputStream out = new FileOutputStream(outputFile);
+
+                byte buf[] = new byte[16384];
+                do {
+                    int numread = is.read(buf);
+                    if (numread <= 0) {
+                        break;
+                    } else {
+                        out.write(buf, 0, numread);
+                    }
+                } while (true);
+
+                out.close();
+            }
+        }
+        catch(IOException e) {
+            Log.i(TAG, "Failed to unzip file: " + name);
+            return false;
+        }
+
+        return true;
     }
 
 }

@@ -108,17 +108,20 @@ public class Twisty extends Activity {
     // Dialog boxes we manage
     private static final int DIALOG_ENTER_WRITEFILE = 1;
     private static final int DIALOG_ENTER_READFILE = 2;
-    private static final int DIALOG_CHOOSE_ZGAME = 3;
+    private static final int DIALOG_CHOOSE_GAME = 3;
     private static final int DIALOG_CANT_SAVE = 4;
     private static final int DIALOG_NO_SDCARD = 5;
 
     // Messages we receive from external threads, via our Handler
     public static final int PROMPT_FOR_WRITEFILE = 1;
     public static final int PROMPT_FOR_READFILE = 2;
-    public static final int PROMPT_FOR_ZGAME = 3;
+    public static final int PROMPT_FOR_GAME = 3;
 
     // Permission request identifiers
     private final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
+
+    // Regular expression that matches all the file extensions we support
+    public static final String EXTENSIONS = "(?i).+(\\.z[1-8]|zblorb|gblorb|ulx|blb|zlb|glb)$";
 
     // The main GLK UI machinery.
     Glk glk;
@@ -136,11 +139,11 @@ public class Twisty extends Activity {
     private TwistyMessage dialog_message; // most recent Message received
     // Persistent dialogs created in onCreateDialog() and updated by onPrepareDialog()
     private Dialog restoredialog;
-    private Dialog choosezgamedialog;
+    private Dialog choosegamedialog;
     // All z-games discovered when we last scanned the sdcard
-    private String[] discovered_zgames;
-    // A persistent map of button-ids to zgames found on the sdcard (absolute paths)
-    private SparseArray<String> zgame_paths = new SparseArray<String>();
+    private String[] discovered_games;
+    // A persistent map of button-ids to games found on the sdcard (absolute paths)
+    private SparseArray<String> game_paths = new SparseArray<String>();
     private SparseArray<String> builtinGames = new SparseArray<String>();
 
 
@@ -162,8 +165,8 @@ public class Twisty extends Activity {
                 twisty.get().dialog_message = (TwistyMessage) m.obj;
                 twisty.get().promptForReadfile();
             }
-            else if (m.what == PROMPT_FOR_ZGAME) {
-                twisty.get().showDialog(DIALOG_CHOOSE_ZGAME);
+            else if (m.what == PROMPT_FOR_GAME) {
+                twisty.get().showDialog(DIALOG_CHOOSE_GAME);
             }
         }
     };
@@ -695,11 +698,11 @@ public class Twisty extends Activity {
                     "Scanning Media", "Searching for Games...", true);
             Thread t = new Thread() {
                 public void run() {
-                    // populate our list of zgames:
-                    discovered_zgames = scanForZGames();
+                    // populate our list of games:
+                    discovered_games = scanForGames();
                     pd.dismiss();
                     Message msg = new Message();
-                    msg.what = PROMPT_FOR_ZGAME;
+                    msg.what = PROMPT_FOR_GAME;
                     dialog_handler.sendMessage(msg);
                 }
             };
@@ -729,7 +732,7 @@ public class Twisty extends Activity {
         return savedir.getPath();
     }
 
-    // Helper for scanForZGames():
+    // Helper for scanForGames():
     //   Walk DIR recursively, adding any file matching *.z[1-8] or *.gblorb to LIST.
     private void scanDir(File dir, ArrayList<String> list) {
         File[] children = dir.listFiles();
@@ -737,28 +740,25 @@ public class Twisty extends Activity {
             return;
         for (int count = 0; count < children.length; count++) {
             File child = children[count];
-            if (child.isFile() &&
-                    (child.getName().matches("[^.].*\\.[Zz][1-8]") ||
-                     child.getName().endsWith(".gblorb") ||
-                     child.getName().endsWith(".ulx")))
+            if (child.isFile() && child.getName().matches(EXTENSIONS))
                 list.add(child.getPath());
             else
                 scanDir(child, list);
         }
     }
 
-    // Search the twisty directory (on sdcard) for any z-games.
+    // Search the twisty directory (on sdcard) for any games.
     // Return an array of absolute paths, or null on failure.
-    private String[] scanForZGames() {
+    private String[] scanForGames() {
         String gamesDirPath = getSavedGamesDir(false);
         if (gamesDirPath == null) {
             showDialog(DIALOG_CANT_SAVE);
             return null;
         }
         File gameDirRoot = new File(gamesDirPath);
-        ArrayList<String> zgamelist = new ArrayList<String>();
-        scanDir(gameDirRoot, zgamelist);
-        String[] files = zgamelist.toArray(new String[zgamelist.size()]);
+        ArrayList<String> gamelist = new ArrayList<String>();
+        scanDir(gameDirRoot, gamelist);
+        String[] files = gamelist.toArray(new String[gamelist.size()]);
         Arrays.sort(files);
         return files;
     }
@@ -798,18 +798,18 @@ public class Twisty extends Activity {
         rg.check(id); // by default, check the last item
     }
 
-    // Used by 'Choose ZGame' dialog box;  scans all of /sdcard for zgames,
-    // updates list of radiobuttons (and the zgame_paths HashMap).
-    private void updateZGameRadioButtons(RadioGroup rg) {
+    // Used by 'Choose Game' dialog box;  scans all of /sdcard for games,
+    // updates list of radiobuttons (and the game_paths HashMap).
+    private void updateGameRadioButtons(RadioGroup rg) {
         rg.removeAllViews();
-        zgame_paths.clear();
+        game_paths.clear();
         int id = 0;
-        for (String path : discovered_zgames) {
+        for (String path : discovered_games) {
             RadioButton rb = new RadioButton(Twisty.this);
             rb.setText(new File(path).getName());
             rg.addView(rb);
             id = rb.getId();
-            zgame_paths.put(id, path);
+            game_paths.put(id, path);
         }
     }
 
@@ -889,23 +889,23 @@ public class Twisty extends Activity {
             });
             return restoredialog;
 
-        case DIALOG_CHOOSE_ZGAME:
-            choosezgamedialog = new Dialog(Twisty.this);
-            choosezgamedialog.setContentView(R.layout.choose_zgame_prompt);
-            choosezgamedialog.setTitle("Choose Game");
-            android.widget.RadioGroup zrg = (RadioGroup) choosezgamedialog.findViewById(R.id.zgame_radiomenu);
-            updateZGameRadioButtons(zrg);
+        case DIALOG_CHOOSE_GAME:
+            choosegamedialog = new Dialog(Twisty.this);
+            choosegamedialog.setContentView(R.layout.choose_game_prompt);
+            choosegamedialog.setTitle("Choose Game");
+            android.widget.RadioGroup zrg = (RadioGroup) choosegamedialog.findViewById(R.id.game_radiomenu);
+            updateGameRadioButtons(zrg);
             zrg.setOnCheckedChangeListener(new OnCheckedChangeListener() {
                 public void onCheckedChanged(RadioGroup group, int checkedId) {
-                    dismissDialog(DIALOG_CHOOSE_ZGAME);
-                    String path = (String) zgame_paths.get(checkedId);
+                    dismissDialog(DIALOG_CHOOSE_GAME);
+                    String path = (String) game_paths.get(checkedId);
                     if (path != null) {
                         stopTerp();
                         startTerp(path);
                     }
                 }
             });
-            return choosezgamedialog;
+            return choosegamedialog;
 
         case DIALOG_CANT_SAVE:
             return new AlertDialog.Builder(Twisty.this)
@@ -947,9 +947,9 @@ public class Twisty extends Activity {
             android.widget.RadioGroup rg = (RadioGroup) restoredialog.findViewById(R.id.radiomenu);
             updateRestoreRadioButtons(rg);
             break;
-        case DIALOG_CHOOSE_ZGAME:
-            android.widget.RadioGroup zrg = (RadioGroup) choosezgamedialog.findViewById(R.id.zgame_radiomenu);
-            updateZGameRadioButtons(zrg);
+        case DIALOG_CHOOSE_GAME:
+            android.widget.RadioGroup zrg = (RadioGroup) choosegamedialog.findViewById(R.id.game_radiomenu);
+            updateGameRadioButtons(zrg);
             break;
         }
     }
