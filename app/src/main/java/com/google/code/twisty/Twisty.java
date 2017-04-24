@@ -121,7 +121,11 @@ public class Twisty extends Activity {
     private final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
     // Regular expression that matches all the file extensions we support
-    public static final String EXTENSIONS = "(?i).+(\\.z[1-8]|blorb|zblorb|gblorb|ulx|blb|zlb|glb)$";
+    public static final String EXTENSIONS = "(?i).+\\.(z[1-8]|blorb|zblorb|gblorb|ulx|blb|zlb|glb)$";
+
+    // Regular expressions that match the file extensions supported by each interpreter
+    public static final String NITFOL_EXTENSIONS = "(?i).+\\.(z[1-8]|zblorb|zlb)$";
+    public static final String GIT_EXTENSIONS = "(?i).+\\.(blorb|gblorb|ulx|blb|glb)$";
 
     // The main GLK UI machinery.
     Glk glk;
@@ -438,12 +442,13 @@ public class Twisty extends Activity {
         terpThread = new Thread(new Runnable() {
                @Override
                 public void run() {
-                   // TODO: When twistyterps supports multiple interpreters,
-                   // it will be important that the first arg to startup
-                   // be the correct interpreter name.
-                   //String[] args = new String[] {"nitfol", gamePath};
-                           // cursesFile.getAbsolutePath()};
-                   String[] args = new String[] {"git", gamePath};
+                   String interpreter = "";
+                   if (gamePath.matches(NITFOL_EXTENSIONS))
+                       interpreter = "nitfol";
+                   else if (gamePath.matches(GIT_EXTENSIONS))
+                       interpreter = "git";
+
+                   String[] args = new String[] {interpreter, gamePath};
                    int res = -1;
                    if (GlkFactory.startup(glk, args)) {
                        res = GlkFactory.run();

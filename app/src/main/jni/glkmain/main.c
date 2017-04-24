@@ -28,32 +28,23 @@ supported_terps_t terp_to_use = UNKNOWN;
 glkunix_argumentlist_t glkunix_arguments[100];
 
 int glkunix_startup_code(glkunix_startup_t *data) {
-  int found_zgame = 0;
-  int i, j;
-  for (i = 1; i < data->argc; ++i) {
-    const char* p = data->argv[i];
+  // At least an interpreter name and a path are required
+  if (data->argc < 2)
+    return 0;
 
-    // Nitfol supports myriad flag commands, but expects
-    // at least one non-flag argv that contains the name
-    // of the file to open.
-    // Git expects exactly one argv that contains the name
-    // of the file to open.
-    if (p[0] != '-') {
-      for (j = 0; p[j] != '\0'; ++j) {
-        if (p[j] == '.' && p[j+1] == 'z') {
-          found_zgame = 1;
-          break;
-        }
-      }
-    }
-  }
-
-  if (found_zgame) {
+  // Nitfol supports myriad flag commands, but expects
+  // at least one non-flag argv that contains the name
+  // of the file to open.
+  // Git expects exactly one argv that contains the name
+  // of the file to open.
+  if (strcmp(data->argv[0], "nitfol") == 0) {
     terp_to_use = NITFOL;
     return glkunix_startup_code_nitfol(data);
-  } else {
+  } else if (strcmp(data->argv[0], "git") == 0) {
     terp_to_use = GIT;
     return glkunix_startup_code_git(data);
+  } else {
+    return 0;
   }
 }
 
