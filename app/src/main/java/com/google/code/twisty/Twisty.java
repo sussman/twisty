@@ -131,6 +131,7 @@ public class Twisty extends Activity {
     Glk glk;
     GlkLayout glkLayout;
     TextBufferIO mainWin;
+    ImageView iv;
     TextBufferView tv;
     LinearLayout ll;
     Thread terpThread = null;
@@ -173,7 +174,7 @@ public class Twisty extends Activity {
                 twisty.get().showDialog(DIALOG_CHOOSE_GAME);
             }
         }
-    };
+    }
 
     static class TerpHandler extends Handler {
         final WeakReference<Twisty> twisty;
@@ -197,10 +198,10 @@ public class Twisty extends Activity {
                Log.i("twistyterp", "The interpreter was interrupted");
                break;
             }
-            twisty.get().setContentView(twisty.get().ll);
+            twisty.get().showWelcome();
             twisty.get().gameIsRunning = false;
             }
-        };
+    }
 
     /** Called when activity is first created. */
     @Override
@@ -219,7 +220,7 @@ public class Twisty extends Activity {
         UISync.setInstance(this);
 
         // An imageview to show the twisty icon
-        ImageView iv = new ImageView(this);
+        iv = new ImageView(this);
         iv.setBackgroundColor(0xffffff);
         iv.setImageResource(R.drawable.app_icon);
         iv.setAdjustViewBounds(true);
@@ -241,6 +242,8 @@ public class Twisty extends Activity {
         ll.setOrientation(android.widget.LinearLayout.VERTICAL);
         ll.addView(iv);
         ll.addView(tv);
+        glkLayout.setVisibility(View.GONE);
+        ll.addView(glkLayout);
         setContentView(ll);
 
         dialog_handler = new DialogHandler(this);
@@ -419,6 +422,19 @@ public class Twisty extends Activity {
         }
     }
 
+    // Show the GlkLayout and hide the welcome screen
+    void showGlk() {
+        iv.setVisibility(View.GONE);
+        tv.setVisibility(View.GONE);
+        glkLayout.setVisibility(View.VISIBLE);
+    }
+
+    // Show the welcome screen and hide the GlkLayout
+    void showWelcome() {
+        iv.setVisibility(View.VISIBLE);
+        tv.setVisibility(View.VISIBLE);
+        glkLayout.setVisibility(View.GONE);
+    }
 
     /**
      * Start a terp thread, loading the program from the given game file
@@ -432,8 +448,9 @@ public class Twisty extends Activity {
         //	PreferenceManager.getDefaultSharedPreferences(context);
         //Log.i(TAG, "Spies tell me that ");
 
-        setContentView(glkLayout);
-        glkLayout.requestFocus();
+        // Switch to the Glk view
+        showGlk();
+
         gamePath = path;
 
         // Make a GLK object which encapsulates I/O between Android UI and our C library
