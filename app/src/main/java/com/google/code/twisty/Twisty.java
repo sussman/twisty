@@ -656,10 +656,10 @@ public class Twisty extends Activity {
         menu.add(MENUGROUP_SELECT, R.raw.glulxercise, 2, "glulxercise").setShortcut('2', 'c');
         menu.add(MENUGROUP_SELECT, R.raw.windowtest, 2, "windowtest").setShortcut('6', 'd');
         menu.add(MENUGROUP_SELECT, MENU_PICK_FILE, 3, "Open Game...").setShortcut('3', 'o');
-        menu.add(MENUGROUP_SELECT, MENU_SHOW_HELP, 5, "Help!?").setShortcut('4', 'h');
+        //menu.add(MENUGROUP_SELECT, MENU_SHOW_HELP, 5, "Help!?").setShortcut('4', 'h');
         menu.add(MENUGROUP_SELECT, MENU_PICK_SETTINGS, 5, "Settings").setShortcut('5', 's');
 
-        menu.add(MENUGROUP_RUNNING, MENU_RESTART, 0, "Restart").setShortcut('7', 'r');
+        //menu.add(MENUGROUP_RUNNING, MENU_RESTART, 0, "Restart").setShortcut('7', 'r');
         menu.add(MENUGROUP_RUNNING, MENU_STOP, 1, "Stop").setShortcut('9', 's');
         menu.add(MENUGROUP_RUNNING, MENU_PICK_SETTINGS, 2, "Settings").setShortcut('4', 's');
 
