@@ -1,6 +1,8 @@
 #ifndef GLK_H
 #define GLK_H
 
+#include <stdint.h>
+
 /* glk.h: Header file for Glk API, version 0.7.0.
     Designed by Andrew Plotkin <erkyrath@eblong.com>
     http://www.eblong.com/zarf/glk/index.html
@@ -17,8 +19,8 @@
 /* You may have to edit the definition of glui32 to make sure it's really a
     32-bit unsigned integer type, and glsi32 to make sure it's really a
     32-bit signed integer type. If they're not, horrible things will happen. */
-typedef unsigned long glui32;
-typedef signed long glsi32;
+typedef uint32_t glui32;
+typedef int32_t glsi32;
 
 /* These are the compile-time conditionals that reveal various Glk optional
     modules. */
